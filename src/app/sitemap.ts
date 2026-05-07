@@ -1,50 +1,54 @@
-import { createClient } from "@/utils/supabase/server";
-import { MetadataRoute } from "next";
-
-export const revalidate = 3600; // Revalidate every hour
+import { MetadataRoute } from 'next'
+import { createClient } from '@/utils/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createClient();
-  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://boxspox.com";
+  const supabase = await createClient()
+  const baseUrl = 'https://boxspox.com'
 
-  // Fetch all published courses
+  // 1. Fetch all courses
   const { data: courses } = await supabase
-    .from("courses")
-    .select("slug, created_at")
-    .eq("status", "published");
+    .from('courses')
+    .select('slug, created_at')
 
-  // Fetch all published learning paths
+  // 2. Fetch all learning paths
   const { data: paths } = await supabase
-    .from("learning_paths")
-    .select("slug, created_at")
-    .eq("status", "published");
+    .from('learning_paths')
+    .select('slug, created_at')
 
-  const courseUrls: MetadataRoute.Sitemap = (courses || []).map((c) => ({
-    url: `${BASE_URL}/tutorials/${c.slug}`,
-    lastModified: new Date(c.created_at),
-    changeFrequency: "weekly",
+  const courseUrls = (courses || []).map((course) => ({
+    url: `${baseUrl}/tutorials/${course.slug}`,
+    lastModified: new Date(course.created_at || Date.now()),
+    changeFrequency: 'weekly' as const,
     priority: 0.8,
-  }));
+  }))
 
-  const pathUrls: MetadataRoute.Sitemap = (paths || []).map((p) => ({
-    url: `${BASE_URL}/paths/${p.slug}`,
-    lastModified: new Date(p.created_at),
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  const pathUrls = (paths || []).map((path) => ({
+    url: `${baseUrl}/paths/${path.slug}`,
+    lastModified: new Date(path.created_at || Date.now()),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }))
 
-  const staticUrls: MetadataRoute.Sitemap = [
-    { url: BASE_URL, changeFrequency: "daily", priority: 1.0 },
-    { url: `${BASE_URL}/tutorials`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${BASE_URL}/paths`, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${BASE_URL}/pricing`, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/about`, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${BASE_URL}/careers`, changeFrequency: "weekly", priority: 0.5 },
-    { url: `${BASE_URL}/privacy`, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${BASE_URL}/terms`, changeFrequency: "monthly", priority: 0.3 },
-    { url: `${BASE_URL}/login`, changeFrequency: "monthly", priority: 0.4 },
-    { url: `${BASE_URL}/register`, changeFrequency: "monthly", priority: 0.4 },
-  ];
+  const staticUrls = [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/tutorials`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/playground`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
+    },
+  ]
 
-  return [...staticUrls, ...courseUrls, ...pathUrls];
+  return [...staticUrls, ...courseUrls, ...pathUrls]
 }

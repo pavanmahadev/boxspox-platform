@@ -46,6 +46,23 @@ export default async function AdminDashboard() {
     .order("created_at", { ascending: false })
     .limit(5);
 
+  // Fetch registration data for the last 7 days
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().split('T')[0];
+  });
+
+  const { data: registrationData } = await supabase
+    .rpc('get_daily_registrations', { days_count: 7 });
+
+  const chartData = last7Days.map(date => {
+    const dayData = (registrationData as any[])?.find(d => d.date === date);
+    return dayData ? dayData.count : 0;
+  });
+
+  const maxReg = Math.max(...chartData, 1);
+
   const stats = [
     { label: "Total Users", value: userCount || 0, icon: <Users size={18} />, color: "#3B82F6", change: "Registered" },
     { label: "Active Courses", value: courseCount || 0, icon: <BookOpen size={18} />, color: "#10B981", change: "Published" },
@@ -121,18 +138,21 @@ export default async function AdminDashboard() {
         
         {/* Performance Chart Placeholder */}
         <div style={{ background: "var(--bg-card)", borderRadius: "16px", border: "1px solid var(--border-primary)", padding: "24px" }}>
-          <h2 style={{ fontSize: "16px", fontWeight: 800, marginBottom: "24px" }}>Platform Engagement</h2>
+          <h2 style={{ fontSize: "16px", fontWeight: 800, marginBottom: "24px" }}>User Registrations (Last 7 Days)</h2>
           <div style={{ height: "200px", display: "flex", alignItems: "flex-end", gap: "12px", padding: "0 10px" }}>
-            {[65, 45, 75, 55, 85, 40, 90].map((height, i) => (
+            {chartData.map((count, i) => (
               <div key={i} style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div style={{ 
                   width: "100%", 
-                  height: `${height}%`, 
+                  height: `${(count / maxReg) * 100}%`, 
+                  minHeight: count > 0 ? "4px" : "0px",
                   background: i === 6 ? "#111827" : "#F3F4F6", 
                   borderRadius: "6px 6px 0 0",
                   transition: "all 0.3s ease"
                 }} />
-                <span style={{ fontSize: "10px", fontWeight: 700, color: "#9CA3AF", marginTop: "8px" }}>Day {i+1}</span>
+                <span style={{ fontSize: "10px", fontWeight: 700, color: "#9CA3AF", marginTop: "8px" }}>
+                  {new Date(last7Days[i]).toLocaleDateString('en-US', { weekday: 'short' })}
+                </span>
               </div>
             ))}
           </div>

@@ -12,7 +12,8 @@ import {
   Trophy,
   Target,
   Settings,
-  Heart
+  Heart,
+  Flame
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const [activeCourses, setActiveCourses] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [streak, setStreak] = useState(0);
   const supabase = createClient();
   const router = useRouter();
 
@@ -43,10 +45,8 @@ export default function DashboardPage() {
     }, 15000);
 
     async function getDashboardData() {
-      console.log("Dashboard fetch started...");
       try {
         // Fast session check with a local timeout
-        console.log("Checking session...");
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Session timeout")), 5000));
 
@@ -80,11 +80,11 @@ export default function DashboardPage() {
           profileRes,
           wishlistRes
         ] = await Promise.all([
-          supabase.from("certificates").select(`*, course:courses (title, slug, image_url)`).eq("user_id", authUser.id).then((r: any) => { console.log("Certs loaded"); return r; }),
-          supabase.from("enrollments").select(`*, course:courses (id, title, slug, icon, gradient, modules:modules (lessons:lessons (id)))`).eq("user_id", authUser.id).then((r: any) => { console.log("Enrollments loaded"); return r; }),
-          supabase.from("user_progress").select(`*, lesson:lessons!inner(id, title, slug, course:courses!inner(id, title, slug, image_url))`).eq("user_id", authUser.id).order("completed_at", { ascending: false }).then((r: any) => { console.log("Progress loaded"); return r; }),
-          supabase.from("profiles").select("*").eq("id", authUser.id).single().then((r: any) => { console.log("Profile loaded"); return r; }),
-          supabase.from("wishlists").select("id", { count: "exact", head: true }).eq("user_id", authUser.id).then((r: any) => { console.log("Wishlist loaded"); return r; })
+          supabase.from("certificates").select(`*, course:courses (title, slug, image_url)`).eq("user_id", authUser.id),
+          supabase.from("enrollments").select(`*, course:courses (id, title, slug, icon, gradient, modules:modules (lessons:lessons (id)))`).eq("user_id", authUser.id),
+          supabase.from("user_progress").select(`*, lesson:lessons!inner(id, title, slug, course:courses!inner(id, title, slug, image_url))`).eq("user_id", authUser.id).order("completed_at", { ascending: false }),
+          supabase.from("profiles").select("*").eq("id", authUser.id).single(),
+          supabase.from("wishlists").select("id", { count: "exact", head: true }).eq("user_id", authUser.id)
         ]);
 
         const certs = certsRes.data;
@@ -122,6 +122,38 @@ export default function DashboardPage() {
 
         setActiveCourses(processedCourses);
         setProgress(userProgress || []);
+
+        // Calculate Streak
+        if (userProgress && userProgress.length > 0) {
+          const uniqueDates = Array.from(new Set(
+            userProgress.map((p: any) => new Date(p.completed_at).toDateString())
+          )).map((d: any) => new Date(d)).sort((a: any, b: any) => b.getTime() - a.getTime());
+
+          let currentStreak = 0;
+          const today = new Date();
+          today.setHours(0,0,0,0);
+          
+          let lastDate = uniqueDates[0];
+          lastDate.setHours(0,0,0,0);
+
+          // If the last activity was today or yesterday, the streak is alive
+          const diff = (today.getTime() - lastDate.getTime()) / (1000 * 3600 * 24);
+          
+          if (diff <= 1) {
+            currentStreak = 1;
+            for (let i = 0; i < uniqueDates.length - 1; i++) {
+              const d1 = uniqueDates[i];
+              const d2 = uniqueDates[i+1];
+              const dayDiff = (d1.getTime() - d2.getTime()) / (1000 * 3600 * 24);
+              if (dayDiff === 1) {
+                currentStreak++;
+              } else {
+                break;
+              }
+            }
+          }
+          setStreak(currentStreak);
+        }
       } catch (err) {
         console.error("Dashboard data fetch failed:", err);
       } finally {
@@ -187,7 +219,7 @@ export default function DashboardPage() {
 
   const stats = [
     { label: "Points Earned", value: (progress.length * 100).toLocaleString(), icon: <TrendingUp size={20} />, color: "#6366f1" },
-    { label: "Courses Started", value: activeCourses.length.toString(), icon: <BookOpen size={20} />, color: "#06b6d4" },
+    { label: "Daily Streak", value: `${streak} Days`, icon: <Flame size={20} />, color: "#ff4d4d" },
     { label: "Lessons Done", value: progress.length.toString(), icon: <CheckCircle2 size={20} />, color: "#10b981" },
     { label: "Certificates", value: certificates.length.toString(), icon: <Award size={20} />, color: "#f59e0b" },
   ];

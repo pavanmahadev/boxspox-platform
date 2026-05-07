@@ -54,13 +54,10 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
     
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+    // Check role from JWT app_metadata (Synced from profiles table)
+    const role = user.app_metadata?.user_role;
 
-    if (profile?.role !== "instructor" && profile?.role !== "admin") {
+    if (role !== "instructor" && role !== "admin") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
@@ -71,13 +68,10 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
     
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+    // Check role from JWT app_metadata (Synced from profiles table)
+    const role = user.app_metadata?.user_role;
 
-    if (profile?.role !== "admin") {
+    if (role !== "admin") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }

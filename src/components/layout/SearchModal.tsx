@@ -8,6 +8,7 @@ import { createClient } from "@/utils/supabase/client";
 interface SearchResult {
   title: string;
   slug: string;
+  description?: string;
   type: "course" | "lesson";
   parent?: string;
 }
@@ -58,36 +59,56 @@ export function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
       try {
         const supabase = createClient();
         
-        // Search courses
+        // Search courses (Title + Description)
         const { data: courses } = await supabase
           .from("courses")
-          .select("title, slug")
-          .ilike("title", `%${query}%`)
+          .select("title, slug, description")
+          .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
           .limit(5);
 
-        // Search lessons
+        // Search lessons (Title + Content)
         const { data: lessons } = await supabase
           .from("lessons")
           .select(`
             title, 
             slug,
+            content,
             course:courses (slug)
           `)
-          .ilike("title", `%${query}%`)
+          .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
           .limit(5);
 
         const courseResults: SearchResult[] = (courses || []).map((c: any) => ({
           title: c.title,
           slug: c.slug,
+          description: c.description,
           type: "course"
         }));
 
-        const lessonResults: SearchResult[] = (lessons || []).map((l: any) => ({
-          title: l.title,
-          slug: l.slug,
-          type: "lesson",
-          parent: (l.course as any)?.slug
-        }));
+        const lessonResults: SearchResult[] = (lessons || []).map((l: any) => {
+          // Intelligent Snippet extraction
+          let snippet = "";
+          const content = l.content || "";
+          const queryLower = query.toLowerCase();
+          const contentLower = content.toLowerCase();
+          const matchIdx = contentLower.indexOf(queryLower);
+          
+          if (matchIdx !== -1) {
+            const start = Math.max(0, matchIdx - 40);
+            const end = Math.min(content.length, matchIdx + queryLower.length + 60);
+            snippet = (start > 0 ? "..." : "") + content.substring(start, end).replace(/[#*`]/g, "") + (end < content.length ? "..." : "");
+          } else {
+            snippet = content.substring(0, 100).replace(/[#*`]/g, "") + "...";
+          }
+
+          return {
+            title: l.title,
+            slug: l.slug,
+            description: snippet,
+            type: "lesson",
+            parent: (l.course as any)?.slug
+          };
+        });
 
         setResults([...courseResults, ...lessonResults]);
       } catch (err) {
@@ -167,35 +188,30 @@ export function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
               </p>
             </div>
           ) : results.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              {results.map((result, i) => (
-                <Link
-                  key={i}
-                  href={result.type === "course" ? `/tutorials/${result.slug}` : `/tutorials/${result.parent}/${result.slug}`}
-                  onClick={onClose}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "16px",
-                    padding: "14px 16px",
-                    borderRadius: "var(--radius-lg)",
-                    textDecoration: "none",
-                    transition: "all 0.2s ease",
-                  }}
-                  className="hover-bg"
-                >
-                  <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--brand-primary)" }}>
-                    {result.type === "course" ? <Book size={20} /> : <Code size={20} />}
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px", paddingBottom: "12px" }}>
+              {/* Courses Group */}
+              {results.filter(r => r.type === "course").length > 0 && (
+                <div>
+                  <h3 style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", letterSpacing: "1px", margin: "0 16px 12px", textTransform: "uppercase" }}>Courses</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    {results.filter(r => r.type === "course").map((result, i) => (
+                      <SearchResultItem key={i} result={result} onClose={onClose} />
+                    ))}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: "1rem" }}>{result.title}</div>
-                    <div style={{ color: "var(--text-tertiary)", fontSize: "0.8rem", textTransform: "capitalize" }}>
-                      {result.type} {result.parent ? `• ${result.parent.toUpperCase()}` : ""}
-                    </div>
+                </div>
+              )}
+
+              {/* Lessons Group */}
+              {results.filter(r => r.type === "lesson").length > 0 && (
+                <div>
+                  <h3 style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", letterSpacing: "1px", margin: "0 16px 12px", textTransform: "uppercase" }}>Lessons</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    {results.filter(r => r.type === "lesson").map((result, i) => (
+                      <SearchResultItem key={i} result={result} onClose={onClose} />
+                    ))}
                   </div>
-                  <ArrowRight size={18} color="var(--text-tertiary)" />
-                </Link>
-              ))}
+                </div>
+              )}
             </div>
           ) : (
             <div style={{ padding: "32px", textAlign: "center" }}>
@@ -220,6 +236,43 @@ export function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
           </span>
         </div>
       </div>
+      <style>{`
+        .hover-bg:hover {
+          background: var(--bg-secondary) !important;
+        }
+      `}</style>
     </div>
+  );
+}
+
+function SearchResultItem({ result, onClose }: { result: SearchResult; onClose: () => void }) {
+  return (
+    <Link
+      href={result.type === "course" ? `/tutorials/${result.slug}` : `/tutorials/${result.parent}/${result.slug}`}
+      onClick={onClose}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "16px",
+        padding: "14px 16px",
+        borderRadius: "var(--radius-lg)",
+        textDecoration: "none",
+        transition: "all 0.2s ease",
+      }}
+      className="hover-bg"
+    >
+      <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--brand-primary)", flexShrink: 0 }}>
+        {result.type === "course" ? <Book size={20} /> : <Code size={20} />}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: "1rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{result.title}</div>
+        {result.description && (
+          <div style={{ color: "var(--text-tertiary)", fontSize: "0.85rem", marginTop: "2px", lineHeight: 1.4 }}>
+            {result.description}
+          </div>
+        )}
+      </div>
+      <ArrowRight size={18} color="var(--text-tertiary)" style={{ flexShrink: 0 }} />
+    </Link>
   );
 }

@@ -202,8 +202,6 @@ function CertificateDocument({
 }
 
 export async function GET(request: NextRequest) {
-  console.log("[CertAPI] Download request received");
-
   // Rate Limiting
   const ip = request.headers.get("x-forwarded-for") || "unknown-ip";
   if (isRateLimited(ip)) {
@@ -230,6 +228,13 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     console.log("[CertAPI] Supabase client created");
 
+    // Get the requester's identity
+    const { data: { user: requester }, error: authError } = await supabase.auth.getUser();
+    if (authError || !requester) {
+      console.error("[CertAPI] Auth error or no requester:", authError);
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { data: cert, error: certError } = await supabase
       .from("certificates")
       .select("*")
@@ -244,12 +249,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch profile and course details separately for maximum reliability
+    // SECURITY CHECK: Ensure requester is owner OR an admin
     const { data: profile } = await supabase
       .from("profiles")
-      .select("full_name")
-      .eq("id", cert.user_id)
+      .select("role, full_name")
+      .eq("id", requester.id)
       .single();
+
+    const isOwner = cert.user_id === requester.id;
+    const isAdmin = profile?.role === "admin";
+
+    if (!isOwner && !isAdmin) {
+      console.warn(`[CertAPI] Unauthorized access attempt by ${requester.email} for cert ${certId}`);
+      return NextResponse.json(
+        { error: "Forbidden: You do not have permission to download this certificate" },
+        { status: 403 }
+      );
+    }
+
+    // Fetch related course details separately for maximum reliability
     const { data: course } = await supabase
       .from("courses")
       .select("title, slug")
@@ -257,8 +275,14 @@ export async function GET(request: NextRequest) {
       .single();
 
     console.log("[CertAPI] Data fetched for:", profile?.full_name);
+    
+    // Use the profile name of the ACTUAL certificate owner, not the requester
+    let recipientName = profile?.full_name || "Graduate";
+    if (!isOwner) {
+       const { data: actualOwner } = await supabase.from("profiles").select("full_name").eq("id", cert.user_id).single();
+       if (actualOwner) recipientName = actualOwner.full_name;
+    }
 
-    const recipientName = profile?.full_name || "Graduate";
     const courseName = course?.title || "Professional Course";
     const date = new Date(cert.issued_at).toLocaleDateString("en-US", {
       month: "long",
@@ -289,6 +313,7 @@ export async function GET(request: NextRequest) {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${fileName}"`,
         "Content-Length": pdfBuffer.length.toString(),
+        "Cache-Control": "private, max-age=3600",
       },
     });
   } catch (err: any) {

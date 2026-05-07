@@ -5,6 +5,7 @@ import { CourseForm } from "@/components/admin/CourseForm";
 import { CourseCurriculum } from "@/components/admin/CourseCurriculum";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
+import { InstructorLessonStats } from "@/components/instructor/InstructorLessonStats";
 
 export default async function InstructorCourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -46,6 +47,8 @@ export default async function InstructorCourseDetailPage({ params }: { params: P
           <ExternalLink size={16} /> View as Student
         </Link>
       </div>
+
+      <InstructorLessonStats courseId={id} />
 
       <CourseForm initialData={course} instructorId={user?.id} />
 

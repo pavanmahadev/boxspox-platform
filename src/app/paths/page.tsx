@@ -21,14 +21,34 @@ export default async function PathsPage() {
   return (
     <div style={{ paddingTop: "112px", background: "var(--bg-secondary)", minHeight: "100vh" }}>
       {/* Header */}
-      <div style={{ background: "var(--bg-card)", borderBottom: "1px solid var(--border-primary)", padding: "60px 0" }}>
+      <div style={{ background: "var(--bg-card)", borderBottom: "1px solid var(--border-primary)", padding: "80px 0 60px" }}>
         <div className="section-container">
-          <h1 style={{ fontSize: "40px", fontWeight: 900, color: "var(--text-primary)", marginBottom: "12px", fontFamily: "var(--font-heading)" }}>
-            Learning <span style={{ color: "var(--brand-primary)" }}>Paths</span>
-          </h1>
-          <p style={{ color: "var(--text-tertiary)", fontSize: "1.1rem", maxWidth: "600px" }}>
-            Structured roadmaps designed to take you from absolute beginner to industry-ready professional.
-          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
+            <div>
+              <span style={{ color: "var(--brand-primary)", fontWeight: 800, fontSize: "14px", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "16px", display: "block" }}>
+                Roadmaps to Success
+              </span>
+              <h1 style={{ fontSize: "48px", fontWeight: 900, color: "var(--text-primary)", marginBottom: "20px", fontFamily: "var(--font-heading)", letterSpacing: "-1.5px", lineHeight: 1 }}>
+                Structured Learning <span style={{ color: "var(--brand-primary)" }}>Paths</span>
+              </h1>
+              <p style={{ color: "var(--text-tertiary)", fontSize: "1.15rem", maxWidth: "540px", lineHeight: 1.6, marginBottom: "0" }}>
+                Don&apos;t just learn to code—master a career. Our roadmaps take you from absolute beginner to industry-ready professional with handpicked projects.
+              </p>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+               {[
+                 { title: "Guided Journey", desc: "No more guessing what to learn next." },
+                 { title: "Project Based", desc: "Build real apps while you learn." },
+                 { title: "Expert Vetted", desc: "Curated by industry professionals." },
+                 { title: "Career Ready", desc: "Focus on job-winning skills." }
+               ].map((item, i) => (
+                 <div key={i} style={{ padding: "20px", background: "var(--bg-secondary)", borderRadius: "16px", border: "1px solid var(--border-primary)" }}>
+                    <div style={{ fontWeight: 800, color: "var(--text-primary)", fontSize: "14px", marginBottom: "4px" }}>{item.title}</div>
+                    <div style={{ fontSize: "12px", color: "var(--text-tertiary)", lineHeight: 1.4 }}>{item.desc}</div>
+                 </div>
+               ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -50,15 +70,27 @@ export default async function PathsPage() {
                 key={path.id}
                 style={{
                   background: "var(--bg-card)",
-                  borderRadius: "24px",
+                  borderRadius: "32px",
                   padding: "40px",
                   border: "1px solid var(--border-primary)",
                   display: "flex",
                   flexDirection: "column",
-                  boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)",
-                  transition: "all 0.2s"
+                  boxShadow: "0 20px 40px -10px rgba(0,0,0,0.03)",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  position: "relative",
+                  overflow: "hidden"
                 }}
+                className="path-card-hover"
               >
+                <div style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  width: "150px",
+                  height: "150px",
+                  background: `radial-gradient(circle at top right, ${path.color}15, transparent 70%)`,
+                  pointerEvents: "none"
+                }} />
                 <div style={{
                   width: "64px",
                   height: "64px",
@@ -130,6 +162,13 @@ export default async function PathsPage() {
           </div>
         )}
       </div>
+      <style>{`
+        .path-card-hover:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 30px 60px -12px rgba(0,0,0,0.08) !important;
+          border-color: var(--brand-primary)40 !important;
+        }
+      `}</style>
     </div>
   );
 }

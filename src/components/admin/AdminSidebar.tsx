@@ -14,7 +14,8 @@ import {
   ExternalLink,
   LogOut,
   ChevronRight,
-  TrendingUp
+  TrendingUp,
+  MessageSquare
 } from "lucide-react";
 
 const menuItems = [
@@ -22,6 +23,7 @@ const menuItems = [
   { name: "Courses", icon: <BookOpen size={20} />, href: "/admin/courses" },
   { name: "Submissions", icon: <FileText size={20} />, href: "/admin/submissions" },
   { name: "Learning Paths", icon: <TrendingUp size={20} />, href: "/admin/paths" },
+  { name: "Course Reviews", icon: <MessageSquare size={20} />, href: "/admin/reviews" },
   { name: "User Management", icon: <Users size={20} />, href: "/admin/users" },
   { name: "Settings", icon: <Settings size={20} />, href: "/admin/settings" },
 ];

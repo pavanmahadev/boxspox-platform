@@ -90,6 +90,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [settings, setSettings] = useState<any>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
   const { showToast } = useToast();
   const supabase = createClient();
@@ -325,9 +326,62 @@ export function Navbar() {
                   </Link>
                 )}
                 <NotificationBell userId={user.id} />
-                <Link href="/dashboard" style={{ width: "36px", height: "36px", borderRadius: "50%", background: "var(--brand-primary)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontWeight: 700, fontSize: "14px" }}>
-                  {user.email?.charAt(0).toUpperCase()}
-                </Link>
+                <div style={{ position: "relative" }} onMouseEnter={() => setDropdownOpen(true)} onMouseLeave={() => setDropdownOpen(false)}>
+                  <button 
+                    style={{ 
+                      width: "36px", height: "36px", borderRadius: "50%", 
+                      background: "var(--brand-primary)", color: "white", 
+                      display: "flex", alignItems: "center", justifyContent: "center", 
+                      border: "none", cursor: "pointer", fontWeight: 700, fontSize: "14px",
+                      transition: "transform 0.2s"
+                    }}
+                  >
+                    {user.email?.charAt(0).toUpperCase()}
+                  </button>
+
+                  {dropdownOpen && (
+                    <div style={{
+                      position: "absolute", top: "100%", right: 0, marginTop: "8px",
+                      width: "200px", background: "var(--bg-primary)", borderRadius: "12px",
+                      border: "1px solid var(--border-primary)", boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                      overflow: "hidden", animation: "slideDown 0.2s ease", zIndex: 1100
+                    }}>
+                      <div style={{ padding: "16px", borderBottom: "1px solid var(--border-primary)" }}>
+                        <p style={{ fontSize: "12px", color: "var(--text-tertiary)", marginBottom: "4px" }}>Signed in as</p>
+                        <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</p>
+                      </div>
+                      <div style={{ padding: "8px" }}>
+                        <Link 
+                          href="/dashboard" 
+                          style={profileLinkStyle}
+                          onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-secondary)"}
+                          onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                        >
+                          <LayoutDashboard size={16} /> Dashboard
+                        </Link>
+                        <Link 
+                          href="/settings" 
+                          style={profileLinkStyle}
+                          onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-secondary)"}
+                          onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                        >
+                          <Settings size={16} /> Settings
+                        </Link>
+                        <button 
+                          onClick={handleLogout}
+                          style={{ 
+                            ...profileLinkStyle, width: "100%", border: "none", background: "none", 
+                            cursor: "pointer", color: "#EF4444", marginTop: "4px" 
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = "#FEF2F2"}
+                          onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                        >
+                          <LogOut size={16} /> Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>

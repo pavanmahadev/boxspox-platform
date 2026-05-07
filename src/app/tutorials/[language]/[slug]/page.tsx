@@ -7,15 +7,26 @@ export async function generateMetadata({ params }: { params: Promise<{ language:
   const { language, slug } = await params;
   const supabase = await createClient();
   
+  // Fetch lesson joining with module and course to ensure we get the right one for this language
   const { data: lesson } = await supabase
     .from("lessons")
-    .select("title, description, course:courses(title)")
+    .select(`
+      title, 
+      description, 
+      module:modules!inner(
+        course:courses!inner(
+          title,
+          slug
+        )
+      )
+    `)
     .eq("slug", slug)
-    .single();
+    .eq("module.course.slug", language)
+    .maybeSingle();
 
   if (!lesson) return { title: "Lesson Not Found | Boxspox" };
 
-  const courseTitle = Array.isArray(lesson.course) ? lesson.course[0]?.title : (lesson.course as any)?.title;
+  const courseTitle = (lesson.module as any)?.course?.title;
 
   return {
     title: `${lesson.title} - ${courseTitle || 'Course'} | Boxspox Academy`,

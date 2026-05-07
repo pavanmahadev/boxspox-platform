@@ -47,8 +47,8 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
     );
   }
 
-  // Fetch modules with nested lessons for this course
-  const { data: modules, error: modulesError } = await supabase
+  // 1. Fetch modules with nested lessons for this course
+  const { data: modules } = await supabase
     .from("modules")
     .select(`
       *,
@@ -57,12 +57,32 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
     .eq("course_id", course.id)
     .order("order_index", { ascending: true });
 
-  // Grouped lessons are now in modules
-  const allLessons = modules?.flatMap(m => m.lessons).sort((a, b) => a.order_index - b.order_index) || [];
+  const allLessons = modules?.flatMap(m => m.lessons).sort((a, b) => (a.order_index || 0) - (b.order_index || 0)) || [];
 
-  // Best UX: Directly jump into the first lesson (3-column view) like W3Schools instead of showing a hero banner.
+  // 2. Check Enrollment for Paid Courses
+  let isEnrolled = false;
+  if (user) {
+    const { data: enrollment } = await supabase
+      .from("enrollments")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("course_id", course.id)
+      .eq("status", "active")
+      .single();
+    
+    isEnrolled = !!enrollment;
+  }
+
+  // 3. Authorization Logic: Redirect based on price and enrollment
   if (allLessons.length > 0) {
-    redirect(`/tutorials/${language}/${allLessons[0].slug}`);
+    const isFree = course.price === 0 || course.price === null;
+    
+    if (isFree || isEnrolled) {
+      redirect(`/tutorials/${language}/${allLessons[0].slug}`);
+    } else {
+      // Not enrolled and not free -> Go to course landing/checkout
+      redirect(`/checkout/${course.id}`);
+    }
   }
 
   // Fallback to overview if no lessons exist yet

@@ -26,19 +26,25 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     .single();
 
   if (!certRecord || certError) {
-    console.error("Certificate not found:", certError);
+    console.error("Certificate not found or fetch error detailed:", {
+      message: certError?.message,
+      details: certError?.details,
+      code: certError?.code,
+      id: id
+    });
     redirect("/dashboard");
   }
 
-  // 2. Fetch related data separately to avoid complex join schema errors
-  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", certRecord.user_id).single();
-  const { data: course } = await supabase.from("courses").select("title, slug, description").eq("id", certRecord.course_id).single();
+  // 2. Fetch related data in parallel for performance and safety
+  const [profileRes, courseRes] = await Promise.all([
+    supabase.from("profiles").select("full_name").eq("id", certRecord.user_id).single(),
+    supabase.from("courses").select("title, slug, description").eq("id", certRecord.course_id).single()
+  ]);
 
-  // 3. Construct the 'cert' object for the JSX
   const cert = {
     ...certRecord,
-    profiles: profile,
-    courses: course
+    profiles: profileRes.data,
+    courses: courseRes.data
   };
 
   return (

@@ -161,7 +161,13 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
         if (error) throw error;
         showToast("Progress removed", "info");
       } else {
-        const { error } = await supabase.from("user_progress").insert({ user_id: user.id, lesson_id: lesson.id, course_id: course.id });
+        const { error } = await supabase.from("user_progress").upsert({ 
+          user_id: user.id, 
+          lesson_id: lesson.id, 
+          course_id: course.id,
+          completed_at: new Date().toISOString()
+        }, { onConflict: 'user_id,lesson_id' });
+
         if (error) throw error;
         
         showToast("Lesson marked as complete!", "success");
@@ -171,8 +177,9 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
            setTimeout(() => router.push(`/tutorials/${course.slug}/${nextLesson.slug}`), 1500);
         }
       }
-    } catch (err) {
-      console.error("Progress error:", err);
+    } catch (err: any) {
+      const errorMsg = err.message || JSON.stringify(err);
+      console.error(`Progress error detailed: ${errorMsg}`, err);
       setCompletedIds(prevIds); // Rollback
       showToast("Failed to sync progress. Please check your connection.", "error");
     } finally {
@@ -205,10 +212,13 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
   const handleQuizSubmit = (answers: any[]) => {
     let correctCount = 0;
     quiz.questions.forEach((q: any, i: number) => {
-      if (q.correct_option === answers[i]) correctCount++;
+      const selectedIdx = answers[i];
+      if (selectedIdx !== null && q.options[selectedIdx]?.isCorrect) {
+        correctCount++;
+      }
     });
     const score = Math.round((correctCount / quiz.questions.length) * 100);
-    const passed = score >= 70;
+    const passed = score >= (quiz.passing_score || 70);
     setQuizResults({ score, passed, correctCount, total: quiz.questions.length });
     
     // Save attempt to DB
@@ -220,7 +230,14 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
         passed,
         metadata: { answers }
       }).then(({ error }: { error: any }) => {
-        if (error) console.error("Failed to save quiz attempt:", error);
+        if (error) {
+          console.error("Failed to save quiz attempt detailed:", {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+        }
       });
     }
 
@@ -295,7 +312,6 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
     <div className="lesson-page-container" style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
       {/* Mobile Top Bar */}
       <div className="mobile-lesson-nav" style={{
-        display: "none",
         position: "sticky",
         top: "108px",
         zIndex: 500,
@@ -303,10 +319,19 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
         backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--border-primary)",
         padding: "8px 16px",
+        display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         boxShadow: "0 4px 20px rgba(0,0,0,0.04)"
       }}>
+        <style>{`
+          @media (min-width: 901px) {
+            .mobile-lesson-nav { display: none !important; }
+          }
+          @media (max-width: 900px) {
+            .mobile-lesson-nav { display: flex !important; }
+          }
+        `}</style>
         <button 
           onClick={() => setMobileNavOpen(!mobileNavOpen)}
           style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--brand-primary)", border: "none", color: "white", padding: "8px 16px", borderRadius: "8px", fontWeight: 700, fontSize: "13px" }}
@@ -551,20 +576,56 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
           )}
         </main>
 
-        {/* Right Sidebar */}
         <aside className="right-sidebar" style={{ borderLeft: "1px solid var(--border-primary)", padding: "40px 24px", background: "var(--bg-secondary)", overflowY: "auto", position: "sticky", top: "108px", height: "calc(100vh - 108px)" }}>
-          {/* Ad / Promo */}
+          {/* Table of Contents */}
+          <div style={{ marginBottom: "40px" }}>
+             <h3 style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", letterSpacing: "1.5px", marginBottom: "20px", textTransform: "uppercase" }}>
+               ON THIS PAGE
+             </h3>
+             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+               {lesson.content?.split("\n")
+                 .filter(line => line.startsWith("## ") || line.startsWith("### "))
+                 .map((line, i) => {
+                   const level = line.startsWith("### ") ? 3 : 2;
+                   const text = line.replace(/^###? /, "");
+                   const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                   return (
+                     <a 
+                       key={i} 
+                       href={`#${id}`} 
+                       style={{ 
+                         fontSize: "13px", 
+                         fontWeight: 600, 
+                         color: "var(--text-secondary)", 
+                         textDecoration: "none",
+                         paddingLeft: level === 3 ? "16px" : "0",
+                         lineHeight: 1.4,
+                         transition: "color 0.2s"
+                       }}
+                       onMouseEnter={(e) => (e.currentTarget.style.color = "var(--brand-primary)")}
+                       onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
+                     >
+                       {text}
+                     </a>
+                   );
+                 })}
+               {(!lesson.content || !lesson.content.includes("##")) && (
+                 <p style={{ fontSize: "13px", color: "var(--text-tertiary)", fontStyle: "italic" }}>No sub-sections in this lesson.</p>
+               )}
+             </div>
+          </div>
+
           <div style={{ 
-            background: "linear-gradient(135deg, #10B981, #059669)", 
+            background: "linear-gradient(135deg, #111827, #1f2937)", 
             padding: "24px", 
             borderRadius: "24px", 
             color: "white", 
             marginBottom: "40px",
-            boxShadow: "0 12px 24px rgba(16, 185, 129, 0.15)"
+            boxShadow: "0 12px 24px rgba(0,0,0,0.1)"
           }}>
-            <h4 style={{ fontSize: "18px", fontWeight: 900, marginBottom: "10px" }}>Boxspox Pro</h4>
-            <p style={{ fontSize: "13px", opacity: 0.9, marginBottom: "24px", lineHeight: 1.5 }}>Get certificates, offline access, and zero ads.</p>
-            <Link href="/pricing" style={{ display: "block", textAlign: "center", background: "white", color: "#059669", padding: "12px", borderRadius: "14px", textDecoration: "none", fontWeight: 800, fontSize: "14px" }}>Upgrade Now</Link>
+            <h4 style={{ fontSize: "16px", fontWeight: 900, marginBottom: "8px" }}>Boxspox Pro</h4>
+            <p style={{ fontSize: "12px", opacity: 0.8, marginBottom: "20px", lineHeight: 1.5 }}>Unlock certificates, offline mode, and 1-on-1 mentor support.</p>
+            <Link href="/checkout" style={{ display: "block", textAlign: "center", background: "var(--brand-primary)", color: "white", padding: "10px", borderRadius: "12px", textDecoration: "none", fontWeight: 800, fontSize: "13px" }}>Upgrade</Link>
           </div>
 
           {/* Widgets */}
@@ -629,7 +690,19 @@ function LessonRenderer({ content, lessonType, videoUrl, codeTemplate }: any) {
 
   return (
     <div className="prose-enhanced-content">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm]}
+        components={{
+          h2: ({node, ...props}) => {
+            const id = props.children?.toString().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            return <h2 id={id} {...props} />;
+          },
+          h3: ({node, ...props}) => {
+            const id = props.children?.toString().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            return <h3 id={id} {...props} />;
+          }
+        }}
+      >
         {formattedContent || "No content available for this lesson."}
       </ReactMarkdown>
       {lessonType === 'coding' && codeTemplate && (
@@ -797,7 +870,7 @@ function QuizPlayer({ quiz, onClose, onSubmit, results, onReset }: any) {
                     }}>
                       {String.fromCharCode(65 + idx)}
                     </div>
-                    {opt}
+                    {typeof opt === 'object' ? opt.text : opt}
                   </motion.button>
                 ))}
              </div>
