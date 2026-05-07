@@ -59,20 +59,27 @@ export default function DashboardPage() {
         const authUser = session.user;
         setUser(authUser);
 
-        // Run all queries in parallel to significantly speed up loading time
+        console.log("Fetching dashboard data for user:", authUser.id);
+
         const [
-          { data: certs },
-          { data: enrollmentData },
-          { data: userProgress },
-          { data: prof },
-          { count: wlCount }
+          certsRes,
+          enrollmentsRes,
+          progressRes,
+          profileRes,
+          wishlistRes
         ] = await Promise.all([
-          supabase.from("certificates").select(`*, course:courses (title, slug, image_url)`).eq("user_id", authUser.id),
-          supabase.from("enrollments").select(`*, course:courses (id, title, slug, icon, gradient, modules:modules (lessons:lessons (id)))`).eq("user_id", authUser.id),
-          supabase.from("user_progress").select(`*, lesson:lessons (id, title, slug, course:courses (id, title, slug, image_url))`).eq("user_id", authUser.id).order("completed_at", { ascending: false }),
-          supabase.from("profiles").select("*").eq("id", authUser.id).single(),
-          supabase.from("wishlists").select("id", { count: "exact", head: true }).eq("user_id", authUser.id)
+          supabase.from("certificates").select(`*, course:courses (title, slug, image_url)`).eq("user_id", authUser.id).then(r => { console.log("Certs loaded"); return r; }),
+          supabase.from("enrollments").select(`*, course:courses (id, title, slug, icon, gradient, modules:modules (lessons:lessons (id)))`).eq("user_id", authUser.id).then(r => { console.log("Enrollments loaded"); return r; }),
+          supabase.from("user_progress").select(`*, lesson:lessons (id, title, slug, course:courses (id, title, slug, image_url))`).eq("user_id", authUser.id).order("completed_at", { ascending: false }).then(r => { console.log("Progress loaded"); return r; }),
+          supabase.from("profiles").select("*").eq("id", authUser.id).single().then(r => { console.log("Profile loaded"); return r; }),
+          supabase.from("wishlists").select("id", { count: "exact", head: true }).eq("user_id", authUser.id).then(r => { console.log("Wishlist loaded"); return r; })
         ]);
+
+        const certs = certsRes.data;
+        const enrollmentData = enrollmentsRes.data;
+        const userProgress = progressRes.data;
+        const prof = profileRes.data;
+        const wlCount = wishlistRes.count;
 
         if (cancelled) return;
 
