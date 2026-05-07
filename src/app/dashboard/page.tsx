@@ -38,7 +38,7 @@ export default function DashboardPage() {
       if (!cancelled && loading) {
         console.warn("Dashboard load timed out — redirecting to login");
         setLoading(false);
-        window.location.href = "/login";
+        router.replace("/login");
       }
     }, 15000);
 
@@ -62,9 +62,9 @@ export default function DashboardPage() {
         if (cancelled) return;
 
         if (!session?.user) {
-          console.log("No user session, redirecting to login...");
+          console.log("No user session, redirecting to login via router...");
           setLoading(false);
-          window.location.href = "/login";
+          router.replace("/login");
           return;
         }
 
