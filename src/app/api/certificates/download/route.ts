@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import puppeteer from "puppeteer";
+import ReactPDF from "@react-pdf/renderer";
+import React from "react";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+} from "@react-pdf/renderer";
 
 // Simple in-memory rate limiter
-const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 5; // 5 PDFs per minute per IP
 
@@ -29,9 +37,173 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
+// PDF Styles
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 60,
+    backgroundColor: "#ffffff",
+  },
+  border: {
+    border: "12pt solid #0f6e56",
+    borderRadius: 4,
+    width: "100%",
+    height: "100%",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 40,
+  },
+  logo: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+    letterSpacing: 3,
+    color: "#333333",
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#0f6e56",
+    textTransform: "uppercase",
+    letterSpacing: 5,
+    marginBottom: 24,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#666666",
+    marginBottom: 12,
+  },
+  name: {
+    fontSize: 44,
+    fontWeight: "bold",
+    color: "#1a1a1a",
+    marginBottom: 16,
+    fontStyle: "italic",
+  },
+  course: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 40,
+    textAlign: "center",
+    color: "#333333",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    position: "absolute",
+    bottom: 50,
+    left: 60,
+    right: 60,
+    paddingHorizontal: 20,
+  },
+  footerItem: {
+    textAlign: "center",
+  },
+  footerLabel: {
+    fontSize: 10,
+    color: "#999999",
+    marginBottom: 4,
+  },
+  footerValue: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333333",
+  },
+});
+
+// Certificate PDF Component
+function CertificateDocument({
+  recipientName,
+  courseName,
+  date,
+  certificateId,
+}: {
+  recipientName: string;
+  courseName: string;
+  date: string;
+  certificateId: string;
+}) {
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", orientation: "landscape", style: styles.page },
+      React.createElement(
+        View,
+        { style: styles.border },
+        React.createElement(Text, { style: styles.logo }, "BOXSPOX ACADEMY"),
+        React.createElement(
+          Text,
+          { style: styles.title },
+          "Certificate of Completion"
+        ),
+        React.createElement(
+          Text,
+          { style: styles.subtitle },
+          "This is to certify that"
+        ),
+        React.createElement(Text, { style: styles.name }, recipientName),
+        React.createElement(
+          Text,
+          { style: styles.subtitle },
+          "has successfully completed the professional course"
+        ),
+        React.createElement(Text, { style: styles.course }, courseName),
+        React.createElement(
+          View,
+          { style: styles.footer },
+          React.createElement(
+            View,
+            { style: styles.footerItem },
+            React.createElement(
+              Text,
+              { style: styles.footerLabel },
+              "Date Issued"
+            ),
+            React.createElement(Text, { style: styles.footerValue }, date)
+          ),
+          React.createElement(
+            View,
+            { style: styles.footerItem },
+            React.createElement(
+              Text,
+              { style: styles.footerLabel },
+              "Authorized By"
+            ),
+            React.createElement(
+              Text,
+              { style: styles.footerValue },
+              "Boxspox Academy"
+            )
+          ),
+          React.createElement(
+            View,
+            { style: styles.footerItem },
+            React.createElement(
+              Text,
+              { style: styles.footerLabel },
+              "Certificate ID"
+            ),
+            React.createElement(
+              Text,
+              { style: styles.footerValue },
+              certificateId
+            )
+          )
+        )
+      )
+    )
+  );
+}
+
 export async function GET(request: NextRequest) {
   console.log("[CertAPI] Download request received");
-  
+
   // Rate Limiting
   const ip = request.headers.get("x-forwarded-for") || "unknown-ip";
   if (isRateLimited(ip)) {
@@ -49,7 +221,10 @@ export async function GET(request: NextRequest) {
   try {
     if (!certId) {
       console.error("[CertAPI] No ID provided in query params");
-      return NextResponse.json({ error: "Missing certificate ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing certificate ID" },
+        { status: 400 }
+      );
     }
 
     const supabase = await createClient();
@@ -63,12 +238,23 @@ export async function GET(request: NextRequest) {
 
     if (certError || !cert) {
       console.error("[CertAPI] Certificate fetch error:", certError);
-      return NextResponse.json({ error: "Certificate record not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Certificate record not found" },
+        { status: 404 }
+      );
     }
 
     // Fetch profile and course details separately for maximum reliability
-    const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", cert.user_id).single();
-    const { data: course } = await supabase.from("courses").select("title, slug").eq("id", cert.course_id).single();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", cert.user_id)
+      .single();
+    const { data: course } = await supabase
+      .from("courses")
+      .select("title, slug")
+      .eq("id", cert.course_id)
+      .single();
 
     console.log("[CertAPI] Data fetched for:", profile?.full_name);
 
@@ -81,74 +267,21 @@ export async function GET(request: NextRequest) {
     });
     const certificateId = cert.id.substring(0, 13).toUpperCase();
 
-    const htmlTemplate = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <title>Certificate</title>
-          <style>
-              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
-              body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; }
-              .cert-container { width: 297mm; height: 210mm; padding: 20mm; box-sizing: border-box; }
-              .cert-border { border: 15px solid #0f6e56; height: 100%; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border-radius: 4px; }
-              .logo { font-size: 24px; font-weight: 900; margin-bottom: 20px; }
-              .title { font-size: 40px; font-weight: 900; color: #0f6e56; text-transform: uppercase; letter-spacing: 5px; margin-bottom: 30px; }
-              .name { font-family: 'Playfair Display', serif; font-size: 60px; font-style: italic; font-weight: 700; margin-bottom: 20px; }
-              .course { font-size: 30px; font-weight: 800; margin-bottom: 40px; text-align: center; max-width: 80%; }
-              .footer { width: 80%; display: flex; justify-content: space-between; position: absolute; bottom: 50px; font-size: 14px; }
-              .footer div { text-align: center; }
-              .footer b { display: block; font-size: 18px; margin-top: 5px; }
-          </style>
-      </head>
-      <body>
-          <div class="cert-container">
-              <div class="cert-border">
-                  <div class="logo">BOXSPOX ACADEMY</div>
-                  <div class="title">Certificate of Completion</div>
-                  <div>This is to certify that</div>
-                  <div class="name">${recipientName}</div>
-                  <div>has successfully completed the professional course</div>
-                  <div class="course">${courseName}</div>
-                  <div class="footer">
-                      <div>Date Issued<b>${date}</b></div>
-                      <div>Authorized By<b>Boxspox Academy</b></div>
-                      <div>Certificate ID<b>${certificateId}</b></div>
-                  </div>
-              </div>
-          </div>
-      </body>
-      </html>
-    `;
+    console.log("[CertAPI] Generating PDF with @react-pdf/renderer...");
+    const pdfStream = await ReactPDF.renderToStream(
+      CertificateDocument({ recipientName, courseName, date, certificateId })
+    );
 
-    console.log("[CertAPI] Launching Puppeteer...");
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-      timeout: 30000, // 30s launch timeout
-    });
+    // Collect the stream into a buffer
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of pdfStream) {
+      chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+    }
+    const pdfBuffer = Buffer.concat(chunks);
 
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1123, height: 794 });
-    
-    console.log("[CertAPI] Setting content...");
-    await page.setContent(htmlTemplate, { waitUntil: 'load' });
-    
-    // Give it a tiny bit of extra time for fonts if needed
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log("[CertAPI] PDF generated successfully");
 
-    console.log("[CertAPI] Rendering PDF...");
-    const pdfUint8Array = await page.pdf({
-      format: 'A4',
-      landscape: true,
-      printBackground: true,
-    });
-    
-    await browser.close();
-    console.log("[CertAPI] Browser closed");
-
-    const pdfBuffer = Buffer.from(pdfUint8Array);
-    const fileName = `Certificate-${recipientName.replace(/\s+/g, '-')}.pdf`;
+    const fileName = `Certificate-${recipientName.replace(/\s+/g, "-")}.pdf`;
 
     return new NextResponse(pdfBuffer, {
       status: 200,
@@ -160,6 +293,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (err: any) {
     console.error("[CertAPI] Fatal error:", err);
-    return NextResponse.json({ error: "PDF generation failed", details: err.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "PDF generation failed", details: err.message },
+      { status: 500 }
+    );
   }
 }
