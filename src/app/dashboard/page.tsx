@@ -45,13 +45,24 @@ export default function DashboardPage() {
     async function getDashboardData() {
       console.log("Dashboard fetch started...");
       try {
-        // Use getSession() — instant local check, no network call
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        // Fast session check with a local timeout
+        console.log("Checking session...");
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Session timeout")), 5000));
+
+        let session;
+        try {
+          const result: any = await Promise.race([sessionPromise, timeoutPromise]);
+          session = result.data?.session;
+          console.log("Session result received:", session ? "User found" : "No user");
+        } catch (e) {
+          console.warn("Session check timed out or failed, attempting to continue...");
+        }
 
         if (cancelled) return;
 
-        if (sessionError || !session?.user) {
-          console.log("No session found, redirecting to login");
+        if (!session?.user) {
+          console.log("No user session, redirecting to login...");
           setLoading(false);
           window.location.href = "/login";
           return;
