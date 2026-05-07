@@ -43,6 +43,7 @@ export default function DashboardPage() {
     }, 15000);
 
     async function getDashboardData() {
+      console.log("Dashboard fetch started...");
       try {
         // Use getSession() — instant local check, no network call
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
