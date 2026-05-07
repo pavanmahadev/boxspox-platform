@@ -293,7 +293,23 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense 
+      fallback={
+        <div style={{ 
+          minHeight: "100vh", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          background: "var(--bg-primary)",
+          color: "var(--text-secondary)"
+        }}>
+          <div style={{ textAlign: "center" }}>
+            <Loader2 size={40} className="animate-spin" style={{ margin: "0 auto 20px", color: "var(--brand-primary)" }} />
+            <p>Preparing login session...</p>
+          </div>
+        </div>
+      }
+    >
       <LoginContent />
     </Suspense>
   );
