@@ -152,11 +152,11 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
       clearTimeout(timeout);
-      profileSub();
-      progressSub();
+      if (profileSub) profileSub();
+      if (progressSub) progressSub();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount to prevent infinite loops
 
   if (loading && !user) {
     return (
