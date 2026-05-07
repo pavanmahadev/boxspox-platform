@@ -36,9 +36,9 @@ export default function DashboardPage() {
     // Hard timeout: if ANYTHING takes longer than 15s, stop loading and redirect
     const timeout = setTimeout(() => {
       if (!cancelled && loading) {
-        console.warn("Dashboard load timed out — redirecting to login");
+        console.warn("Dashboard load timed out — FORCING redirect to login");
         setLoading(false);
-        router.replace("/login");
+        window.location.replace("/login");
       }
     }, 15000);
 
@@ -62,9 +62,9 @@ export default function DashboardPage() {
         if (cancelled) return;
 
         if (!session?.user) {
-          console.log("No user session, redirecting to login via router...");
+          console.log("No user session, FORCING redirect to login...");
           setLoading(false);
-          router.replace("/login");
+          window.location.replace("/login");
           return;
         }
 
