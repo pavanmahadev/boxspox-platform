@@ -19,10 +19,14 @@ export function createClient() {
     key || '',
     {
       auth: {
-        autoRefreshToken: true,
+        autoRefreshToken: false, // Turn off initially to prevent hanging on load
         persistSession: true,
-        detectSessionInUrl: true
-      }
+        detectSessionInUrl: true,
+        flowType: 'pkce'
+      },
+      global: {
+        headers: { 'x-application-name': 'boxspox' },
+      },
     }
   );
 
