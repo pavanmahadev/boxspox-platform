@@ -68,11 +68,11 @@ export default function DashboardPage() {
           profileRes,
           wishlistRes
         ] = await Promise.all([
-          supabase.from("certificates").select(`*, course:courses (title, slug, image_url)`).eq("user_id", authUser.id).then(r => { console.log("Certs loaded"); return r; }),
-          supabase.from("enrollments").select(`*, course:courses (id, title, slug, icon, gradient, modules:modules (lessons:lessons (id)))`).eq("user_id", authUser.id).then(r => { console.log("Enrollments loaded"); return r; }),
-          supabase.from("user_progress").select(`*, lesson:lessons (id, title, slug, course:courses (id, title, slug, image_url))`).eq("user_id", authUser.id).order("completed_at", { ascending: false }).then(r => { console.log("Progress loaded"); return r; }),
-          supabase.from("profiles").select("*").eq("id", authUser.id).single().then(r => { console.log("Profile loaded"); return r; }),
-          supabase.from("wishlists").select("id", { count: "exact", head: true }).eq("user_id", authUser.id).then(r => { console.log("Wishlist loaded"); return r; })
+          supabase.from("certificates").select(`*, course:courses (title, slug, image_url)`).eq("user_id", authUser.id).then((r: any) => { console.log("Certs loaded"); return r; }),
+          supabase.from("enrollments").select(`*, course:courses (id, title, slug, icon, gradient, modules:modules (lessons:lessons (id)))`).eq("user_id", authUser.id).then((r: any) => { console.log("Enrollments loaded"); return r; }),
+          supabase.from("user_progress").select(`*, lesson:lessons (id, title, slug, course:courses (id, title, slug, image_url))`).eq("user_id", authUser.id).order("completed_at", { ascending: false }).then((r: any) => { console.log("Progress loaded"); return r; }),
+          supabase.from("profiles").select("*").eq("id", authUser.id).single().then((r: any) => { console.log("Profile loaded"); return r; }),
+          supabase.from("wishlists").select("id", { count: "exact", head: true }).eq("user_id", authUser.id).then((r: any) => { console.log("Wishlist loaded"); return r; })
         ]);
 
         const certs = certsRes.data;
