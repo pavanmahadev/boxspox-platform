@@ -5,9 +5,18 @@ let client: any = null;
 export function createClient() {
   if (client) return client;
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    console.error("Supabase environment variables are MISSING!");
+  } else {
+    console.log("Supabase client initialized with URL:", url.substring(0, 10) + "...");
+  }
+
   client = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    url || '',
+    key || '',
     {
       auth: {
         autoRefreshToken: true,
