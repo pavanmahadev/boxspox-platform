@@ -54,7 +54,7 @@ export function Footer() {
         { label: "Tutorials", href: "/tutorials" },
         { label: "Learning Paths", href: "/paths" },
         { label: "Projects", href: "/projects" },
-        { label: "Interactive Editor", href: "/editor" },
+        { label: "Interactive Editor", href: "/playground" },
       ]
     },
     {
@@ -88,18 +88,23 @@ export function Footer() {
     <footer style={{ 
       background: "var(--bg-primary)", 
       borderTop: "1px solid var(--border-primary)", 
-      padding: "80px 0 40px",
+      padding: "var(--section-spacing) 0 40px",
       color: "var(--text-primary)"
     }}>
       <div className="section-container">
         <div style={{ 
           display: "grid", 
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", 
           gap: "48px",
-          marginBottom: "80px"
+          marginBottom: "60px"
         }}>
           {/* Brand Column */}
-          <div style={{ gridColumn: "span 2" }}>
+          <div style={{ gridColumn: "span 1", minWidth: "260px" }} className="footer-brand-col">
+            <style>{`
+              @media (min-width: 1024px) {
+                .footer-brand-col { grid-column: span 2 !important; }
+              }
+            `}</style>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none", color: "var(--text-primary)", marginBottom: "24px" }}>
               <div style={{ width: 36, height: 36, borderRadius: "8px", background: "var(--brand-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Code2 size={22} color="white" aria-hidden="true" />
@@ -108,7 +113,7 @@ export function Footer() {
                 {settings?.platform_name || "BOXSPOX"}
               </span>
             </Link>
-            <p style={{ color: "var(--text-tertiary)", lineHeight: 1.6, maxWidth: "320px", marginBottom: "32px" }}>
+            <p style={{ color: "var(--text-tertiary)", lineHeight: 1.6, maxWidth: "320px", marginBottom: "32px", fontSize: "14px" }}>
               Empowering developers worldwide with project-based learning and AI-powered mentorship.
             </p>
             <div style={{ display: "flex", gap: "16px" }}>
@@ -138,10 +143,10 @@ export function Footer() {
           {/* Links Columns */}
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h4 style={{ fontSize: "14px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "24px", color: "var(--text-primary)" }}>
+              <h4 style={{ fontSize: "12px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "24px", color: "var(--text-primary)" }}>
                 {section.title}
               </h4>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "14px" }}>
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <Link href={link.href} style={{ 
@@ -168,16 +173,30 @@ export function Footer() {
           justifyContent: "space-between", 
           alignItems: "center",
           flexWrap: "wrap",
-          gap: "20px"
-        }}>
+          gap: "24px",
+          textAlign: "center"
+        }} className="footer-bottom">
+          <style>{`
+            @media (max-width: 640px) {
+              .footer-bottom { 
+                flex-direction: column !important;
+                text-align: center !important;
+              }
+              .footer-bottom-links {
+                flex-direction: column !important;
+                gap: 12px !important;
+              }
+              .footer-divider { display: none !important; }
+            }
+          `}</style>
           <div style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500 }}>
             © {currentYear} {settings?.platform_name || "BOXSPOX"}. All rights reserved.
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "24px" }} className="footer-bottom-links">
             <Link href={`mailto:${settings?.admin_email || "hello@boxspox.com"}`} style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-tertiary)", textDecoration: "none", fontSize: "14px", fontWeight: 500 }}>
               <Mail size={16} /> {settings?.admin_email || "hello@boxspox.com"}
             </Link>
-            <div style={{ width: "1px", height: "14px", background: "#E5E7EB" }} />
+            <div style={{ width: "1px", height: "14px", background: "#E5E7EB" }} className="footer-divider" />
             <div style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500 }}>
               Made with ❤️ by GreenNetspark
             </div>

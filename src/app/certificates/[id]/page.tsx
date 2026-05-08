@@ -55,10 +55,32 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
           <ArrowLeft size={16} /> Back to Dashboard
         </Link>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: "40px", alignItems: "start" }}>
+        <div className="cert-grid">
+          <style>{`
+            .cert-grid {
+              display: grid;
+              grid-template-columns: 1fr 280px;
+              gap: 40px;
+              align-items: start;
+            }
+            @media (max-width: 900px) {
+              .cert-grid {
+                grid-template-columns: 1fr;
+              }
+              .cert-card {
+                padding: 40px 20px !important;
+              }
+              .cert-title {
+                font-size: 1.75rem !important;
+              }
+              .cert-course {
+                font-size: 1.25rem !important;
+              }
+            }
+          `}</style>
           
           {/* Certificate Card */}
-          <div style={{ 
+          <div className="cert-card" style={{ 
             background: "var(--bg-card)", 
             borderRadius: "24px", 
             padding: "80px", 
@@ -83,7 +105,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
               Certificate of Completion
             </div>
             
-            <h1 style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--text-primary)", marginBottom: "24px", fontFamily: "var(--font-heading)" }}>
+            <h1 className="cert-title" style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--text-primary)", marginBottom: "24px", fontFamily: "var(--font-heading)" }}>
               {cert.profiles?.full_name}
             </h1>
 
@@ -91,13 +113,13 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
               has successfully completed all requirements and assessments for the professional course:
             </p>
 
-            <div style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "12px" }}>
+            <div className="cert-course" style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "12px" }}>
               {cert.courses?.title}
             </div>
             
             <div style={{ height: "2px", width: "100px", background: "#E5E7EB", margin: "0 auto 40px" }} />
 
-            <div style={{ display: "flex", justifyContent: "center", gap: "60px" }}>
+            <div style={{ display: "flex", justifyContent: "center", gap: "clamp(20px, 5vw, 60px)", flexWrap: "wrap" }}>
               <div>
                 <div style={{ fontSize: "11px", fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", marginBottom: "4px" }}>Issued On</div>
                 <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>{new Date(cert.issued_at).toLocaleDateString("en-US", { month: 'long', day: 'numeric', year: 'numeric' })}</div>

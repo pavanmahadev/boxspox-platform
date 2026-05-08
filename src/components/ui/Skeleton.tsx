@@ -56,6 +56,28 @@ export function CourseCardSkeleton() {
   );
 }
 
+export function StatSkeleton() {
+  return (
+    <div style={{ background: "var(--bg-card)", padding: "24px", borderRadius: "20px", border: "1px solid var(--border-primary)" }}>
+      <Skeleton width="40px" height="40px" borderRadius="10px" style={{ marginBottom: "16px" }} />
+      <Skeleton width="60%" height="12px" style={{ marginBottom: "8px" }} />
+      <Skeleton width="40%" height="28px" />
+    </div>
+  );
+}
+
+export function DashboardHeaderSkeleton() {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px", flexWrap: "wrap", gap: "20px" }}>
+      <div>
+        <Skeleton width="240px" height="32px" style={{ marginBottom: "8px" }} />
+        <Skeleton width="180px" height="16px" />
+      </div>
+      <Skeleton width="140px" height="44px" borderRadius="12px" />
+    </div>
+  );
+}
+
 export function LessonItemSkeleton() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px" }}>

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { BarChart3, Users, AlertCircle, Loader2 } from "lucide-react";
+import { getLessonEngagementAction } from "@/app/instructor/courses/actions";
 
 interface LessonStat {
   lesson_title: string;
@@ -16,14 +17,19 @@ export function InstructorLessonStats({ courseId }: { courseId: string }) {
 
   useEffect(() => {
     async function fetchStats() {
-      const { data, error } = await supabase.rpc("get_lesson_engagement", { p_course_id: courseId });
-      if (!error && data) {
-        setStats(data);
+      try {
+        const data = await getLessonEngagementAction(courseId);
+        if (data) {
+          setStats(data);
+        }
+      } catch (err) {
+        console.error("Error fetching lesson stats:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchStats();
-  }, [courseId, supabase]);
+  }, [courseId]);
 
   if (loading) {
     return (

@@ -110,7 +110,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px", marginBottom: "32px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: "20px", marginBottom: "32px" }}>
         {stats.map((stat) => (
           <div key={stat.label} style={{ 
             background: "var(--bg-card)", 

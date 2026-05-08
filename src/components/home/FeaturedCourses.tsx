@@ -41,14 +41,22 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
   const displayCourses = dbCourses && dbCourses.length > 0 ? dbCourses : defaultCourses;
   
   return (
-    <section style={{ padding: "100px 0", background: "var(--bg-primary)" }}>
+    <section style={{ padding: "var(--section-spacing) 0", background: "var(--bg-primary)" }}>
       <div className="section-container">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "48px" }}>
-          <div>
-            <h2 style={{ fontSize: "36px", fontWeight: 900, color: "var(--text-primary)", marginBottom: "16px", fontFamily: "var(--font-heading)" }}>
+        <div style={{ 
+          display: "flex", 
+          flexDirection: "row", 
+          justifyContent: "space-between", 
+          alignItems: "flex-end", 
+          marginBottom: "48px",
+          gap: "24px",
+          flexWrap: "wrap"
+        }}>
+          <div style={{ flex: "1 1 300px" }}>
+            <h2 style={{ fontSize: "var(--h2-size)", fontWeight: 900, color: "var(--text-primary)", marginBottom: "16px", fontFamily: "var(--font-heading)", lineHeight: 1.2 }}>
               Featured <span style={{ color: "var(--brand-primary)" }}>Courses</span>
             </h2>
-            <p style={{ color: "var(--text-tertiary)", fontSize: "1.1rem", maxWidth: "540px" }}>
+            <p style={{ color: "var(--text-tertiary)", fontSize: "var(--body-size)", maxWidth: "540px" }}>
               Hand-picked tutorials to help you start your coding journey today.
             </p>
           </div>
@@ -59,7 +67,8 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
             display: "flex",
             alignItems: "center",
             gap: "4px",
-            fontSize: "14px"
+            fontSize: "14px",
+            marginBottom: "8px"
           }}>
             View All Tutorials <ChevronRight size={18} />
           </Link>
@@ -67,8 +76,8 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-          gap: "clamp(24px, 4vw, 40px)"
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))",
+          gap: "var(--container-padding)"
         }}>
           {displayCourses.map((course: any, i: number) => {
             const duration = (course.duration || "—").replace("minitis", "minutes");

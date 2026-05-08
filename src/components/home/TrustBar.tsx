@@ -21,7 +21,7 @@ export function TrustBar() {
   return (
     <section style={{ 
       background: "#FFFFFF", 
-      padding: "60px 0", 
+      padding: "var(--container-padding) 0", 
       borderTop: "1px solid var(--border-primary)",
       borderBottom: "1px solid var(--border-primary)",
       overflow: "hidden"
@@ -29,12 +29,12 @@ export function TrustBar() {
       <div className="section-container">
         <p style={{ 
           textAlign: "center", 
-          fontSize: "13px", 
+          fontSize: "11px", 
           fontWeight: 700, 
           color: "var(--text-secondary)", 
           textTransform: "uppercase", 
-          letterSpacing: "1.5px", 
-          marginBottom: "48px" 
+          letterSpacing: "2px", 
+          marginBottom: "32px" 
         }}>
           Master the Industry&apos;s Most In-Demand Technologies
         </p>
@@ -42,17 +42,24 @@ export function TrustBar() {
         <div className="logo-slider">
           <div className="logo-track">
             {[...techLogos, ...techLogos].map((logo, i) => (
-              <div key={i} className="logo-item" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 60px" }}>
+              <div key={i} className="logo-item" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 5vw, 60px)" }}>
                 <img 
                   src={logo.url} 
                   alt={logo.name} 
                   style={{ 
-                    height: "44px", 
+                    height: "clamp(24px, 5vw, 44px)", 
                     width: "auto", 
-                    transition: "all 0.3s ease"
+                    transition: "all 0.3s ease",
+                    filter: "grayscale(1) opacity(0.6)"
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "scale(1.1)";
+                    e.currentTarget.style.filter = "grayscale(0) opacity(1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.filter = "grayscale(1) opacity(0.6)";
+                  }}
                 />
               </div>
             ))}

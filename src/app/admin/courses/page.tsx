@@ -31,13 +31,13 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
   const totalPages = Math.ceil((count || 0) / pageSize);
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px" }}>
+    <div className="admin-page-content">
+      <div className="admin-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px", gap: "20px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, color: "var(--text-primary)", marginBottom: "8px", fontFamily: "var(--font-heading)" }}>
+          <h1 style={{ fontSize: "clamp(1.4rem, 4vw, 1.75rem)", fontWeight: 900, color: "var(--text-primary)", marginBottom: "8px", fontFamily: "var(--font-heading)" }}>
             Course Management
           </h1>
-          <p style={{ color: "var(--text-tertiary)", fontWeight: 600 }}>Create, edit, and organize your curriculum.</p>
+          <p style={{ color: "var(--text-tertiary)", fontWeight: 600, fontSize: "14px" }}>Manage your curriculum.</p>
         </div>
         <Link href="/admin/courses/new" style={{ 
           background: "var(--brand-primary)", 
@@ -48,13 +48,23 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
           fontWeight: 700, 
           display: "flex", 
           alignItems: "center", 
-          gap: "8px"
+          gap: "8px",
+          whiteSpace: "nowrap"
         }}>
-          <Plus size={20} /> Add Course
+          <Plus size={20} /> <span className="hide-on-mobile">Add Course</span>
         </Link>
       </div>
 
-      {/* Filters Bar - must be in Suspense because CourseSearch uses useSearchParams() */}
+      <style>{`
+        @media (max-width: 640px) {
+          .admin-header { flex-direction: column; align-items: flex-start !important; }
+          .admin-header > a { width: 100%; justify-content: center; }
+          .hide-on-mobile { display: none !important; }
+          .table-cell-hide-mobile { display: none !important; }
+        }
+      `}</style>
+
+      {/* Filters Bar */}
       <Suspense fallback={
         <div style={{ height: "72px", background: "var(--bg-card)", borderRadius: "16px", border: "1px solid var(--border-primary)", marginBottom: "32px", display: "flex", alignItems: "center", padding: "0 20px", color: "var(--text-tertiary)", fontSize: "14px" }}>
           Loading filters...
@@ -69,35 +79,36 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
         borderRadius: "16px", 
         border: "1px solid var(--border-primary)", 
         overflowX: "auto",
-        boxShadow: "0 1px 2px rgba(0,0,0,0.03)"
+        boxShadow: "var(--shadow-sm)"
       }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", minWidth: "800px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", minWidth: "600px" }}>
           <thead style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-primary)" }}>
             <tr>
               <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Course</th>
               <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Category</th>
-              <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Duration</th>
-              <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Price</th>
+              <th className="table-cell-hide-mobile" style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Duration</th>
+              <th className="table-cell-hide-mobile" style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Price</th>
               <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Curriculum</th>
-              <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Created</th>
+              <th className="table-cell-hide-mobile" style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Created</th>
               <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "right" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {courses?.map((course) => (
-              <tr key={course.id} style={{ borderBottom: "1px solid #F3F4F6", transition: "background 0.1s" }}>
+              <tr key={course.id} style={{ borderBottom: "1px solid var(--border-primary)", transition: "background 0.1s" }}>
                 <td style={{ padding: "16px 24px", whiteSpace: "nowrap" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <div style={{ 
                       width: "40px", 
                       height: "40px", 
-                      borderRadius: "8px", 
+                      borderRadius: "10px", 
                       background: course.gradient || "#111827",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       color: "white",
-                      fontSize: "18px"
+                      fontSize: "18px",
+                      flexShrink: 0
                     }}>
                       {course.icon || "📚"}
                     </div>
@@ -117,7 +128,7 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
                           {course.status || "draft"}
                         </span>
                       </div>
-                      <div style={{ fontSize: "11px", color: "#9CA3AF" }}>{course.slug}</div>
+                      <div style={{ fontSize: "11px", color: "var(--text-tertiary)" }}>{course.slug}</div>
                     </div>
                   </div>
                 </td>
@@ -134,10 +145,10 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
                     {course.category || "web"}
                   </span>
                 </td>
-                <td style={{ padding: "16px 24px", color: "var(--text-tertiary)", fontSize: "13px", fontWeight: 500 }}>
+                <td className="table-cell-hide-mobile" style={{ padding: "16px 24px", color: "var(--text-tertiary)", fontSize: "13px", fontWeight: 500 }}>
                   {course.duration || "-"}
                 </td>
-                <td style={{ padding: "16px 24px", color: "var(--text-tertiary)", fontSize: "13px", fontWeight: 500 }}>
+                <td className="table-cell-hide-mobile" style={{ padding: "16px 24px", color: "var(--text-tertiary)", fontSize: "13px", fontWeight: 500 }}>
                   {course.price ? `$${course.price}` : "Free"}
                 </td>
                 <td style={{ padding: "16px 24px" }}>
@@ -145,12 +156,12 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
                     <Layers size={14} color="#9CA3AF" /> {course.modules?.length || 0} Modules
                   </div>
                 </td>
-                <td style={{ padding: "16px 24px", color: "var(--text-tertiary)", fontSize: "13px" }}>
+                <td className="table-cell-hide-mobile" style={{ padding: "16px 24px", color: "var(--text-tertiary)", fontSize: "13px" }}>
                   {new Date(course.created_at).toLocaleDateString()}
                 </td>
                 <td style={{ padding: "16px 24px", textAlign: "right" }}>
-                  <div style={{ display: "flex", gap: "4px", justifyContent: "flex-end" }}>
-                    <Link href={`/admin/courses/${course.id}`} style={{ padding: "8px", borderRadius: "6px", color: "var(--text-primary)", background: "var(--bg-tertiary)", transition: "all 0.1s" }}>
+                  <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                    <Link href={`/admin/courses/${course.id}`} style={{ padding: "10px", borderRadius: "10px", color: "var(--text-primary)", background: "var(--bg-tertiary)", border: "1px solid var(--border-primary)", transition: "all 0.1s" }}>
                       <Edit2 size={16} />
                     </Link>
                     <DeleteCourseButton courseId={course.id} />

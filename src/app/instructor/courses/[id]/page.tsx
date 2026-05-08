@@ -12,14 +12,27 @@ export default async function InstructorCourseDetailPage({ params }: { params: P
   const supabase = await createClient();
   
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
 
-  // Fetch course ensuring it belongs to this instructor
-  const { data: course } = await supabase
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  let query = supabase
     .from("courses")
     .select("*")
-    .eq("id", id)
-    .eq("instructor_id", user?.id)
-    .single();
+    .eq("id", id);
+
+  // If not admin, restrict to instructor's own courses
+  if (profile?.role !== "admin") {
+    query = query.eq("instructor_id", user.id);
+  }
+
+  const { data: course } = await query.single();
 
   if (!course) {
     notFound();

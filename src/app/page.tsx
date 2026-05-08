@@ -14,18 +14,28 @@ const AIFeature = dynamic(() => import("@/components/home/AIFeature").then(mod =
 export default async function HomePage() {
   const supabase = await createClient();
   
-  // Fetch courses for the FeaturedCourses component
-  const { data: courses } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("status", "published")
-    .order("created_at", { ascending: false });
+  // Fetch courses with a safety timeout to prevent page hangs
+  let courses = [];
+  try {
+    const coursePromise = supabase
+      .from("courses")
+      .select("*")
+      .eq("status", "published")
+      .order("created_at", { ascending: false });
+    
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 4000));
+    
+    const result: any = await Promise.race([coursePromise, timeoutPromise]);
+    courses = result.data || [];
+  } catch (err) {
+    console.warn("Home data fetch delayed, proceeding with empty state");
+  }
 
   return (
     <>
       <Hero />
       <TrustBar />
-      <FeaturedCourses courses={courses || []} />
+      <FeaturedCourses courses={courses} />
       <EditorPreview />
       <LearningPaths />
       <ProjectsPreview />

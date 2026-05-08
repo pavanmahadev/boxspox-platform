@@ -26,6 +26,7 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { fetchQuizAction, fetchUserProgressAction } from "@/app/tutorials/actions";
 import { useToast } from "@/components/ui/ToastProvider";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -71,9 +72,16 @@ interface LessonContentProps {
   allLessons: Lesson[];
   gradient: string;
   currentUserId?: string;
+  ad?: {
+    id: string;
+    title: string;
+    image_url: string;
+    link_url: string;
+    status: string;
+  } | null;
 }
 
-export function LessonContent({ course, lesson, allLessons }: LessonContentProps) {
+export function LessonContent({ course, lesson, allLessons, ad }: LessonContentProps) {
   const [user, setUser] = useState<any>(null);
   const [completedIds, setCompletedIds] = useState<string[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
@@ -90,6 +98,9 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
   const [hinglishContent, setHinglishContent] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
 
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+
   const [quiz, setQuiz] = useState<any>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizResults, setQuizResults] = useState<any>(null);
@@ -97,31 +108,26 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
 
   useEffect(() => {
     const fetchQuiz = async () => {
-      const { data } = await supabase
-        .from("quizzes")
-        .select("*, questions:quiz_questions(*)")
-        .eq("lesson_id", lesson.id)
-        .single();
-      
-      if (data) {
-        setQuiz({
-          ...data,
-          questions: data.questions.sort((a: any, b: any) => a.order_index - b.order_index)
-        });
+      try {
+        const data = await fetchQuizAction(lesson.id);
+        if (data) {
+          setQuiz({
+            ...data,
+            questions: data.questions.sort((a: any, b: any) => a.order_index - b.order_index)
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching quiz:", err);
       }
     };
     fetchQuiz();
 
     const loadData = async () => {
       try {
-        const { data: authData } = await supabase.auth.getUser();
-        if (authData?.user) {
-          setUser(authData.user);
-          const { data: completions } = await supabase
-            .from("user_progress")
-            .select("lesson_id")
-            .eq("user_id", authData.user.id);
-          if (completions) setCompletedIds(completions.map((c: { lesson_id: string }) => c.lesson_id));
+        const { user, completedIds } = await fetchUserProgressAction();
+        if (user) {
+          setUser(user);
+          setCompletedIds(completedIds);
         }
       } catch (err) {
         console.error("Auth error:", err);
@@ -304,6 +310,25 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
     }
   };
 
+  const handleGenerateSummary = async () => {
+    if (aiSummary) return;
+    
+    setIsSummarizing(true);
+    try {
+      const res = await fetch("/api/ai/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lessonContent: lesson.content })
+      });
+      const data = await res.json();
+      if (data.summary) setAiSummary(data.summary);
+    } catch (err) {
+      showToast("Failed to generate summary", "error");
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
   const lessonIdx = allLessons.findIndex(l => l.id === lesson.id);
   const prevLesson = lessonIdx > 0 ? allLessons[lessonIdx - 1] : null;
   const nextLesson = lessonIdx < allLessons.length - 1 ? allLessons[lessonIdx + 1] : null;
@@ -318,11 +343,14 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
         background: "rgba(255,255,255,0.85)",
         backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--border-primary)",
-        padding: "8px 16px",
+        padding: "12px 20px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.04)"
+        boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
+        width: "100%",
+        left: 0,
+        boxSizing: "border-box"
       }}>
         <style>{`
           @media (min-width: 901px) {
@@ -384,7 +412,7 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
           className={`left-sidebar ${mobileNavOpen ? 'mobile-open' : ''}`}
           style={{
             borderRight: "1px solid var(--border-primary)",
-            background: "var(--bg-card)",
+            background: "#F8FAFC",
             overflowY: "auto",
             position: "sticky",
             top: "108px",
@@ -392,8 +420,37 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
             zIndex: 600
           }}
         >
-          <div style={{ padding: "32px 20px" }}>
-            <h3 style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", letterSpacing: "1.5px", marginBottom: "24px" }}>
+          {/* User Profile Section (Matching User's Screenshot) */}
+          <div style={{ padding: "20px", borderBottom: "1px solid #E2E8F0", background: "white" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+              <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "#E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem" }}>
+                🦊
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, color: "#0F172A", fontSize: "14px" }}>Pavan m MCA OMBR</div>
+                <Link href="/dashboard" style={{ fontSize: "12px", color: "var(--brand-primary)", textDecoration: "none", fontWeight: 600 }}>Open profile &gt;</Link>
+              </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div style={{ display: "flex", gap: "6px" }}>
+              <div style={{ flex: 1, background: "white", border: "1px solid #E2E8F0", borderRadius: "10px", padding: "8px", textAlign: "center" }}>
+                <span style={{ fontSize: "9px", fontWeight: 700, color: "#64748B", display: "block", textTransform: "uppercase" }}>XP</span>
+                <span style={{ fontSize: "14px", fontWeight: 800, color: "#0F172A" }}>70</span>
+              </div>
+              <div style={{ flex: 1, background: "white", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                <span style={{ fontSize: "9px", fontWeight: 700, color: "#64748B", display: "block", textTransform: "uppercase" }}>Coins</span>
+                <span style={{ fontSize: "14px", fontWeight: 800, color: "#0F172A" }}>1000</span>
+              </div>
+              <div style={{ flex: 1, background: "white", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                <span style={{ fontSize: "9px", fontWeight: 700, color: "#64748B", display: "block", textTransform: "uppercase" }}>⚡</span>
+                <span style={{ fontSize: "14px", fontWeight: 800, color: "#0F172A" }}>1</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ padding: "20px" }}>
+            <h3 style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", letterSpacing: "1.5px", marginBottom: "16px" }}>
               CURRICULUM
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -438,42 +495,50 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
         )}
 
         {/* Main Content Area */}
-        <main style={{ padding: "60px clamp(24px, 5vw, 100px)", maxWidth: "1000px", margin: "0 auto", width: "100%" }}>
+        <main style={{ padding: "clamp(32px, 8vw, 60px) var(--container-padding)", maxWidth: "1000px", margin: "0 auto", width: "100%" }}>
           {/* Presence and Header */}
           <div style={{ marginBottom: "32px" }}>
             <PresenceIndicator lessonId={lesson.id} user={user} />
             
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px", flexWrap: "wrap", gap: "20px" }}>
-              <div style={{ flex: 1, minWidth: "280px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px", flexWrap: "wrap", gap: "24px" }}>
+              <div style={{ flex: "1 1 300px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", color: "var(--text-tertiary)", fontSize: "13px", fontWeight: 600 }}>
                   <Link href="/tutorials" style={{ color: "inherit", textDecoration: "none" }}>Learn</Link>
                   <ChevronRight size={14} />
-                  <Link href={`/tutorials/${course.slug}`} style={{ color: "inherit", textDecoration: "none" }}>{course.title}</Link>
+                  <Link href={`/tutorials/${course.slug}`} style={{ color: "inherit", textDecoration: "none" }} className="breadcrumb-truncate">{course.title}</Link>
                 </div>
-                <h1 style={{ fontSize: "clamp(1.8rem, 5vw, 3rem)", fontWeight: 900, color: "var(--text-primary)", marginBottom: "16px", letterSpacing: "-1.5px", lineHeight: 1 }}>
+                <h1 className="lesson-title" style={{ fontSize: "var(--h1-size)", fontWeight: 900, color: "var(--text-primary)", marginBottom: "16px", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
                   {lesson.title}
                 </h1>
-                <div style={{ display: "flex", alignItems: "center", gap: "16px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: 600 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "16px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: 600, flexWrap: "wrap" }}>
                   <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     {lesson.lesson_type === 'video' ? <Video size={16} /> : <BookOpen size={16} />} 
                     {lesson.lesson_type === 'video' ? 'Video Lesson' : 'Text Lesson'}
                   </span>
-                  <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--border-primary)" }} />
+                  <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--border-primary)" }} className="hide-on-mobile" />
                   <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     <Clock size={16} /> {lesson.duration_minutes || 5} min read
                   </span>
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "12px" }}>
+              <div style={{ display: "flex", gap: "12px", width: "100%", smWidth: "auto" }} className="lesson-header-actions">
+                <style>{`
+                  @media (max-width: 640px) {
+                    .lesson-header-actions { flex-direction: column !important; }
+                    .lesson-header-actions button { width: 100% !important; justify-content: center !important; }
+                    .lesson-title { font-size: 1.75rem !important; }
+                  }
+                `}</style>
                 <button 
                   onClick={handleToggleHinglish}
                   disabled={isTranslating}
                   style={{
-                    padding: "8px 16px", borderRadius: "10px", fontWeight: 700, fontSize: "12px", cursor: "pointer",
+                    padding: "10px 16px", borderRadius: "12px", fontWeight: 700, fontSize: "12px", cursor: "pointer",
                     background: hinglishMode ? "var(--brand-primary)" : "var(--bg-tertiary)",
                     color: hinglishMode ? "white" : "var(--text-primary)",
-                    border: "none", display: "flex", alignItems: "center", gap: "8px", transition: "all 0.2s"
+                    border: "none", display: "flex", alignItems: "center", gap: "8px", transition: "all 0.2s",
+                    flex: 1
                   }}
                 >
                   {isTranslating ? <Loader2 size={14} className="animate-spin" /> : <Globe size={14} />}
@@ -482,12 +547,14 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
                 <button 
                   onClick={() => setAiModalOpen(true)}
                   style={{
-                    padding: "8px 16px", borderRadius: "10px", fontWeight: 700, fontSize: "12px", cursor: "pointer",
-                    background: "#111827", color: "white", border: "none", display: "flex", alignItems: "center", gap: "8px"
+                    padding: "10px 16px", borderRadius: "12px", fontWeight: 700, fontSize: "12px", cursor: "pointer",
+                    background: "#111827", color: "white", border: "none", display: "flex", alignItems: "center", gap: "8px",
+                    flex: 1
                   }}
                 >
                   <Zap size={14} color="#10B981" /> Ask AI
                 </button>
+
               </div>
             </div>
           </div>
@@ -502,50 +569,44 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
              />
           </div>
 
+          {aiSummary && (
+            <div style={{ marginTop: "40px", padding: "24px", background: "var(--bg-secondary)", borderRadius: "16px", border: "1px solid var(--border-primary)", marginBottom: "40px" }}>
+              <h3 style={{ fontSize: "16px", fontWeight: 800, marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <FileText size={18} color="var(--brand-primary)" /> AI Key Takeaways
+              </h3>
+              <div className="prose-enhanced">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{aiSummary}</ReactMarkdown>
+              </div>
+            </div>
+          )}
+
           {/* Footer Navigation */}
           <div className="lesson-nav-buttons" style={{ 
             marginTop: "80px", 
             padding: "48px 0", 
             borderTop: "1px solid var(--border-primary)",
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: "24px"
+            display: "flex",
+            gap: "16px",
+            flexWrap: "wrap"
           }}>
-            <div style={{ display: "flex", gap: "12px" }}>
-              {prevLesson ? (
+            <style>{`
+              @media (max-width: 640px) {
+                .lesson-nav-buttons { flex-direction: column !important; }
+                .lesson-nav-buttons > * { width: 100% !important; }
+              }
+            `}</style>
+            <div style={{ display: "flex", gap: "12px", flex: 1 }}>
+              {prevLesson && (
                 <Link
                   href={`/tutorials/${course.slug}/${prevLesson.slug}`}
                   className="btn-secondary"
-                  style={{ padding: "14px 16px", borderRadius: "14px", flex: 1, justifyContent: "center", fontSize: "14px" }}
+                  style={{ padding: "14px 16px", borderRadius: "14px", flex: 1, justifyContent: "center", fontSize: "14px", whiteSpace: "nowrap" }}
                 >
                   <ChevronLeft size={18} /> Previous
                 </Link>
-              ) : null}
+              )}
               
-              <button
-                onClick={handleToggleComplete}
-                disabled={actionLoading}
-                style={{
-                  padding: "14px 20px",
-                  borderRadius: "14px",
-                  background: isCompleted(lesson.id) ? "#10B981" : "var(--brand-primary)",
-                  color: "white",
-                  fontSize: "14px",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                  border: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  flex: 1.5,
-                  justifyContent: "center",
-                  boxShadow: "0 10px 20px -5px rgba(15, 110, 86, 0.3)"
-                }}
-              >
-                {actionLoading ? <Loader2 size={18} className="animate-spin" /> : isCompleted(lesson.id) ? <CheckCircle2 size={18} /> : <Circle size={18} />}
-                <span className="hidden-mobile">{isCompleted(lesson.id) ? "Completed" : "Complete Lesson"}</span>
-                <span className="show-mobile-only">{isCompleted(lesson.id) ? "Done" : "Complete"}</span>
-              </button>
+              {/* Completed button removed. Certificates require exams. */}
             </div>
 
             {nextLesson && (
@@ -560,7 +621,9 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
                   boxShadow: "0 10px 20px -5px rgba(15, 110, 86, 0.4)",
                   border: "none",
                   color: "white",
-                  fontWeight: 800
+                  fontWeight: 800,
+                  flex: 1,
+                  whiteSpace: "nowrap"
                 }}
               >
                 Next <ChevronRight size={20} />
@@ -570,6 +633,29 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
 
           {user && (
             <div style={{ marginTop: "100px" }}>
+              <div className="mobile-only-toc" style={{ marginBottom: "60px", padding: "32px", background: "var(--bg-secondary)", borderRadius: "24px", border: "1px solid var(--border-primary)" }}>
+                <h3 style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", letterSpacing: "1.5px", marginBottom: "20px", textTransform: "uppercase" }}>
+                  ON THIS PAGE
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {lesson.content?.split("\n")
+                    .filter(line => line.startsWith("## ") || line.startsWith("### ") || line.startsWith("#### "))
+                    .map((line, i) => {
+                      const level = line.startsWith("#### ") ? 4 : line.startsWith("### ") ? 3 : 2;
+                      const text = line.replace(/^#{2,4} /, "");
+                      const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                      return (
+                        <a key={i} href={`#${id}`} style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-secondary)", textDecoration: "none", paddingLeft: level === 4 ? "32px" : level === 3 ? "16px" : "0" }}>{text}</a>
+                      );
+                    })}
+                </div>
+              </div>
+              <style>{`
+                .mobile-only-toc { display: none; }
+                @media (max-width: 1200px) {
+                  .mobile-only-toc { display: block !important; }
+                }
+              `}</style>
               <LessonNotes lessonId={lesson.id} currentUserId={user.id} />
               <Discussion lessonId={lesson.id} currentUserId={user.id} />
             </div>
@@ -584,10 +670,10 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
              </h3>
              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                {lesson.content?.split("\n")
-                 .filter(line => line.startsWith("## ") || line.startsWith("### "))
+                 .filter(line => line.startsWith("## ") || line.startsWith("### ") || line.startsWith("#### "))
                  .map((line, i) => {
-                   const level = line.startsWith("### ") ? 3 : 2;
-                   const text = line.replace(/^###? /, "");
+                   const level = line.startsWith("#### ") ? 4 : line.startsWith("### ") ? 3 : 2;
+                   const text = line.replace(/^#{2,4} /, "");
                    const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
                    return (
                      <a 
@@ -598,7 +684,7 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
                          fontWeight: 600, 
                          color: "var(--text-secondary)", 
                          textDecoration: "none",
-                         paddingLeft: level === 3 ? "16px" : "0",
+                         paddingLeft: level === 4 ? "32px" : level === 3 ? "16px" : "0",
                          lineHeight: 1.4,
                          transition: "color 0.2s"
                        }}
@@ -613,6 +699,39 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
                  <p style={{ fontSize: "13px", color: "var(--text-tertiary)", fontStyle: "italic" }}>No sub-sections in this lesson.</p>
                )}
              </div>
+          </div>
+
+          {/* Advertisement Slot */}
+          <div style={{ 
+            background: "var(--bg-card)", 
+            padding: "20px", 
+            borderRadius: "16px", 
+            border: "1px solid var(--border-primary)",
+            marginBottom: "30px",
+            textAlign: "center"
+          }}>
+            <span style={{ fontSize: "10px", color: "var(--text-tertiary)", letterSpacing: "1px", textTransform: "uppercase", display: "block", marginBottom: "12px" }}>ADVERTISEMENT</span>
+            <div style={{ 
+              width: "100%", 
+              height: "250px", 
+              background: "var(--bg-secondary)", 
+              borderRadius: "12px", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center",
+              color: "var(--text-secondary)",
+              fontSize: "13px",
+              overflow: "hidden"
+            }}>
+              {ad ? (
+                <a href={ad.link_url} target="_blank" rel="noopener noreferrer" style={{ width: "100%", height: "100%", display: "block" }}>
+                  <img src={ad.image_url} alt={ad.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </a>
+              ) : (
+                /* This is where Google Ads will load if no custom ad */
+                <span>Space for Google Ads or Admin Posted Ads</span>
+              )}
+            </div>
           </div>
 
           <div style={{ 
@@ -660,15 +779,23 @@ export function LessonContent({ course, lesson, allLessons }: LessonContentProps
         .prose-enhanced p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--text-secondary); font-size: 1.05rem; }
         .prose-enhanced ul, .prose-enhanced ol { margin-bottom: 2rem; padding-left: 1.5rem; }
         .prose-enhanced li { margin-bottom: 0.75rem; color: var(--text-secondary); }
-        .prose-enhanced pre { background: #1e293b; color: #f8fafc; padding: 1.5rem; border-radius: 16px; overflow-x: auto; margin: 2rem 0; font-family: var(--font-mono); font-size: 0.9rem; border: 1px solid #334155; }
+        .prose-enhanced pre { background: #1e293b; color: #f8fafc; padding: 1.5rem; border-radius: 16px; overflow-x: auto; margin: 2rem 0; font-family: var(--font-mono); font-size: 0.9rem; border: 1px solid #334155; max-width: 100%; white-space: pre-wrap; word-break: break-all; }
         .prose-enhanced code:not(pre code) { background: var(--bg-tertiary); color: var(--brand-primary); padding: 2px 6px; border-radius: 6px; font-weight: 600; font-size: 0.9em; }
         
         .hidden-mobile { display: inline-block; }
         .show-mobile-only { display: none; }
+        .breadcrumb-truncate {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 200px;
+        }
 
         @media (max-width: 600px) {
           .hidden-mobile { display: none !important; }
           .show-mobile-only { display: inline-block !important; }
+          .breadcrumb-truncate { max-width: 100px !important; }
+          .hide-on-mobile { display: none !important; }
         }
       `}</style>
     </div>
@@ -695,11 +822,18 @@ function LessonRenderer({ content, lessonType, videoUrl, codeTemplate }: any) {
         components={{
           h2: ({node, ...props}) => {
             const id = props.children?.toString().toLowerCase().replace(/[^a-z0-9]+/g, "-");
-            return <h2 id={id} {...props} />;
+            return <h2 id={id} {...props} style={{ ...props.style, scrollMarginTop: "100px" }} />;
           },
           h3: ({node, ...props}) => {
             const id = props.children?.toString().toLowerCase().replace(/[^a-z0-9]+/g, "-");
-            return <h3 id={id} {...props} />;
+            return <h3 id={id} {...props} style={{ ...props.style, scrollMarginTop: "100px" }} />;
+          },
+          h4: ({node, ...props}) => {
+            const id = props.children?.toString().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            return <h4 id={id} {...props} style={{ ...props.style, scrollMarginTop: "100px" }} />;
+          },
+          img: ({node, ...props}) => {
+            return <img {...props} style={{ ...props.style, maxWidth: "100%", height: "auto", borderRadius: "12px", margin: "1.5rem 0" }} alt={props.alt || "Lesson image"} />;
           }
         }}
       >

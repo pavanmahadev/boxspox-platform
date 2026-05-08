@@ -73,19 +73,32 @@ export default function DashboardPage() {
 
         console.log("Fetching dashboard data for user:", authUser.id);
 
-        const [
-          certsRes,
-          enrollmentsRes,
-          progressRes,
-          profileRes,
-          wishlistRes
-        ] = await Promise.all([
+        // Parallel fetch with a dedicated timeout for the data batch
+        const dataPromise = Promise.all([
           supabase.from("certificates").select(`*, course:courses (title, slug, image_url)`).eq("user_id", authUser.id),
           supabase.from("enrollments").select(`*, course:courses (id, title, slug, icon, gradient, modules:modules (lessons:lessons (id)))`).eq("user_id", authUser.id),
           supabase.from("user_progress").select(`*, lesson:lessons!inner(id, title, slug, course:courses!inner(id, title, slug, image_url))`).eq("user_id", authUser.id).order("completed_at", { ascending: false }),
           supabase.from("profiles").select("*").eq("id", authUser.id).single(),
           supabase.from("wishlists").select("id", { count: "exact", head: true }).eq("user_id", authUser.id)
         ]);
+
+        const dataTimeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Data fetch timeout")), 6000));
+
+        let results: any[];
+        try {
+          results = await Promise.race([dataPromise, dataTimeoutPromise]) as any[];
+        } catch (e) {
+          console.warn("Dashboard data fetch partial timeout, using fallback or empty states");
+          results = [ { data: [] }, { data: [] }, { data: [] }, { data: null }, { count: 0 } ];
+        }
+
+        const [
+          certsRes,
+          enrollmentsRes,
+          progressRes,
+          profileRes,
+          wishlistRes
+        ] = results;
 
         const certs = certsRes.data;
         const enrollmentData = enrollmentsRes.data;
@@ -231,28 +244,28 @@ export default function DashboardPage() {
   const goalProgress = Math.min((lessonsToday / dailyGoal) * 100, 100);
 
   return (
-    <div className="dashboard-container" style={{ minHeight: "100vh", background: "var(--bg-primary)", padding: "calc(var(--nav-height) + 40px) 20px 40px" }}>
+    <div className="dashboard-container" style={{ minHeight: "100vh", background: "var(--bg-primary)", padding: "calc(var(--nav-height) + var(--container-padding)) var(--container-padding) 40px" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
         
         {/* Header */}
-        <div style={{ marginBottom: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "20px" }}>
+        <div className="dashboard-header" style={{ marginBottom: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "20px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: "1 1 auto" }}>
             {/* Avatar */}
             <div style={{ 
-              width: "clamp(56px, 15vw, 72px)", 
-              height: "clamp(56px, 15vw, 72px)", 
+              width: "clamp(64px, 12vw, 80px)", 
+              height: "clamp(64px, 12vw, 80px)", 
               borderRadius: "50%", 
               background: profile?.avatar_url ? "transparent" : "var(--brand-primary)", 
               display: "flex", 
               alignItems: "center", 
               justifyContent: "center", 
-              fontSize: "1.5rem", 
+              fontSize: "1.8rem", 
               fontWeight: 800, 
               color: "white", 
               overflow: "hidden", 
-              border: "3px solid var(--bg-card)", 
+              border: "4px solid var(--bg-card)", 
               flexShrink: 0,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+              boxShadow: "0 8px 16px rgba(0,0,0,0.1)"
             }}>
               {profile?.avatar_url
                 ? <img src={profile.avatar_url} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -275,21 +288,23 @@ export default function DashboardPage() {
               display: "flex", 
               alignItems: "center", 
               gap: "8px", 
-              padding: "10px 20px",
-              fontSize: "0.85rem",
-              borderRadius: "12px",
-              width: "auto"
+              padding: "12px 24px",
+              fontSize: "0.9rem",
+              borderRadius: "14px",
+              width: "auto",
+              boxShadow: "0 10px 20px -5px rgba(15, 110, 86, 0.2)"
             }}
           >
-            <Settings size={16} /> Edit Profile
+            <Settings size={18} /> Edit Profile
           </button>
         </div>
 
         {/* Stats Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px", marginBottom: "40px" }}>
+        <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: "20px", marginBottom: "40px" }}>
           {stats.map((stat, i) => (
             <div 
               key={i} 
+              className="stat-item"
               style={{ 
                 background: "var(--bg-card)", 
                 padding: "24px", 
@@ -300,7 +315,7 @@ export default function DashboardPage() {
                 gap: "16px"
               }}
             >
-              <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: `${stat.color}15`, color: stat.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div className="stat-icon" style={{ width: "48px", height: "48px", borderRadius: "12px", background: `${stat.color}15`, color: stat.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 {stat.icon}
               </div>
               <div>
@@ -326,6 +341,12 @@ export default function DashboardPage() {
             border-radius: var(--radius-xl);
             border: 1px solid var(--border-primary);
             transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+          }
+          .course-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--brand-primary);
           }
           @media (max-width: 1024px) {
             .dashboard-grid {
@@ -336,19 +357,44 @@ export default function DashboardPage() {
             }
           }
           @media (max-width: 640px) {
+            .dashboard-header {
+              flex-direction: column !important;
+              align-items: stretch !important;
+              gap: 16px !important;
+            }
+            .dashboard-header .btn-primary {
+              width: 100% !important;
+              justify-content: center !important;
+            }
             .dashboard-container {
-              padding-top: calc(var(--nav-height) + 24px) !important;
-              padding-left: 16px !important;
-              padding-right: 16px !important;
+              padding-top: calc(var(--nav-height) + 20px) !important;
+              padding-left: 12px !important;
+              padding-right: 12px !important;
             }
             .course-card {
               flex-direction: column;
-              align-items: flex-start;
+              align-items: stretch;
               gap: 16px;
+              padding: 20px;
             }
             .course-card .btn-primary {
               width: 100%;
               justify-content: center;
+              padding: 14px;
+            }
+            .stats-grid {
+              grid-template-columns: 1fr 1fr !important;
+              gap: 12px !important;
+            }
+            .stat-item {
+              padding: 16px !important;
+              flex-direction: column !important;
+              align-items: flex-start !important;
+              gap: 12px !important;
+            }
+            .stat-icon {
+              width: 36px !important;
+              height: 36px !important;
             }
           }
         `}</style>

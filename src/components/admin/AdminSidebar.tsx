@@ -15,7 +15,8 @@ import {
   LogOut,
   ChevronRight,
   TrendingUp,
-  MessageSquare
+  MessageSquare,
+  Megaphone
 } from "lucide-react";
 
 const menuItems = [
@@ -25,6 +26,7 @@ const menuItems = [
   { name: "Learning Paths", icon: <TrendingUp size={20} />, href: "/admin/paths" },
   { name: "Course Reviews", icon: <MessageSquare size={20} />, href: "/admin/reviews" },
   { name: "User Management", icon: <Users size={20} />, href: "/admin/users" },
+  { name: "Manage Ads", icon: <Megaphone size={20} />, href: "/admin/ads" },
   { name: "Settings", icon: <Settings size={20} />, href: "/admin/settings" },
 ];
 

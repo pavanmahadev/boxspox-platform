@@ -55,14 +55,14 @@ const paths = [
 
 export function LearningPaths() {
   return (
-    <section style={{ padding: "100px 0", background: "var(--bg-primary)" }}>
+    <section style={{ padding: "clamp(40px, 8vw, 80px) 0", background: "var(--bg-secondary)" }}>
       <div className="section-container">
         <div style={{ textAlign: "center", marginBottom: "64px" }}>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            style={{ fontSize: "3rem", fontWeight: 900, marginBottom: "16px" }}
+            style={{ fontSize: "var(--h2-size)", fontWeight: 900, color: "var(--text-primary)", marginBottom: "16px", fontFamily: "var(--font-heading)", lineHeight: 1.1 }}
           >
             Explore Our <span style={{ color: "var(--brand-primary)" }}>Professional Roadmaps</span>
           </motion.h2>
@@ -71,7 +71,7 @@ export function LearningPaths() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            style={{ color: "var(--text-secondary)", fontSize: "1.2rem", maxWidth: "700px", margin: "0 auto" }}
+            style={{ color: "var(--text-secondary)", fontSize: "var(--body-size)", maxWidth: "700px", margin: "0 auto" }}
           >
             Structured roadmaps designed to take you from absolute beginner to industry-ready professional.
           </motion.p>
@@ -79,8 +79,8 @@ export function LearningPaths() {
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: "clamp(24px, 4vw, 40px)"
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+          gap: "var(--container-padding)"
         }}>
           {paths.map((path, i) => (
             <motion.div

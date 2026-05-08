@@ -7,6 +7,7 @@ import { Save, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/ToastProvider";
 import { CATEGORIES, slugifyCategory } from "./CourseSearch";
+import { createCourseAction, updateCourseAction } from "@/app/instructor/courses/actions";
 
 const inputStyle: React.CSSProperties = {
   padding: "10px 14px",
@@ -59,14 +60,14 @@ export function CourseForm({ initialData, instructorId }: CourseFormProps) {
     setLoading(true);
     try {
       if (initialData?.id) {
-        const { error } = await supabase.from("courses").update(formData).eq("id", initialData.id);
-        if (error) throw error;
+        // Use Server Action for update
+        await updateCourseAction(initialData.id, formData);
         showToast("Course updated successfully!", "success");
         router.refresh();
       } else {
-        const payload = instructorId ? { ...formData, instructor_id: instructorId } : formData;
-        const { data, error } = await supabase.from("courses").insert([payload]).select().single();
-        if (error) throw error;
+        // Use Server Action instead of client-side Supabase call
+        const data = await createCourseAction(formData);
+        
         showToast("Course created! Now add modules & lessons.", "success");
         router.push(`${instructorId ? '/instructor/courses' : '/admin/courses'}/${data.id}`);
         router.refresh();
@@ -103,7 +104,7 @@ export function CourseForm({ initialData, instructorId }: CourseFormProps) {
       <div style={{
         display: "flex", justifyContent: "space-between", alignItems: "center",
         padding: "16px 20px", background: "var(--bg-card)", borderRadius: "14px",
-        border: "1px solid var(--border-primary)"
+        border: "1px solid var(--border-primary)", flexWrap: "wrap", gap: "12px"
       }}>
         <Link href={instructorId ? "/instructor/courses" : "/admin/courses"} style={{
           color: "var(--text-tertiary)", textDecoration: "none",
@@ -140,7 +141,20 @@ export function CourseForm({ initialData, instructorId }: CourseFormProps) {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "2.5fr 1fr", gap: "24px" }}>
+      <style>{`
+        .course-form-grid {
+          display: grid;
+          grid-template-columns: 2.5fr 1fr;
+          gap: 24px;
+        }
+        @media (max-width: 1024px) {
+          .course-form-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+
+      <div className="course-form-grid">
         {/* Main Details */}
         <div style={{
           display: "flex", flexDirection: "column", gap: "20px",
@@ -192,6 +206,18 @@ export function CourseForm({ initialData, instructorId }: CourseFormProps) {
               placeholder="https://..."
               style={inputStyle}
             />
+            {formData.image_url && (
+              <div style={{ marginTop: "8px", width: "100%", maxHeight: "200px", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--border-primary)" }}>
+                <img 
+                  src={formData.image_url} 
+                  alt="Course Preview" 
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Description */}

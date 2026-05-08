@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
+import { fetchCoursesAction } from "@/app/tutorials/actions";
 
 /**
  * Boxspox: Infinite Tutorial List
@@ -33,7 +33,6 @@ export function InfiniteTutorialList({ initialCourses, searchQuery = "", categor
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const observerTarget = useRef(null);
-  const supabase = createClient();
 
   // Reset list when search or filter changes
   useEffect(() => {
@@ -42,33 +41,18 @@ export function InfiniteTutorialList({ initialCourses, searchQuery = "", categor
       setPage(0);
       setHasMore(true);
       
-      let query = supabase
-        .from("courses")
-        .select(`
-          *,
-          modules:modules (
-            lessons:lessons (id)
-          )
-        `)
-        .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .range(0, 7);
-
-      if (searchQuery) query = query.ilike("title", `%${searchQuery}%`);
-      if (categoryFilter) query = query.eq("category", categoryFilter);
-
-      const { data, error } = await query;
-      
-      if (error) {
+      try {
+        const data = await fetchCoursesAction(0, 7, searchQuery, categoryFilter);
+        setCourses(data);
+        setPage(1);
+        setHasMore(data.length === 8);
+      } catch (error) {
         console.error("Search error:", error);
         setCourses([]);
         setHasMore(false);
-      } else {
-        setCourses(data || []);
-        setPage(1);
-        setHasMore((data?.length || 0) === 8);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     if (page > 0 || searchQuery || categoryFilter) {
@@ -84,35 +68,21 @@ export function InfiniteTutorialList({ initialCourses, searchQuery = "", categor
     const from = page * 8;
     const to = from + 7;
 
-    let query = supabase
-      .from("courses")
-      .select(`
-        *,
-        modules:modules (
-          lessons:lessons (id)
-        )
-      `)
-      .eq("status", "published")
-      .order("created_at", { ascending: false })
-      .range(from, to);
-
-    if (searchQuery) query = query.ilike("title", `%${searchQuery}%`);
-    if (categoryFilter) query = query.eq("category", categoryFilter);
-
-    const { data, error } = await query;
-
-    if (error) {
+    try {
+      const data = await fetchCoursesAction(from, to, searchQuery, categoryFilter);
+      if (data.length > 0) {
+        setCourses(prev => [...prev, ...data]);
+        setPage(prev => prev + 1);
+        if (data.length < 8) setHasMore(false);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
       console.error("Error fetching more courses:", error);
       setHasMore(false);
-    } else if (data && data.length > 0) {
-      setCourses(prev => [...prev, ...data]);
-      setPage(prev => prev + 1);
-      if (data.length < 8) setHasMore(false);
-    } else {
-      setHasMore(false);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -176,6 +146,7 @@ export function InfiniteTutorialList({ initialCourses, searchQuery = "", categor
                           width: "56px",
                           height: "56px",
                           borderRadius: "12px",
+                          overflow: "hidden",
                           background: course.gradient?.match(/#[a-fA-F0-9]{6}/)?.[0] + "15" || "#E1F5EE",
                           color: course.gradient?.match(/#[a-fA-F0-9]{6}/)?.[0] || "var(--brand-primary)",
                           display: "flex",
@@ -184,7 +155,11 @@ export function InfiniteTutorialList({ initialCourses, searchQuery = "", categor
                           fontSize: "24px",
                           fontWeight: 800
                         }}>
-                          {course.icon || "📚"}
+                          {(course as any).image_url ? (
+                            <img src={(course as any).image_url} alt={course.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            course.icon || "📚"
+                          )}
                         </div>
                         <div style={{ flex: 1 }}>
                           <h3 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>

@@ -40,10 +40,23 @@ export function AITutor() {
   };
 
   return (
-    <div style={{ position: "fixed", bottom: "30px", right: "30px", zIndex: 2000 }}>
+    <div className="ai-tutor-container" style={{ position: "fixed", zIndex: 2000 }}>
       <style>{`
-        @media (max-width: 500px) {
-          .ai-tutor-trigger { display: none !important; }
+        .ai-tutor-container {
+          bottom: 30px;
+          right: 30px;
+        }
+        
+        @media (max-width: 640px) {
+          .ai-tutor-container {
+            bottom: 90px;
+            right: 20px;
+          }
+          .ai-tutor-window {
+            width: calc(100vw - 40px) !important;
+            height: calc(100vh - 200px) !important;
+            max-height: 500px !important;
+          }
         }
       `}</style>
       <AnimatePresence>
@@ -55,8 +68,8 @@ export function AITutor() {
             exit={{ scale: 0.8, opacity: 0 }}
             onClick={() => setIsOpen(true)}
             style={{
-              width: "60px",
-              height: "60px",
+              width: "56px",
+              height: "56px",
               borderRadius: "50%",
               background: "linear-gradient(135deg, #6366f1, #06b6d4)",
               color: "white",
@@ -68,10 +81,11 @@ export function AITutor() {
               justifyContent: "center",
             }}
           >
-            <MessageSquare size={28} />
+            <MessageSquare size={24} />
           </motion.button>
         ) : (
           <motion.div
+            className="ai-tutor-window"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
@@ -104,7 +118,6 @@ export function AITutor() {
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <Bot size={20} />
                 <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>AI Tutor</span>
-                <Sparkles size={14} />
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <button

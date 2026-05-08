@@ -1,5 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { CourseContent } from "@/components/tutorials/CourseContent";
+
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -24,17 +26,36 @@ export async function generateMetadata({ params }: { params: Promise<{ language:
 
 export default async function CoursePage({ params }: { params: Promise<{ language: string }> }) {
   const { language } = await params;
+  
+  if (language.includes(" ")) {
+    redirect(`/tutorials/${language.replace(/ /g, "-")}`);
+  }
+
   const supabase = await createClient();
   
   // Get the current user session
   const { data: { user } } = await supabase.auth.getUser();
 
   // Fetch course from Supabase
-  const { data: course, error: courseError } = await supabase
+  let { data: course, error: courseError } = await supabase
     .from("courses")
     .select("*")
     .eq("slug", language)
     .single();
+
+  // Fallback to category search if not found by slug
+  if (!course) {
+    const { data: categoryCourses } = await supabase
+      .from("courses")
+      .select("*")
+      .ilike("category", language)
+      .limit(1);
+      
+    if (categoryCourses && categoryCourses.length > 0) {
+      course = categoryCourses[0];
+      courseError = null;
+    }
+  }
 
   if (courseError || !course) {
     return (

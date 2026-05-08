@@ -3,6 +3,8 @@ import { LessonContent } from "@/components/tutorials/LessonContent";
 import Link from "next/link";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: { params: Promise<{ language: string; slug: string }> }): Promise<Metadata> {
   const { language, slug } = await params;
   const supabase = await createClient();
@@ -62,17 +64,28 @@ export default async function LessonPage({
   }
 
   // Fetch all lessons for sidebar (ordered by module then lesson index)
-  const { data: allLessons, error: allLessonsError } = await supabase
-    .from("lessons")
-    .select("id, title, slug, content, code_template, order_index, video_url, lesson_type")
-    .in("module_id", (
-      await supabase
-        .from("modules")
-        .select("id")
-        .eq("course_id", course.id)
-        .order("order_index", { ascending: true })
-    ).data?.map(m => m.id) || [])
+  const { data: modulesData, error: modulesError } = await supabase
+    .from("modules")
+    .select(`
+      id,
+      order_index,
+      lessons (
+        id, title, slug, content, code_template, order_index, video_url, lesson_type
+      )
+    `)
+    .eq("course_id", course.id)
     .order("order_index", { ascending: true });
+
+  if (modulesError) {
+    console.error("Error fetching modules/lessons for sidebar:", modulesError);
+  }
+
+  // Flatten lessons and ensure correct order
+  const allLessons = modulesData?.flatMap(mod => {
+    // Sort lessons within the module
+    const sortedLessons = mod.lessons.sort((a: any, b: any) => a.order_index - b.order_index);
+    return sortedLessons;
+  }) || [];
 
   const lesson = allLessons?.find(l => l.slug === slug);
 
@@ -87,6 +100,16 @@ export default async function LessonPage({
     );
   }
 
+  // Fetch latest active ad
+  const { data: ads } = await supabase
+    .from("ads")
+    .select("*")
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(1);
+    
+  const ad = ads && ads.length > 0 ? ads[0] : null;
+
   // Fallback gradient if not in DB
   const gradient = course.gradient || "linear-gradient(135deg, #6366f1, #a855f7)";
 
@@ -95,6 +118,7 @@ export default async function LessonPage({
       <LessonContent 
         course={course} 
         lesson={lesson} 
+        ad={ad} 
         allLessons={allLessons || []} 
         gradient={gradient}
         currentUserId={user?.id}

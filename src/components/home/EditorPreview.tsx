@@ -12,14 +12,14 @@ const SandpackEditor = dynamic(() => import("@/components/editor/SandpackEditor"
 export function EditorPreview() {
   return (
     <>
-      <section style={{ padding: "100px 0", background: "var(--bg-secondary)" }}>
+      <section style={{ padding: "var(--section-spacing) 0", background: "var(--bg-secondary)" }}>
         <div className="section-container">
           <div className="editor-preview-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "60px", alignItems: "center" }}>
             <div>
-              <h2 style={{ fontSize: "36px", fontWeight: 900, color: "var(--text-primary)", marginBottom: "24px", fontFamily: "var(--font-heading)" }}>
+              <h2 style={{ fontSize: "var(--h2-size)", fontWeight: 900, color: "var(--text-primary)", marginBottom: "24px", fontFamily: "var(--font-heading)", lineHeight: 1.2 }}>
                 Learn by <span style={{ color: "var(--brand-primary)" }}>Doing</span>
               </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", lineHeight: 1.6, marginBottom: "32px" }}>
+              <p style={{ color: "var(--text-secondary)", fontSize: "var(--body-size)", lineHeight: 1.6, marginBottom: "32px" }}>
                 Our interactive editor allows you to write, test, and preview your code directly in the browser. No complex setup required.
               </p>
 

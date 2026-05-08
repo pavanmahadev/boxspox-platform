@@ -30,6 +30,7 @@ import NotificationBell from "@/components/ui/NotificationBell";
 import { createClient } from "@/utils/supabase/client";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useRouter, usePathname } from "next/navigation";
+import { getCurrentUserAction } from "@/app/tutorials/actions";
 
 const navLinks = [
   { name: "Tutorials", href: "/tutorials" },
@@ -116,23 +117,15 @@ export function Navbar() {
     };
 
     const getUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      if (user) {
-        // Fetch Role
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-        setRole(profile?.role || "user");
-
-        // Fetch Wishlist Count
-        const { count } = await supabase
-          .from("wishlists")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", user.id);
-        setWishlistCount(count || 0);
+      const userData = await getCurrentUserAction();
+      if (userData) {
+        setUser(userData);
+        setRole(userData.role);
+        setWishlistCount(userData.wishlistCount);
+      } else {
+        setUser(null);
+        setRole(null);
+        setWishlistCount(0);
       }
     };
 
@@ -195,53 +188,54 @@ export function Navbar() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 24px",
+          padding: "0 var(--container-padding)",
           background: "var(--bg-primary)",
           borderBottom: "1px solid var(--border-primary)",
+          width: "100%",
         }}
       >
         {/* Left Side: Logo & Tutorials Dropdown */}
-        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none", marginRight: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 2vw, 24px)" }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
             {settings?.logo_url ? (
-                <img src={settings.logo_url} alt={settings.platform_name} style={{ height: "32px", width: "auto", borderRadius: "4px" }} />
+                <img src={settings.logo_url} alt={settings.platform_name} style={{ height: "28px", width: "auto", borderRadius: "4px" }} />
             ) : (
-                <Code2 size={28} color="var(--brand-primary)" />
+                <Code2 size={24} color="var(--brand-primary)" />
             )}
             <span style={{
-              fontSize: "1.4rem",
+              fontSize: "clamp(1rem, 3vw, 1.3rem)",
               fontWeight: 800,
               color: "var(--text-primary)",
-              letterSpacing: "-1px",
+              letterSpacing: "-0.5px",
               fontFamily: "var(--font-heading)",
-              textTransform: "uppercase"
-            }}>
+              textTransform: "uppercase",
+              display: "block"
+            }} className="logo-text">
               {settings?.platform_name || "BOXSPOX"}
             </span>
           </Link>
 
           <button
             onClick={() => setTutorialsOpen(!tutorialsOpen)}
+            className="learn-btn"
             style={{
               background: "none",
               border: "none",
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "6px",
               cursor: "pointer",
               color: "var(--text-primary)",
               fontWeight: 700,
-              fontSize: "0.9rem",
-              padding: "8px 12px",
+              fontSize: "0.85rem",
+              padding: "6px 10px",
               borderRadius: "8px",
               transition: "background 0.2s"
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#F3F4F6")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
           >
-            <BookOpen size={18} />
-            Learn
-            <ChevronDown size={14} color="#6B7280" style={{ transform: tutorialsOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+            <BookOpen size={16} />
+            <span className="hidden-mobile">Learn</span>
+            <ChevronDown size={12} color="#6B7280" style={{ transform: tutorialsOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
           </button>
         </div>
 
@@ -314,13 +308,13 @@ export function Navbar() {
             {user ? (
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 {role === "admin" && (
-                  <Link href="/admin" style={{ textDecoration: "none", color: "var(--brand-primary)", fontWeight: 700, fontSize: "12px", padding: "6px 10px", background: "rgba(15, 110, 86, 0.1)", borderRadius: "8px", whiteSpace: "nowrap" }}>
+                  <Link href="/admin" className="hidden-mobile" style={{ textDecoration: "none", color: "var(--brand-primary)", fontWeight: 700, fontSize: "12px", padding: "6px 10px", background: "rgba(15, 110, 86, 0.1)", borderRadius: "8px", whiteSpace: "nowrap" }}>
                     <span className="hidden-tablet">Admin</span>
                     <LayoutDashboard size={14} className="show-tablet-only" />
                   </Link>
                 )}
                 {role === "instructor" && (
-                  <Link href="/instructor" style={{ textDecoration: "none", color: "var(--brand-primary)", fontWeight: 700, fontSize: "12px", padding: "6px 10px", background: "rgba(15, 110, 86, 0.1)", borderRadius: "8px", whiteSpace: "nowrap" }}>
+                  <Link href="/instructor" className="hidden-mobile" style={{ textDecoration: "none", color: "var(--brand-primary)", fontWeight: 700, fontSize: "12px", padding: "6px 10px", background: "rgba(15, 110, 86, 0.1)", borderRadius: "8px", whiteSpace: "nowrap" }}>
                     <span className="hidden-tablet">Instructor</span>
                     <Zap size={14} className="show-tablet-only" />
                   </Link>
@@ -384,7 +378,7 @@ export function Navbar() {
                 </div>
               </div>
             ) : (
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div className="hidden-mobile" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <Link href="/login" style={{ color: "var(--text-primary)", textDecoration: "none", fontWeight: 700, fontSize: "0.9rem", padding: "8px 12px" }}>
                   Login
                 </Link>
@@ -441,35 +435,107 @@ export function Navbar() {
         <div style={{
           position: "fixed",
           inset: "64px 0 0",
-          background: "var(--bg-card)",
+          background: "#F8FAFC", 
           zIndex: 999,
-          padding: "24px",
+          padding: "20px",
           display: "flex",
           flexDirection: "column",
-          gap: "24px",
+          gap: "16px",
           overflowY: "auto",
-          animation: "slideDown 0.3s ease"
+          animation: "slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
         }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <Link href="/paths" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", textDecoration: "none" }}>Learning Paths</Link>
-            <Link href="/projects" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", textDecoration: "none" }}>Projects</Link>
-            <Link href="/playground" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", textDecoration: "none" }}>Playground</Link>
-            <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", textDecoration: "none" }}>Pricing</Link>
-          </div>
-          <div style={{ height: "1px", background: "var(--bg-tertiary)" }} />
           {!user ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-secondary" style={{ justifyContent: "center" }}>Login</Link>
-              <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="btn-primary" style={{ justifyContent: "center" }}>Start Free</Link>
+            /* Logged Out State */
+            <div style={{ background: "white", padding: "20px", borderRadius: "16px", border: "1px solid #E2E8F0", textAlign: "center" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#0F172A", marginBottom: "8px" }}>Welcome to Boxspox</h3>
+              <p style={{ fontSize: "14px", color: "#64748B", marginBottom: "20px" }}>Log in to track your progress and earn XP!</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-primary" style={{ justifyContent: "center" }}>Login</Link>
+                <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="btn-secondary" style={{ justifyContent: "center" }}>Sign Up</Link>
+              </div>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="btn-primary" style={{ justifyContent: "center" }}>My Dashboard</Link>
-              {role === "admin" && <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="btn-secondary" style={{ justifyContent: "center" }}>Admin Panel</Link>}
-              {role === "instructor" && <Link href="/instructor" onClick={() => setMobileMenuOpen(false)} className="btn-secondary" style={{ justifyContent: "center" }}>Instructor Panel</Link>}
-              <button onClick={handleLogout} style={{ padding: "12px", borderRadius: "var(--radius-md)", background: "#FEE2E2", color: "#EF4444", border: "none", fontWeight: 700, cursor: "pointer" }}>Logout</button>
-            </div>
+            /* Logged In State (Matching User's Screenshot) */
+            <>
+              {/* User Profile Section */}
+              <div style={{ background: "white", padding: "16px", borderRadius: "16px", border: "1px solid #E2E8F0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                  <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "#E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>
+                    🦊
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: "#0F172A", fontSize: "16px" }}>{user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User"}</div>
+                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: "14px", color: "var(--brand-primary)", textDecoration: "none", fontWeight: 600 }}>Open profile &gt;</Link>
+                  </div>
+                </div>
+
+                {/* Stats Cards */}
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <div style={{ flex: 1, background: "white", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                    <span style={{ fontSize: "10px", fontWeight: 700, color: "#64748B", display: "block", textTransform: "uppercase", marginBottom: "4px" }}>XP</span>
+                    <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>70</span>
+                  </div>
+                  <div style={{ flex: 1, background: "white", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                    <span style={{ fontSize: "10px", fontWeight: 700, color: "#64748B", display: "block", textTransform: "uppercase", marginBottom: "4px" }}>Coins</span>
+                    <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>1000</span>
+                  </div>
+                  <div style={{ flex: 1, background: "white", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
+                    <span style={{ fontSize: "10px", fontWeight: 700, color: "#64748B", display: "block", textTransform: "uppercase", marginBottom: "4px" }}><Zap size={12} style={{ display: "inline", verticalAlign: "middle" }} /> Streak</span>
+                    <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>1</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Section */}
+              <div style={{ background: "white", padding: "16px", borderRadius: "16px", border: "1px solid #E2E8F0" }}>
+                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#0F172A", marginBottom: "12px" }}>Progress</h3>
+                <div style={{ marginBottom: "12px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 600, color: "#64748B", marginBottom: "4px" }}>
+                    <span>Kotlin</span>
+                    <span>0%</span>
+                  </div>
+                  <div style={{ width: "100%", height: "6px", background: "#F1F5F9", borderRadius: "3px" }}>
+                    <div style={{ width: "0%", height: "100%", background: "var(--brand-primary)", borderRadius: "3px" }} />
+                  </div>
+                </div>
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 600, color: "#64748B", marginBottom: "4px" }}>
+                    <span>Web Development</span>
+                    <span>8%</span>
+                  </div>
+                  <div style={{ width: "100%", height: "6px", background: "#F1F5F9", borderRadius: "3px" }}>
+                    <div style={{ width: "8%", height: "100%", background: "var(--brand-primary)", borderRadius: "3px" }} />
+                  </div>
+                </div>
+              </div>
+            </>
           )}
+
+          {/* Quick Tools */}
+          <div style={{ background: "white", padding: "16px", borderRadius: "16px", border: "1px solid #E2E8F0" }}>
+            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#0F172A", marginBottom: "12px" }}>Quick Tools</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>
+                <LayoutDashboard size={16} color="#64748B" /> Dashboard
+              </Link>
+              <Link href="/tutorials" onClick={() => setMobileMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>
+                <BookOpen size={16} color="#64748B" /> Tutorials
+              </Link>
+              <Link href="/playground" onClick={() => setMobileMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>
+                <Code2 size={16} color="#64748B" /> Tryit Editor
+              </Link>
+              {user && role === "admin" && (
+                <Link href="/admin" onClick={() => setMobileMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>
+                  <User size={16} color="#64748B" /> Admin Panel
+                </Link>
+              )}
+              {user && (
+                <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: "12px", background: "none", border: "none", color: "#EF4444", fontSize: "14px", fontWeight: 600, padding: 0, cursor: "pointer" }}>
+                  <LogOut size={16} color="#EF4444" /> Logout
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -479,11 +545,12 @@ export function Navbar() {
           className="sub-nav-bar"
           style={{
             background: "#1F2937",
-            height: "44px",
+            height: "var(--subnav-height)",
             display: "flex",
             alignItems: "center",
             position: "relative",
-            padding: "0 8px",
+            padding: "0 4px",
+            overflow: "hidden"
           }}
         >
         <button
@@ -506,7 +573,7 @@ export function Navbar() {
           ].map((name) => (
             <Link
               key={name}
-              href={`/tutorials/${name.toLowerCase().replace(".", "")}`}
+              href={name === "GIT" ? "/tutorials/git-github-complete-beginner-guide" : `/tutorials/${name.toLowerCase().replace(".", "")}`}
               style={{
                 color: "rgba(255,255,255,0.8)",
                 textDecoration: "none",
@@ -558,13 +625,19 @@ export function Navbar() {
           .nav-links-desktop { display: none !important; }
           .mobile-menu-toggle { display: block !important; }
           .nav-actions-desktop { display: none !important; }
-          .show-tablet-only { display: block !important; }
         }
+
         @media (max-width: 640px) {
-          .hidden-tablet { display: none !important; }
-          .mobile-menu-toggle { display: none !important; }
-          .nav-actions-desktop { display: flex !important; }
+          .logo-text { font-size: 1.1rem !important; }
+          .learn-btn { padding: 4px 8px !important; }
+          .hidden-mobile { display: none !important; }
+          .nav-actions-desktop { 
+            display: flex !important; 
+            gap: 4px !important;
+          }
+          /* Show only critical actions on mobile */
           .nav-actions-desktop > button:not(:first-child) { display: none !important; }
+          .nav-actions-desktop > a { display: none !important; }
         }
       `}</style>
     </header>

@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/ToastProvider";
+import { getCurrentUserAction } from "@/app/tutorials/actions";
 
 const Discussion = dynamic(() => import("./Discussion"), { ssr: false, loading: () => null });
 const CourseReview = dynamic(() => import("./CourseReview"), { ssr: false, loading: () => null });
@@ -36,7 +37,7 @@ export function CourseContent({ course, modules, lessons, gradient, currentUserI
 
   useEffect(() => {
     const checkEnrollment = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUserAction();
       setUser(user);
       if (user) {
         const { data: enrollment } = await supabase

@@ -250,7 +250,7 @@ export default function AdminPathsPage() {
                         return IconCmp ? <IconCmp size={18} /> : iconStr.charAt(0);
                       })()}
                     </span>
-                    <h3 style={{ fontSize: "16px", fontWeight: 800, color: "var(--text-primary)" }}>{path.title}</h3>
+                    <h3 style={{ fontSize: "16px", fontWeight: 800, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{path.title}</h3>
                     {path.status === 'published' ? (
                       <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 6px", background: "#D1FAE5", color: "#059669", borderRadius: "4px", textTransform: "uppercase" }}>Published</span>
                     ) : (
@@ -355,7 +355,7 @@ export default function AdminPathsPage() {
                   <option value="published">Published</option>
                 </select>
               </div>
-              <div style={{ display: "flex", gap: "16px" }}>
+              <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "6px", display: "block" }}>Icon (Emoji or Lucide name)</label>
                   <input 

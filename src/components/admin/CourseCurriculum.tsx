@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useToast } from "@/components/ui/ToastProvider";
-import { Plus, Trash2, Edit2, GripVertical, Save, X, ChevronDown, ChevronRight, Video, FileCode, HelpCircle } from "lucide-react";
+import { fetchCurriculumAction } from "@/app/instructor/courses/actions";
+import { Plus, Trash2, Edit2, GripVertical, Save, X, ChevronDown, ChevronRight, Video, FileCode, HelpCircle, Loader2, Zap } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
@@ -45,7 +46,7 @@ interface Module {
   lessons: Lesson[];
 }
 
-function SortableLessonItem({ lesson, index, handleOpenQuiz, setEditingLesson, handleDeleteLesson }: any) {
+function SortableLessonItem({ lesson, index, module, handleOpenQuiz, setEditingLesson, handleDeleteLesson, handleGenerateLessonContent }: any) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: lesson.id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -61,7 +62,7 @@ function SortableLessonItem({ lesson, index, handleOpenQuiz, setEditingLesson, h
         <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)" }}>
           {index + 1}
         </div>
-        <span style={{ fontSize: "14px", fontWeight: 600 }}>{lesson.title}</span>
+        <span style={{ fontSize: "14px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{lesson.title}</span>
         {lesson.lesson_type === 'video' && <Video size={14} color="#9CA3AF" />}
         {lesson.lesson_type === 'coding' && <FileCode size={14} color="#9CA3AF" />}
         {lesson.lesson_type === 'quiz' && <HelpCircle size={14} color="#9CA3AF" />}
@@ -69,6 +70,9 @@ function SortableLessonItem({ lesson, index, handleOpenQuiz, setEditingLesson, h
       <div style={{ display: "flex", gap: "8px" }}>
         <button onClick={() => handleOpenQuiz(lesson)} onPointerDown={(e) => e.stopPropagation()} draggable={false} title="Manage Quiz" style={{ background: "none", border: "none", color: lesson.lesson_type === 'quiz' ? "var(--brand-primary)" : "var(--text-tertiary)", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 700 }}>
           <HelpCircle size={14} /> {lesson.lesson_type === 'quiz' ? "Quiz" : "Add Quiz"}
+        </button>
+        <button onClick={() => handleGenerateLessonContent(lesson, module)} onPointerDown={(e) => e.stopPropagation()} draggable={false} title="Generate Content" style={{ background: "none", border: "none", color: "var(--brand-primary)", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 700 }}>
+          <Zap size={14} /> AI Content
         </button>
         <button onClick={() => setEditingLesson(lesson)} onPointerDown={(e) => e.stopPropagation()} draggable={false} style={{ background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer" }}><Edit2 size={14} /></button>
         <button onClick={() => handleDeleteLesson(lesson.id)} onPointerDown={(e) => e.stopPropagation()} draggable={false} style={{ background: "none", border: "none", color: "#EF4444", cursor: "pointer" }}><Trash2 size={14} /></button>
@@ -89,6 +93,8 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const [previewMarkdown, setPreviewMarkdown] = useState(false);
+  const [isGeneratingOutline, setIsGeneratingOutline] = useState(false);
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -103,22 +109,18 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
 
   const fetchCurriculum = async () => {
     setLoading(true);
-    const { data: modulesData, error: modulesError } = await supabase
-      .from("modules")
-      .select("*, lessons(*)")
-      .eq("course_id", courseId)
-      .order("order_index", { ascending: true });
-
-    if (modulesError) {
-      showToast(modulesError.message, "error");
-    } else {
+    try {
+      const modulesData = await fetchCurriculumAction(courseId);
       const sortedModules = modulesData?.map((m: any) => ({
         ...m,
         lessons: m.lessons.sort((a: any, b: any) => a.order_index - b.order_index)
       })) || [];
       setModules(sortedModules);
+    } catch (err: any) {
+      showToast(err.message, "error");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDragEnd = async (event: DragEndEvent, moduleId: string) => {
@@ -209,6 +211,119 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
       fetchCurriculum(); // Refresh to show new lesson type icon
     } catch (err: any) {
       showToast(err.message, "error");
+    }
+  };
+
+  const handleGenerateOutline = async () => {
+    if (modules.length > 0) {
+      if (!confirm("You already have modules in this course. Generating a new outline will ADD more modules and may create duplicates. If you want to start fresh, please delete the existing modules first.\n\nDo you still want to proceed and ADD more modules?")) return;
+    } else {
+      if (!confirm("This will generate a course outline with AI and insert it into the database. Continue?")) return;
+    }
+    
+    setIsGeneratingOutline(true);
+    try {
+      const { data: course } = await supabase
+        .from("courses")
+        .select("title")
+        .eq("id", courseId)
+        .single();
+        
+      if (!course) throw new Error("Course not found");
+
+      const res = await fetch("/api/ai/generate-outline", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseTitle: course.title })
+      });
+      const data = await res.json();
+      
+      if (data.outline) {
+        for (let i = 0; i < data.outline.length; i++) {
+          const mod = data.outline[i];
+          const { data: insertedMod } = await supabase
+            .from("modules")
+            .insert([{ course_id: courseId, title: mod.title, order_index: i }])
+            .select()
+            .single();
+            
+          if (insertedMod && mod.lessons) {
+            const lessonsToInsert = mod.lessons.map((l: any, lIdx: number) => ({
+              module_id: insertedMod.id,
+              title: l.title,
+              slug: l.slug,
+              order_index: lIdx,
+              content: `# ${l.title}\n\nContent coming soon!`,
+              lesson_type: "text"
+            }));
+            await supabase.from("lessons").insert(lessonsToInsert);
+          }
+        }
+        showToast("Outline generated and saved!", "success");
+        fetchCurriculum();
+      } else if (data.error) {
+        showToast(data.error, "error");
+      }
+    } catch (err: any) {
+      showToast(err.message, "error");
+    } finally {
+      setIsGeneratingOutline(false);
+    }
+  };
+
+  const handleGenerateAllContent = async () => {
+    if (!confirm("This will generate content for all lessons with 'Content coming soon!'. It may take several minutes. Do you want to proceed?")) return;
+    
+    setIsGeneratingContent(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    try {
+      const { data: course } = await supabase
+        .from("courses")
+        .select("title")
+        .eq("id", courseId)
+        .single();
+
+      for (const mod of modules) {
+        for (const lesson of mod.lessons) {
+          if (lesson.content && lesson.content.includes("Content coming soon!")) {
+            try {
+              const res = await fetch("/api/ai/generate-lesson-content", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  lessonTitle: lesson.title,
+                  moduleTitle: mod.title,
+                  courseTitle: course?.title || "This Course"
+                })
+              });
+              
+              const data = await res.json();
+              
+              if (data.content) {
+                await supabase
+                  .from("lessons")
+                  .update({ content: data.content })
+                  .eq("id", lesson.id);
+                successCount++;
+              } else {
+                failCount++;
+              }
+            } catch (err) {
+              console.error(`Error generating content for lesson ${lesson.id}:`, err);
+              failCount++;
+            }
+          }
+        }
+      }
+      
+      showToast(`Finished! Generated content for ${successCount} lessons. ${failCount} failed.`, "success");
+      fetchCurriculum();
+    } catch (err: any) {
+      showToast(err.message, "error");
+    } finally {
+      setIsGeneratingContent(false);
     }
   };
 
@@ -305,18 +420,70 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
     }
   };
 
+  const handleGenerateLessonContent = async (lesson: Lesson, mod: Module) => {
+    showToast("Generating content for this lesson...", "info");
+    try {
+      const { data: course } = await supabase
+        .from("courses")
+        .select("title")
+        .eq("id", courseId)
+        .single();
+
+      const res = await fetch("/api/ai/generate-lesson-content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lessonTitle: lesson.title,
+          moduleTitle: mod.title,
+          courseTitle: course?.title || "This Course"
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (data.content) {
+        await supabase
+          .from("lessons")
+          .update({ content: data.content })
+          .eq("id", lesson.id);
+        showToast("Content generated successfully!", "success");
+        fetchCurriculum();
+      } else {
+        showToast(data.error || "Failed to generate content", "error");
+      }
+    } catch (err: any) {
+      showToast(err.message, "error");
+    }
+  };
+
   if (loading) return <div style={{ padding: "40px", textAlign: "center" }}>Loading curriculum...</div>;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2 style={{ fontSize: "18px", fontWeight: 800 }}>Course Curriculum</h2>
-        <button 
-          onClick={() => setEditingModule({ title: "", description: "" })}
-          style={{ padding: "8px 16px", background: "#111827", color: "white", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
-        >
-          <Plus size={16} /> Add Module
-        </button>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button 
+            onClick={handleGenerateOutline}
+            disabled={isGeneratingOutline}
+            style={{ padding: "8px 16px", background: "#10B981", color: "white", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
+          >
+            {isGeneratingOutline ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />} Generate Outline with AI
+          </button>
+          <button 
+            onClick={handleGenerateAllContent}
+            disabled={isGeneratingContent}
+            style={{ padding: "8px 16px", background: "#0F6E56", color: "white", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
+          >
+            {isGeneratingContent ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />} Generate Content for All
+          </button>
+          <button 
+            onClick={() => setEditingModule({ title: "", description: "" })}
+            style={{ padding: "8px 16px", background: "#111827", color: "white", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
+          >
+            <Plus size={16} /> Add Module
+          </button>
+        </div>
       </div>
 
       {modules.map((mod, mIndex) => (
@@ -348,9 +515,11 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
                         key={lesson.id} 
                         lesson={lesson} 
                         index={lIndex} 
+                        module={mod}
                         handleOpenQuiz={handleOpenQuiz} 
                         setEditingLesson={setEditingLesson} 
                         handleDeleteLesson={handleDeleteLesson} 
+                        handleGenerateLessonContent={handleGenerateLessonContent}
                       />
                     ))}
                   </SortableContext>

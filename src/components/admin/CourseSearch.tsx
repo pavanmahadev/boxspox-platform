@@ -30,6 +30,13 @@ export function CourseSearch({ initialValue, initialCategory = "" }: { initialVa
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      const currentQ = searchParams.get("q") || "";
+      const currentCategory = searchParams.get("category") || "";
+      
+      if (value === currentQ && category === currentCategory) {
+        return; // No change, don't push
+      }
+
       const params = new URLSearchParams(searchParams.toString());
       if (value) {
         params.set("q", value);
@@ -48,45 +55,52 @@ export function CourseSearch({ initialValue, initialCategory = "" }: { initialVa
   }, [value, category, pathname, router, searchParams]);
 
   return (
-    <div style={{ 
-      display: "flex", 
-      gap: "16px", 
-      marginBottom: "32px",
-      background: "var(--bg-card)",
-      padding: "16px",
-      borderRadius: "16px",
-      border: "1px solid var(--border-primary)"
-    }}>
-      <div style={{ flex: 1, position: "relative" }}>
+    <div 
+      className="course-search-container"
+      style={{ 
+        display: "flex", 
+        gap: "16px", 
+        marginBottom: "32px",
+        background: "var(--bg-card)",
+        padding: "16px",
+        borderRadius: "16px",
+        border: "1px solid var(--border-primary)",
+        boxShadow: "var(--shadow-sm)"
+      }}
+    >
+      <div style={{ flex: 2, position: "relative" }}>
         <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }} />
         <input 
           type="text" 
-          placeholder="Search courses by title..." 
+          placeholder="Search tutorials..." 
           value={value}
           onChange={(e) => setValue(e.target.value)}
           style={{ 
             width: "100%", 
-            padding: "10px 10px 10px 40px", 
+            padding: "12px 12px 12px 40px", 
             borderRadius: "10px", 
             border: "1px solid var(--border-primary)",
             fontSize: "14px",
-            outline: "none"
+            background: "var(--bg-secondary)",
+            outline: "none",
+            transition: "all 0.2s"
           }} 
         />
       </div>
-      <div style={{ position: "relative" }}>
+      <div style={{ flex: 1, position: "relative" }}>
         <select 
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           style={{ 
             appearance: "none",
+            width: "100%",
             display: "flex", 
             alignItems: "center", 
             gap: "8px", 
-            padding: "10px 36px 10px 16px", 
+            padding: "12px 40px 12px 16px", 
             borderRadius: "10px", 
             border: "1px solid var(--border-primary)", 
-            background: "var(--bg-card)", 
+            background: "var(--bg-secondary)", 
             fontSize: "14px", 
             fontWeight: 600, 
             color: "var(--text-secondary)",
@@ -95,12 +109,20 @@ export function CourseSearch({ initialValue, initialCategory = "" }: { initialVa
           }}
         >
           <option value="">All Categories</option>
-          <option value="web-development">Web Development</option>
-          <option value="mobile-apps">Mobile Apps</option>
           {CATEGORIES.map((c, i) => <option key={`${slugifyCategory(c)}-${i}`} value={slugifyCategory(c)}>{c}</option>)}
         </select>
-        <Filter size={16} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--text-tertiary)" }} />
+        <Filter size={16} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--text-tertiary)" }} />
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .course-search-container {
+            flex-direction: column !important;
+            gap: 12px !important;
+            padding: 12px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -148,82 +148,116 @@ export function InstructorDashboardClient({ initialCourses, instructorId }: { in
       </div>
 
       <style>{`
+        .instructor-client-container {
+          padding: 12px 0;
+        }
         .stats-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
           gap: 24px;
           margin-bottom: 48px;
         }
         .stat-card {
-          background: var(--bg-card);
-          padding: 24px;
-          borderRadius: 20px;
+          background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+          padding: 28px;
+          border-radius: 24px;
           border: 1px solid var(--border-primary);
           display: flex;
           flex-direction: column;
-          gap: 16px;
-          transition: transform 0.2s;
+          gap: 20px;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+          position: relative;
+          overflow: hidden;
         }
-        .stat-card:hover { transform: translateY(-4px); }
+        .stat-card:hover { 
+          transform: translateY(-8px); 
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+          border-color: var(--brand-primary);
+        }
+        .stat-card::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          right: -50%;
+          width: 150px;
+          height: 150px;
+          background: radial-gradient(circle, var(--brand-primary) 0%, transparent 70%);
+          opacity: 0.03;
+          transition: opacity 0.4s;
+          border-radius: 50%;
+        }
+        .stat-card:hover::before { opacity: 0.08; }
         .stat-icon {
-          width: 48px;
-          height: 48px;
-          border-radius: 14px;
+          width: 56px;
+          height: 56px;
+          border-radius: 16px;
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .stat-label { font-size: 11px; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { font-size: 32px; font-weight: 900; color: var(--text-primary); }
+        .stat-card:hover .stat-icon { transform: scale(1.1) rotate(5deg); }
+        .stat-label { font-size: 11px; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1.5px; }
+        .stat-value { font-size: 36px; font-weight: 900; color: var(--text-primary); letter-spacing: -1px; }
 
         .main-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 32px; }
         @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
 
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .section-title { font-size: 20px; font-weight: 800; color: var(--text-primary); }
-        .view-all-link { color: var(--brand-primary); text-decoration: none; font-size: 14px; font-weight: 700; }
+        .section-title { font-size: 22px; font-weight: 900; color: var(--text-primary); letter-spacing: -0.5px; }
+        .view-all-link { color: var(--brand-primary); text-decoration: none; font-size: 14px; font-weight: 700; transition: color 0.2s; }
+        .view-all-link:hover { color: #0D5C45; }
 
-        .course-list { display: flex; flexDirection: column; gap: 16px; }
+        .course-list { display: flex; flex-direction: column; gap: 16px; }
         .course-item { 
           background: var(--bg-card); 
-          padding: 20px; 
-          border-radius: 16px; 
+          padding: 24px; 
+          border-radius: 20px; 
           border: 1px solid var(--border-primary); 
           display: flex; 
           justify-content: space-between; 
           align-items: center;
           text-decoration: none;
-          transition: all 0.2s;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.01);
         }
-        .course-info { display: flex; align-items: center; gap: 16px; }
-        .course-icon-bg { width: 48px; height: 48px; border-radius: 12px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; fontSize: 24px; }
-        .course-title-text { fontWeight: 800; color: var(--text-primary); fontSize: 15px; }
-        .course-meta-text { fontSize: 12px; color: var(--text-tertiary); fontWeight: 600; }
+        .course-item:hover { 
+          transform: translateX(6px); 
+          border-color: var(--brand-primary);
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+        }
+        .course-info { display: flex; align-items: center; gap: 20px; }
+        .course-icon-bg { width: 52px; height: 52px; border-radius: 14px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid var(--border-primary); }
+        .course-title-text { font-weight: 800; color: var(--text-primary); font-size: 16px; margin-bottom: 4px; }
+        .course-meta-text { font-size: 13px; color: var(--text-tertiary); font-weight: 600; }
 
         .status-badge { 
-          padding: 6px 12px; border-radius: 8px; fontSize: 11px; fontWeight: 800; text-transform: uppercase;
+          padding: 6px 14px; border-radius: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .status-badge.published { background: #ECFDF5; color: #10B981; border: 1px solid #10B98130; }
-        .status-badge.draft { background: #FFFBEB; color: #F59E0B; border: 1px solid #F59E0B30; }
+        .status-badge.published { background: #ECFDF5; color: #10B981; border: 1px solid #10B98120; }
+        .status-badge.draft { background: #FFFBEB; color: #F59E0B; border: 1px solid #F59E0B20; }
 
-        .analytics-card { background: var(--bg-card); padding: 24px; border-radius: 24px; border: 1px solid var(--border-primary); }
+        .analytics-card { background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%); padding: 28px; border-radius: 28px; border: 1px solid var(--border-primary); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03); }
         .chart-container { 
           height: 200px; 
-          background: linear-gradient(180deg, rgba(15, 110, 86, 0.05) 0%, transparent 100%); 
-          border-radius: 16px; 
+          background: linear-gradient(180deg, rgba(15, 110, 86, 0.08) 0%, transparent 100%); 
+          border-radius: 20px; 
           margin-bottom: 24px; 
           position: relative; 
           overflow: hidden; 
+          border: 1px solid var(--border-primary);
         }
-        .pulse-indicator { position: absolute; top: 16px; right: 16px; display: flex; alignItems: center; gap: 8px; background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 20px; backdrop-filter: blur(4px); }
+        .pulse-indicator { position: absolute; top: 16px; right: 16px; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 20px; backdrop-filter: blur(4px); }
         .pulse-circle { width: 8px; height: 8px; background: #10B981; border-radius: 50%; animation: pulse 1.5s infinite; }
-        .pulse-text { color: white; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .pulse-text { color: white; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
         .chart-svg { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; }
 
         .metrics-list { display: flex; flex-direction: column; gap: 16px; }
-        .metric-item { display: flex; justify-content: space-between; align-items: center; }
+        .metric-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-primary); }
+        .metric-item:last-child { border-bottom: none; }
         .metric-label-group { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: var(--text-secondary); }
-        .metric-value { fontWeight: 800; }
+        .metric-value { font-weight: 800; color: var(--text-primary); }
 
         @keyframes pulse {
           0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }

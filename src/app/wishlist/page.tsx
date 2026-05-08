@@ -78,6 +78,20 @@ export default function WishlistPage() {
           </p>
         </div>
 
+        <style>{`
+          @media (max-width: 640px) {
+            .wishlist-item {
+              flex-direction: column !important;
+              align-items: flex-start !important;
+              gap: 16px !important;
+            }
+            .wishlist-actions {
+              width: 100% !important;
+              justify-content: space-between !important;
+            }
+          }
+        `}</style>
+
         {items.length === 0 ? (
           /* Empty State */
           <div style={{
@@ -112,7 +126,7 @@ export default function WishlistPage() {
               const color = course?.gradient?.match(/#[a-fA-F0-9]{6}/)?.[0] || "#6366f1";
 
               return (
-                <div key={item.id} style={{
+                <div key={item.id} className="wishlist-item" style={{
                   background: "var(--bg-card)",
                   border: "1px solid var(--border-primary)",
                   borderRadius: "var(--radius-xl)",
@@ -161,7 +175,7 @@ export default function WishlistPage() {
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center", flexShrink: 0 }}>
+                  <div className="wishlist-actions" style={{ display: "flex", gap: "10px", alignItems: "center", flexShrink: 0 }}>
                     <button
                       onClick={() => removeFromWishlist(item.id)}
                       disabled={removingId === item.id}

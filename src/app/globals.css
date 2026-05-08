@@ -41,10 +41,12 @@
     --container-max: 1440px;
 
     /* Responsive Spacing & Typography */
-    --container-padding: clamp(16px, 5vw, 40px);
-    --section-spacing: clamp(60px, 10vw, 100px);
-    --h1-size: clamp(2rem, 8vw, 3.5rem);
-    --h2-size: clamp(1.5rem, 5vw, 2.5rem);
+    --container-padding: clamp(1rem, 5vw, 2.5rem);
+    --section-spacing: clamp(4rem, 10vw, 8rem);
+    --h1-size: clamp(2.25rem, 8vw, 4rem);
+    --h2-size: clamp(1.75rem, 6vw, 3rem);
+    --h3-size: clamp(1.25rem, 4vw, 2rem);
+    --body-size: clamp(0.95rem, 2vw, 1.1rem);
   }
 
   [data-theme='dark'] {
@@ -75,7 +77,35 @@
   .section-container {
     max-width: var(--container-max);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--container-padding);
+    width: 100%;
+  }
+
+  /* Responsive Utilities */
+  .hide-on-mobile {
+    @media (max-width: 640px) {
+      display: none !important;
+    }
+  }
+
+  .show-on-mobile {
+    display: none;
+    @media (max-width: 640px) {
+      display: block !important;
+    }
+  }
+
+  .mobile-stack {
+    @media (max-width: 768px) {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+  }
+
+  .mobile-grid-1 {
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr !important;
+    }
   }
 
   /* Base Buttons */
