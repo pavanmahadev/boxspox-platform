@@ -522,7 +522,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "12px", width: "100%", smWidth: "auto" }} className="lesson-header-actions">
+              <div style={{ display: "flex", gap: "12px", width: "100%" }} className="lesson-header-actions">
                 <style>{`
                   @media (max-width: 640px) {
                     .lesson-header-actions { flex-direction: column !important; }

@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 
 const SandpackEditor = dynamic(() => import("@/components/editor/SandpackEditor"), {
   ssr: false,
-  loading: () => <div style={{ height: "400px", background: "#1e293b", borderRadius: "12px", animate: "pulse 2s infinite" }} />
+  loading: () => <div style={{ height: "400px", background: "#1e293b", borderRadius: "12px", animation: "pulse 2s infinite" }} />
 });
 
 export function Hero() {

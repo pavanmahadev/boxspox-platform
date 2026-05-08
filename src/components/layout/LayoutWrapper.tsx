@@ -38,7 +38,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
     checkStatus();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
       if (session?.user) {
         const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
         setIsAdmin(profile?.role === "admin");
