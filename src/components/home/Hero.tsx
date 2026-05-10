@@ -36,11 +36,11 @@ export function Hero() {
       }} />
 
       <div className="section-container" style={{ position: "relative", zIndex: 1 }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 500px), 1fr))",
-          gap: "60px",
-          alignItems: "center"
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 500px), 1fr))", 
+          gap: "60px", 
+          alignItems: "center" 
         }}>
           {/* Left Content */}
           <motion.div
@@ -75,7 +75,7 @@ export function Hero() {
               fontFamily: "var(--font-heading)"
             }}>
               Master Coding with <br />
-              <span style={{
+              <span style={{ 
                 background: "linear-gradient(135deg, var(--brand-primary), #10B981)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent"
@@ -140,7 +140,7 @@ export function Hero() {
                 <div style={{ flex: 1, textAlign: "center", fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: 600 }}>interactive_lesson.html</div>
               </div>
               <div style={{ padding: "8px" }}>
-                <SandpackEditor
+                <SandpackEditor 
                   template="vanilla"
                   files={{
                     "/index.html": `<!DOCTYPE html>
@@ -195,7 +195,7 @@ export function Hero() {
           </motion.div>
         </div>
       </div>
-
+      
       <style>{`
         @media (max-width: 1024px) {
           section { text-align: center; }
@@ -220,4 +220,3 @@ export function Hero() {
     </section>
   );
 }
-
