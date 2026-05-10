@@ -70,14 +70,19 @@ Requirements:
 
     // Log usage to database
     if (usage) {
-      supabase.from("ai_usage").insert({
-        user_id: user.id,
-        feature: "generate-outline",
-        model: "llama-3.1-8b-instant",
-        prompt_tokens: usage.prompt_tokens,
-        completion_tokens: usage.completion_tokens,
-        total_tokens: usage.total_tokens,
-      }).then(() => {}).catch(() => {});
+      // Log usage to database
+      try {
+        await supabase.from("ai_usage").insert({
+          user_id: user.id,
+          feature: "generate-outline",
+          model: "llama-3.1-8b-instant",
+          prompt_tokens: usage.prompt_tokens,
+          completion_tokens: usage.completion_tokens,
+          total_tokens: usage.total_tokens,
+        });
+      } catch (e) {
+        console.warn("Failed to log AI usage:", e);
+      }
     }
     
     // Extract the JSON array from the response

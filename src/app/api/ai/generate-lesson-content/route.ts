@@ -79,14 +79,19 @@ Generate the lesson content now:`;
 
     // Log usage to database (non-blocking — don't fail if this errors)
     if (usage) {
-      supabase.from("ai_usage").insert({
-        user_id: user.id,
-        feature: "generate-lesson-content",
-        model: "llama-3.3-70b-versatile",
-        prompt_tokens: usage.prompt_tokens,
-        completion_tokens: usage.completion_tokens,
-        total_tokens: usage.total_tokens,
-      }).then(() => {}).catch(() => {});
+      // Log usage to database
+      try {
+        await supabase.from("ai_usage").insert({
+          user_id: user.id,
+          feature: "generate-lesson-content",
+          model: "llama-3.3-70b-versatile",
+          prompt_tokens: usage.prompt_tokens,
+          completion_tokens: usage.completion_tokens,
+          total_tokens: usage.total_tokens,
+        });
+      } catch (e) {
+        console.warn("Failed to log AI usage:", e);
+      }
     }
 
     return NextResponse.json({ content });

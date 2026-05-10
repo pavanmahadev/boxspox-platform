@@ -76,7 +76,7 @@ export default function DashboardPage() {
         // Parallel fetch with a dedicated timeout for the data batch
         const dataPromise = Promise.all([
           supabase.from("certificates").select(`*, course:courses (title, slug, image_url)`).eq("user_id", authUser.id),
-          supabase.from("enrollments").select(`*, course:courses (id, title, slug, icon, gradient, modules:modules (lessons:lessons (id)))`).eq("user_id", authUser.id),
+          supabase.from("enrollments").select(`*, course:courses (id, title, slug, icon, gradient, price, exam_fee, modules:modules (lessons:lessons (id)))`).eq("user_id", authUser.id),
           supabase.from("user_progress").select(`*, lesson:lessons!inner(id, title, slug, course:courses!inner(id, title, slug, image_url))`).eq("user_id", authUser.id).order("completed_at", { ascending: false }),
           supabase.from("profiles").select("*").eq("id", authUser.id).single(),
           supabase.from("wishlists").select("id", { count: "exact", head: true }).eq("user_id", authUser.id)
@@ -129,7 +129,9 @@ export default function DashboardPage() {
             total: totalLessons,
             completed: completedLessons,
             color: course.gradient?.match(/#[a-fA-F0-9]{6}/)?.[0] || "#6366f1",
-            icon: course.icon || "📚"
+            icon: course.icon || "📚",
+            exam_unlocked: enrollment.exam_unlocked,
+            is_free: course.price === 0 || course.price === "0" || course.price === null
           };
         }).filter(Boolean) || [];
 
@@ -424,13 +426,24 @@ export default function DashboardPage() {
                         <div style={{ width: `${course.progress}%`, height: "100%", background: `linear-gradient(90deg, ${course.color}, ${course.color}dd)`, borderRadius: "4px", transition: "width 0.5s ease" }} />
                       </div>
                     </div>
-                    <Link 
-                      href={`/tutorials/${course.slug}`} 
-                      className="btn-primary" 
-                      style={{ padding: "10px 20px", fontSize: "0.9rem", whiteSpace: "nowrap" }}
-                    >
-                      Continue
-                    </Link>
+                    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                      {!course.is_free && !course.exam_unlocked && (
+                        <Link 
+                          href={`/checkout/${course.id}`} 
+                          className="btn-primary" 
+                          style={{ padding: "10px 20px", fontSize: "0.9rem", whiteSpace: "nowrap", background: "var(--brand-primary)", color: "white" }}
+                        >
+                          Pay to Learn
+                        </Link>
+                      )}
+                      <Link 
+                        href={`/tutorials/${course.slug}`} 
+                        className="btn-primary" 
+                        style={{ padding: "10px 20px", fontSize: "0.9rem", whiteSpace: "nowrap", background: "var(--bg-secondary)", color: "var(--text-primary)", border: "1px solid var(--border-primary)" }}
+                      >
+                        Continue
+                      </Link>
+                    </div>
                   </div>
                 ))
               ) : (

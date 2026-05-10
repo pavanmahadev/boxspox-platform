@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { Check, ShieldCheck, Lock, CreditCard, Sparkles, MoveRight } from "lucide-react";
 import Link from "next/link";
+import RazorpayButton from "@/components/checkout/RazorpayButton";
 import { revalidatePath } from "next/cache";
 
 export default async function CheckoutPage({ params }: { params: Promise<{ id: string }> }) {
@@ -45,52 +46,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
     redirect(`/tutorials/${course.slug}/exam`);
   }
 
-  async function handlePurchase() {
-    "use server";
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) return;
 
-    // SIMULATED PAYMENT SUCCESS
-    // In production, you would call Razorpay/Stripe here
-    
-    if (enrollment) {
-      const { error } = await supabase
-        .from("enrollments")
-        .update({
-          status: "active",       // ensure status is active so lesson page doesn't bounce
-          exam_unlocked: true,
-          payment_reference_id: `sim_pay_${Date.now()}`
-        })
-        .eq("id", enrollment.id);
-        
-      if (!error) {
-        revalidatePath(`/tutorials/${course.slug}`);
-        revalidatePath(`/tutorials/${course.slug}/exam`);
-        redirect(`/tutorials/${course.slug}/exam`);
-      } else {
-        console.error("[Checkout] Payment Update Error:", error);
-      }
-    } else {
-      const { error } = await supabase
-        .from("enrollments")
-        .insert({
-          user_id: user.id,
-          course_id: normalizedId,
-          status: "active",
-          exam_unlocked: true,
-          payment_reference_id: `sim_pay_${Date.now()}`
-        });
-
-      if (!error) {
-        revalidatePath(`/tutorials/${course.slug}`);
-        redirect(`/tutorials/${course.slug}/exam`);
-      } else {
-        console.error("[Checkout] Payment Insert Error:", error);
-      }
-    }
-  }
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-secondary)", paddingTop: "180px", paddingBottom: "60px", paddingLeft: "20px", paddingRight: "20px" }}>
@@ -111,10 +67,10 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
               Official Certification
             </span>
             <h1 style={{ fontSize: "40px", fontWeight: 900, color: "var(--text-primary)", marginTop: "12px", letterSpacing: "-1px" }}>
-              {course.title} - Final Exam
+              Buy {course.title} Course
             </h1>
             <p style={{ fontSize: "18px", color: "var(--text-secondary)", marginTop: "16px", lineHeight: 1.6 }}>
-              Unlock the final certification exam for {course.title}. Pass the exam to earn your verified industry certificate.
+              Get full access to the {course.title} course and earn a verified industry certificate upon completion.
             </p>
           </div>
 
@@ -154,36 +110,20 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
             <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-secondary)" }}>
                 <span>Exam & Certificate Fee</span>
-                <span style={{ fontWeight: 700, textDecoration: "line-through", opacity: 0.5 }}>₹{course.exam_fee || 199}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-secondary)" }}>
-                <span>Early Access Discount</span>
-                <span style={{ color: "#059669", fontWeight: 700 }}>-₹{course.exam_fee || 199}</span>
+                <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>₹{course.exam_fee || 199}</span>
               </div>
               <div style={{ height: "1px", background: "var(--border-primary)" }} />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "24px", fontWeight: 900, color: "var(--text-primary)" }}>
                 <span>Total</span>
-                <span style={{ color: "#059669" }}>Free</span>
+                <span style={{ color: "var(--brand-primary)" }}>₹{course.exam_fee || 199}</span>
               </div>
             </div>
 
-            <form action={handlePurchase}>
-              <button 
-                type="submit"
-                style={{ 
-                  width: "100%", background: "var(--brand-primary)", color: "white", padding: "18px", 
-                  borderRadius: "16px", border: "none", fontSize: "16px", fontWeight: 800, 
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
-                  transition: "transform 0.2s"
-                }}
-              >
-                Unlock Exam for Free <MoveRight size={20} />
-              </button>
-            </form>
+            <RazorpayButton courseId={normalizedId} />
 
             <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", color: "var(--text-tertiary)", fontSize: "12px", fontWeight: 600 }}>
-                <Sparkles size={12} /> Free for a limited time only
+                <CreditCard size={12} /> Secure Payment via Razorpay
               </div>
             </div>
           </div>

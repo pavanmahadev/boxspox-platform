@@ -104,7 +104,7 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
     isEnrolled = !!enrollment;
   }
 
-  const isFree = course.price === 0 || course.price === null;
+  const isFree = course.price === 0 || course.price === "0" || course.price === null;
 
   // 3. Authorization Logic: Always redirect when lessons exist
   if (allLessons.length > 0) {
