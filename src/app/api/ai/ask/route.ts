@@ -6,10 +6,10 @@ import { createClient } from "@/utils/supabase/server";
 export async function POST(req: Request) {
   try {
     const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized — please log in." }, { status: 401 });
     }
 
     const { question, lessonTitle, lessonContent, history } = await req.json();

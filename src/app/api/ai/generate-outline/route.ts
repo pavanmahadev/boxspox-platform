@@ -5,17 +5,18 @@ import { createClient } from "@/utils/supabase/server";
 export async function POST(req: Request) {
   try {
     const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    // Use getUser() instead of getSession() — more reliable in API routes
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized — please log in." }, { status: 401 });
     }
 
     // Check if user is admin or instructor
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single();
 
     if (!profile || (profile.role !== "admin" && profile.role !== "instructor")) {
@@ -69,14 +70,14 @@ Requirements:
 
     // Log usage to database
     if (usage) {
-      await supabase.from("ai_usage").insert({
-        user_id: session.user.id,
+      supabase.from("ai_usage").insert({
+        user_id: user.id,
         feature: "generate-outline",
         model: "llama-3.1-8b-instant",
         prompt_tokens: usage.prompt_tokens,
         completion_tokens: usage.completion_tokens,
         total_tokens: usage.total_tokens,
-      });
+      }).then(() => {}).catch(() => {});
     }
     
     // Extract the JSON array from the response
