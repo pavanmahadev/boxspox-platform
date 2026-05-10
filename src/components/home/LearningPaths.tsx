@@ -85,6 +85,7 @@ export function LearningPaths() {
           {paths.map((path, i) => (
             <motion.div
               key={path.title}
+              className="path-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -199,6 +200,13 @@ export function LearningPaths() {
           ))}
         </div>
       </div>
+      <style>{`
+        @media (max-width: 640px) {
+          .path-card {
+            padding: 32px 24px !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

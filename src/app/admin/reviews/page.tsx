@@ -47,7 +47,7 @@ export default async function ReviewsModerationPage() {
           <p style={{ color: "var(--text-tertiary)", marginTop: "8px" }}>When students review courses, they will appear here.</p>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 350px), 1fr))", gap: "24px" }}>
           {reviews.map((review: any) => (
             <div key={review.id} style={{ 
               background: "var(--bg-card)", 

@@ -16,7 +16,8 @@ import {
   ChevronRight,
   TrendingUp,
   MessageSquare,
-  Megaphone
+  Megaphone,
+  Cpu
 } from "lucide-react";
 
 const menuItems = [
@@ -27,6 +28,7 @@ const menuItems = [
   { name: "Course Reviews", icon: <MessageSquare size={20} />, href: "/admin/reviews" },
   { name: "User Management", icon: <Users size={20} />, href: "/admin/users" },
   { name: "Manage Ads", icon: <Megaphone size={20} />, href: "/admin/ads" },
+  { name: "AI Usage", icon: <Cpu size={20} />, href: "/admin/ai-usage" },
   { name: "Settings", icon: <Settings size={20} />, href: "/admin/settings" },
 ];
 

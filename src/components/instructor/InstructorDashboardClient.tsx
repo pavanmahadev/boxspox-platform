@@ -17,17 +17,43 @@ interface Course {
 export function InstructorDashboardClient({ initialCourses, instructorId }: { initialCourses: Course[], instructorId: string }) {
   const [courses, setCourses] = useState<Course[]>(initialCourses);
   const [loading, setLoading] = useState(false);
+  const [avgRating, setAvgRating] = useState<string>("...");
   const supabase = createClient();
 
   const fetchUpdatedData = async () => {
-    const { data } = await supabase
+    setLoading(true);
+    const { data: coursesData } = await supabase
       .from("courses")
       .select("id, title, status, enrollments(id), modules(lessons(id))")
       .eq("instructor_id", instructorId);
-    if (data) setCourses(data);
+    
+    if (coursesData) {
+      setCourses(coursesData);
+      
+      // Fetch average rating for these courses
+      const courseIds = coursesData.map((c: any) => c.id);
+      if (courseIds.length > 0) {
+        const { data: reviews } = await supabase
+          .from("course_reviews")
+          .select("rating")
+          .in("course_id", courseIds);
+        
+        if (reviews && reviews.length > 0) {
+          const avg = reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / reviews.length;
+          setAvgRating(avg.toFixed(1));
+        } else {
+          setAvgRating("N/A");
+        }
+      } else {
+        setAvgRating("N/A");
+      }
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
+    fetchUpdatedData(); // Fetch on mount to get ratings
+    
     // Listen for new enrollments to any of the instructor's courses
     const enrollmentSub = subscribeToChannel('enrollments', 'INSERT', () => {
        fetchUpdatedData();
@@ -59,7 +85,7 @@ export function InstructorDashboardClient({ initialCourses, instructorId }: { in
           { label: "Total Courses", value: totalCourses, icon: <BookOpen size={24} />, color: "#10B981" },
           { label: "Total Students", value: totalStudents, icon: <Users size={24} />, color: "#3B82F6" },
           { label: "Total Lessons", value: totalLessons, icon: <Layers size={24} />, color: "#8B5CF6" },
-          { label: "Avg. Rating", value: "4.8", icon: <Star size={24} />, color: "#F59E0B" },
+          { label: "Avg. Rating", value: avgRating, icon: <Star size={24} />, color: "#F59E0B" },
         ].map((stat, i) => (
           <div key={i} className="stat-card">
             <div className="stat-icon" style={{ background: stat.color + "15", color: stat.color }}>

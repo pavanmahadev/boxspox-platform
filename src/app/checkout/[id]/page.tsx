@@ -14,24 +14,35 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
     redirect(`/login?next=/checkout/${id}`);
   }
 
-  const { data: course } = await supabase
+  // Normalize ID (just in case browser somehow converted hyphens to spaces)
+  const normalizedId = id.replace(/%20| /g, "-");
+
+  const { data: course, error: courseError } = await supabase
     .from("courses")
-    .select("*, profiles:instructor_id(full_name)")
-    .eq("id", id)
+    .select("*")
+    .eq("id", normalizedId)
     .single();
 
-  if (!course) notFound();
+  if (courseError) {
+    console.error("[Checkout] Error fetching course:", courseError);
+  }
 
-  // Check if already enrolled
+  if (!course) {
+    console.error("[Checkout] Course not found for ID:", normalizedId);
+    notFound();
+  }
+
+  // Check if already paid for exam
   const { data: enrollment } = await supabase
     .from("enrollments")
-    .select("id")
+    .select("*")
     .eq("user_id", user.id)
-    .eq("course_id", id)
+    .eq("course_id", normalizedId)
     .single();
 
-  if (enrollment) {
-    redirect(`/tutorials/${course.slug}`);
+  if (enrollment?.exam_unlocked) {
+    // Already unlocked — go straight to the exam, NOT /tutorials/slug (that causes a redirect loop)
+    redirect(`/tutorials/${course.slug}/exam`);
   }
 
   async function handlePurchase() {
@@ -42,24 +53,47 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
     if (!user) return;
 
     // SIMULATED PAYMENT SUCCESS
-    // In production, you would call Stripe here
+    // In production, you would call Razorpay/Stripe here
     
-    const { error } = await supabase
-      .from("enrollments")
-      .insert({
-        user_id: user.id,
-        course_id: id,
-        status: "active"
-      });
+    if (enrollment) {
+      const { error } = await supabase
+        .from("enrollments")
+        .update({
+          status: "active",       // ensure status is active so lesson page doesn't bounce
+          exam_unlocked: true,
+          payment_reference_id: `sim_pay_${Date.now()}`
+        })
+        .eq("id", enrollment.id);
+        
+      if (!error) {
+        revalidatePath(`/tutorials/${course.slug}`);
+        revalidatePath(`/tutorials/${course.slug}/exam`);
+        redirect(`/tutorials/${course.slug}/exam`);
+      } else {
+        console.error("[Checkout] Payment Update Error:", error);
+      }
+    } else {
+      const { error } = await supabase
+        .from("enrollments")
+        .insert({
+          user_id: user.id,
+          course_id: normalizedId,
+          status: "active",
+          exam_unlocked: true,
+          payment_reference_id: `sim_pay_${Date.now()}`
+        });
 
-    if (!error) {
-      revalidatePath(`/tutorials/${course.slug}`);
-      redirect(`/tutorials/${course.slug}`);
+      if (!error) {
+        revalidatePath(`/tutorials/${course.slug}`);
+        redirect(`/tutorials/${course.slug}/exam`);
+      } else {
+        console.error("[Checkout] Payment Insert Error:", error);
+      }
     }
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-secondary)", padding: "100px 20px" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-secondary)", paddingTop: "180px", paddingBottom: "60px", paddingLeft: "20px", paddingRight: "20px" }}>
       <div style={{ maxWidth: "1000px", margin: "0 auto", display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "40px" }}>
         
         {/* Left Side: Course Info */}
@@ -74,24 +108,23 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
               padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: 800,
               textTransform: "uppercase", letterSpacing: "1px"
             }}>
-              Premium Course
+              Official Certification
             </span>
             <h1 style={{ fontSize: "40px", fontWeight: 900, color: "var(--text-primary)", marginTop: "12px", letterSpacing: "-1px" }}>
-              {course.title}
+              {course.title} - Final Exam
             </h1>
             <p style={{ fontSize: "18px", color: "var(--text-secondary)", marginTop: "16px", lineHeight: 1.6 }}>
-              {course.description}
+              Unlock the final certification exam for {course.title}. Pass the exam to earn your verified industry certificate.
             </p>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
             {[
-              "Full Lifetime Access",
-              "Certificate of Completion",
-              "Interactive Coding Playground",
-              "AI-Powered Learning Support",
-              "Regular Content Updates",
-              "Premium Community Access"
+              "1 Attempt at Final Exam",
+              "Verified Digital Certificate",
+              "Shareable LinkedIn Credential",
+              "Lifetime Access to Certificate",
+              "Instant PDF Download"
             ].map((feature, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: "12px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: 600 }}>
                 <div style={{ width: "20px", height: "20px", borderRadius: "50%", background: "#ECFDF5", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -107,30 +140,30 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
               <ShieldCheck size={24} color="var(--brand-primary)" />
             </div>
             <div>
-              <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--text-primary)" }}>Secure Checkout</div>
-              <div style={{ fontSize: "13px", color: "var(--text-tertiary)" }}>Your payment information is encrypted and secure.</div>
+              <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--text-primary)" }}>Free Early Access</div>
+              <div style={{ fontSize: "13px", color: "var(--text-tertiary)" }}>Certification is currently free for a limited time.</div>
             </div>
           </div>
         </div>
 
         {/* Right Side: Order Summary */}
-        <div style={{ position: "sticky", top: "100px", height: "fit-content" }}>
+        <div style={{ position: "sticky", top: "160px", height: "fit-content" }}>
           <div style={{ background: "var(--bg-primary)", borderRadius: "24px", border: "1px solid var(--border-primary)", padding: "32px", boxShadow: "0 20px 40px rgba(0,0,0,0.05)" }}>
             <h2 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "24px" }}>Order Summary</h2>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-secondary)" }}>
-                <span>Course Price</span>
-                <span style={{ fontWeight: 700 }}>${course.price}</span>
+                <span>Exam & Certificate Fee</span>
+                <span style={{ fontWeight: 700, textDecoration: "line-through", opacity: 0.5 }}>₹{course.exam_fee || 199}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-secondary)" }}>
-                <span>Platform Discount</span>
-                <span style={{ color: "#059669", fontWeight: 700 }}>-$0.00</span>
+                <span>Early Access Discount</span>
+                <span style={{ color: "#059669", fontWeight: 700 }}>-₹{course.exam_fee || 199}</span>
               </div>
               <div style={{ height: "1px", background: "var(--border-primary)" }} />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "24px", fontWeight: 900, color: "var(--text-primary)" }}>
                 <span>Total</span>
-                <span>${course.price}</span>
+                <span style={{ color: "#059669" }}>Free</span>
               </div>
             </div>
 
@@ -144,17 +177,13 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                   transition: "transform 0.2s"
                 }}
               >
-                Enroll Now <MoveRight size={20} />
+                Unlock Exam for Free <MoveRight size={20} />
               </button>
             </form>
 
             <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", color: "var(--text-tertiary)", fontSize: "12px", fontWeight: 600 }}>
-                <Lock size={12} /> 30-Day Money-Back Guarantee
-              </div>
-              <div style={{ display: "flex", gap: "8px", justifyContent: "center", opacity: 0.5 }}>
-                 <CreditCard size={20} />
-                 <Sparkles size={20} />
+                <Sparkles size={12} /> Free for a limited time only
               </div>
             </div>
           </div>

@@ -27,6 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ language:
 export default async function CoursePage({ params }: { params: Promise<{ language: string }> }) {
   const { language } = await params;
   
+  console.log("===> CoursePage called with language:", language);
+  
   if (language.includes(" ")) {
     redirect(`/tutorials/${language.replace(/ /g, "-")}`);
   }
@@ -78,7 +80,15 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
     .eq("course_id", course.id)
     .order("order_index", { ascending: true });
 
-  const allLessons = modules?.flatMap(m => m.lessons).sort((a, b) => (a.order_index || 0) - (b.order_index || 0)) || [];
+  // Sort lessons across modules: first sort by module order_index, then lesson order_index
+  const allLessons = (modules || [])
+    .slice()
+    .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
+    .flatMap(m =>
+      (m.lessons || [])
+        .slice()
+        .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+    );
 
   // 2. Check Enrollment for Paid Courses
   let isEnrolled = false;
@@ -94,16 +104,22 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
     isEnrolled = !!enrollment;
   }
 
-  // 3. Authorization Logic: Redirect based on price and enrollment
+  const isFree = course.price === 0 || course.price === null;
+
+  // 3. Authorization Logic: Always redirect when lessons exist
   if (allLessons.length > 0) {
-    const isFree = course.price === 0 || course.price === null;
-    
     if (isFree || isEnrolled) {
+      // Go to the very first lesson
       redirect(`/tutorials/${language}/${allLessons[0].slug}`);
     } else {
-      // Not enrolled and not free -> Go to course landing/checkout
+      // Paid course, not enrolled → checkout
       redirect(`/checkout/${course.id}`);
     }
+  }
+
+  // Paid course with no lessons yet → checkout
+  if (!isFree && !isEnrolled) {
+    redirect(`/checkout/${course.id}`);
   }
 
   // Fallback to overview if no lessons exist yet

@@ -38,7 +38,7 @@ export default async function SubmissionsPage() {
             .table-cell-hide-mobile { display: none !important; }
           }
         `}</style>
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", minWidth: "600px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
           <thead style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-primary)" }}>
             <tr>
               <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase" }}>Student</th>

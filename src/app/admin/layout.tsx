@@ -44,7 +44,7 @@ export default async function AdminLayout({
           } 
         />
 
-        <main style={{ padding: "40px", flex: 1 }}>
+        <main style={{ padding: "clamp(16px, 5vw, 40px)", flex: 1, minWidth: 0 }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
             {children}
           </div>

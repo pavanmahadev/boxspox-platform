@@ -274,6 +274,22 @@ export async function GET(request: NextRequest) {
       .eq("id", cert.course_id)
       .single();
 
+    // STRICT EXAM ENFORCEMENT: Verify enrollment has final_exam_passed === true
+    const { data: enrollment } = await supabase
+      .from("enrollments")
+      .select("final_exam_passed")
+      .eq("user_id", cert.user_id)
+      .eq("course_id", cert.course_id)
+      .single();
+
+    if (!enrollment?.final_exam_passed && !isAdmin) {
+      console.warn(`[CertAPI] Security Blocked: ${requester.email} attempted to download certificate without passing final exam.`);
+      return NextResponse.json(
+        { error: "Forbidden: You must pass the Final Certification Exam to download this certificate." },
+        { status: 403 }
+      );
+    }
+
     console.log("[CertAPI] Data fetched for:", profile?.full_name);
     
     // Use the profile name of the ACTUAL certificate owner, not the requester

@@ -36,11 +36,11 @@ export function Hero() {
       }} />
 
       <div className="section-container" style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 500px), 1fr))", 
-          gap: "60px", 
-          alignItems: "center" 
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 500px), 1fr))",
+          gap: "60px",
+          alignItems: "center"
         }}>
           {/* Left Content */}
           <motion.div
@@ -75,7 +75,7 @@ export function Hero() {
               fontFamily: "var(--font-heading)"
             }}>
               Master Coding with <br />
-              <span style={{ 
+              <span style={{
                 background: "linear-gradient(135deg, var(--brand-primary), #10B981)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent"
@@ -93,20 +93,21 @@ export function Hero() {
               Go from absolute beginner to building professional-grade projects. Interactive tutorials, a live browser-based editor, and an AI tutor ready to help 24/7.
             </p>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center" }}>
-              <Link href="/register" className="btn-primary" style={{ padding: "16px 40px", fontSize: "16px" }}>
+            <div className="hero-buttons" style={{ display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center" }}>
+              <Link href="/register" className="btn-primary hero-btn-primary" style={{ padding: "16px 40px", fontSize: "16px", display: "flex", justifyContent: "center" }}>
                 Start Learning Free <ChevronRight size={18} />
               </Link>
-              <Link href="/tutorials" style={{
+              <Link href="/tutorials" className="hover-lift hero-btn-secondary" style={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "8px",
                 color: "var(--text-primary)",
                 textDecoration: "none",
                 fontWeight: 700,
                 fontSize: "15px",
                 padding: "16px 20px"
-              }} className="hover-lift">
+              }}>
                 <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Play size={14} fill="currentColor" />
                 </div>
@@ -122,7 +123,7 @@ export function Hero() {
             transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             style={{ position: "relative" }}
           >
-            <div style={{
+            <div className="hero-visual" style={{
               background: "#1E293B",
               borderRadius: "20px",
               overflow: "hidden",
@@ -139,7 +140,7 @@ export function Hero() {
                 <div style={{ flex: 1, textAlign: "center", fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: 600 }}>interactive_lesson.html</div>
               </div>
               <div style={{ padding: "8px" }}>
-                <SandpackEditor 
+                <SandpackEditor
                   template="vanilla"
                   files={{
                     "/index.html": `<!DOCTYPE html>
@@ -165,6 +166,7 @@ export function Hero() {
 
             {/* Floating Achievement Card */}
             <motion.div
+              className="hero-floating-card"
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               style={{
@@ -193,16 +195,26 @@ export function Hero() {
           </motion.div>
         </div>
       </div>
-      
+
       <style>{`
         @media (max-width: 1024px) {
           section { text-align: center; }
           .section-container > div { grid-template-columns: 1fr !important; }
           h1 { margin-left: auto; margin-right: auto; }
           p { margin-left: auto; margin-right: auto; }
-          div[style*="display: flex"] { justify-content: center; }
-          div[style*="transform: perspective"] { transform: none !important; margin-top: 40px; }
-          div[style*="position: absolute"][style*="bottom: -20px"] { display: none; }
+          .hero-buttons { justify-content: center; }
+          .hero-visual { transform: none !important; margin-top: 40px; }
+          .hero-floating-card { 
+            left: 50% !important; 
+            transform: translateX(-50%) translateY(var(--tw-translate-y, 0)) !important; 
+            bottom: -30px !important;
+            width: max-content;
+          }
+        }
+        @media (max-width: 640px) {
+          .hero-buttons { flex-direction: column; width: 100%; }
+          .hero-btn-primary, .hero-btn-secondary { width: 100%; padding: 14px 20px !important; }
+          .hero-floating-card { display: none !important; }
         }
       `}</style>
     </section>

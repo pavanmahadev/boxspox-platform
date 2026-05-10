@@ -59,7 +59,6 @@ export function AdminHeader({ email, breadcrumbs }: { email: string | undefined,
           position: "fixed",
           inset: 0,
           background: "rgba(0,0,0,0.5)",
-          backdropFilter: "blur(4px)",
           zIndex: 140,
           opacity: 0,
           pointerEvents: "none",
@@ -68,24 +67,26 @@ export function AdminHeader({ email, breadcrumbs }: { email: string | undefined,
         }}
       />
 
-      <div className={`admin-sidebar-container ${isSidebarOpen ? 'open' : ''}`}>
+      <div className={`admin-sidebar-container ${isSidebarOpen ? 'open' : ''}`} style={{ position: "relative" }}>
          <AdminSidebar onNavItemClick={() => setIsSidebarOpen(false)} />
          <button 
             onClick={() => setIsSidebarOpen(false)}
             className="show-mobile"
             style={{
               position: "absolute",
-              top: "20px",
-              right: "-50px",
+              top: "16px",
+              right: "16px",
               background: "var(--bg-card)",
               border: "1px solid var(--border-primary)",
               borderRadius: "50%",
-              padding: "8px",
+              padding: "6px",
               zIndex: 160,
-              display: "none"
+              display: "none",
+              color: "var(--text-primary)",
+              cursor: "pointer"
             }}
          >
-            <X size={20} />
+            <X size={18} />
          </button>
       </div>
 
@@ -95,13 +96,19 @@ export function AdminHeader({ email, breadcrumbs }: { email: string | undefined,
           .hidden-mobile { display: none !important; }
           .admin-sidebar-overlay.open { display: block !important; opacity: 1 !important; pointer-events: auto !important; }
           .admin-sidebar-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            z-index: 150;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
             transform: translateX(-100%);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg-card);
+          }
+          .admin-sidebar-container aside {
+            width: 100% !important;
           }
           .admin-sidebar-container.open {
             transform: translateX(0);

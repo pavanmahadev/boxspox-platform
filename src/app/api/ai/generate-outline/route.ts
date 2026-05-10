@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import { createClient } from "@/utils/supabase/server";
 
 export async function POST(req: Request) {
@@ -11,44 +11,84 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { courseTitle } = await req.json();
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    // Check if user is admin or instructor
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
 
-    if (!GEMINI_API_KEY) {
+    if (!profile || (profile.role !== "admin" && profile.role !== "instructor")) {
+      return NextResponse.json({ error: "Unauthorized. Only admins and instructors can use this feature." }, { status: 403 });
+    }
+
+    const { courseTitle } = await req.json();
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+    if (!GROQ_API_KEY) {
       return NextResponse.json({ 
         error: "AI Service is currently unavailable." 
       }, { status: 503 });
     }
 
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const openai = new OpenAI({
+      apiKey: GROQ_API_KEY,
+      baseURL: "https://api.groq.com/openai/v1",
+    });
 
     const prompt = `You are an expert curriculum designer.
 Generate a comprehensive, logically structured course outline for a tutorial on "${courseTitle}".
 I want it to be inspired by W3Schools but with a more premium, scenario-based and role-based structure (not a copy).
 
-Cover these topics in a structured way:
-- Git Basics (Home, Intro, Install, Config, Get Started, New Files, Staging, Commit, Tagging, Stash, History, Help)
-- Branching & Merging (Workflow, Best Practices)
-- Git and GitHub (Get Started, SSH, Set Remote, Edit Code, Pull, Push, Flow, Pages, GUI)
-- Contributing (Fork, Clone, Pull Request)
-- Undoing Changes (Revert, Reset, Amend, Rebase, Reflog, Recovery)
-- Advanced Git (.gitignore, Attributes, LFS, Signing, Cherrypick, Conflicts, CI/CD, Hooks, Submodules)
-- Certificate & Exercises (Quiz, Syllabus, Study Plan)
+Please cover all essential topics for "${courseTitle}" in a structured way, suitable for a complete beginner to master the subject.
+
+CRITICAL REQUIREMENT:
+Generate topics ONLY for "${courseTitle}". Do NOT include any other subjects. For example, if the course is about HTML, do NOT include Git, GitHub, or any other programming languages or tools unless they are strictly part of learning "${courseTitle}". Focus 100% on "${courseTitle}".
 
 Requirements:
-1. Divide the course into 4-6 modules grouped by the learner's journey (e.g., Solo Developer, Team Player, Git Master).
-2. Use engaging, scenario-based titles for modules and lessons (e.g., "Oops! Fixing Mistakes" instead of "Git Undo").
+1. Divide the course into 4-6 modules grouped by the learner's journey (e.g., "Getting Started", "Building Real Projects").
+2. Use engaging, scenario-based titles for modules and lessons.
 3. Each module should have 5-10 lessons.
 4. Return the result as a JSON array of modules, where each module has 'title' and 'lessons' (array of objects with 'title' and 'slug' in kebab-case).
 5. Do NOT prefix titles with "Module X:" or "Lesson X:".
 6. Do not include any other text, markdown formatting (like \`\`\`json), or explanations. Return ONLY the raw JSON array.`;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const response = await openai.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      messages: [
+        { role: "user", content: prompt }
+      ],
+    });
+
+    const text = response.choices[0].message.content;
+    const usage = response.usage;
+
+    if (!text) {
+      return NextResponse.json({ error: "AI returned empty response" }, { status: 500 });
+    }
+
+    // Log usage to database
+    if (usage) {
+      await supabase.from("ai_usage").insert({
+        user_id: session.user.id,
+        feature: "generate-outline",
+        model: "llama-3.1-8b-instant",
+        prompt_tokens: usage.prompt_tokens,
+        completion_tokens: usage.completion_tokens,
+        total_tokens: usage.total_tokens,
+      });
+    }
     
-    // Clean up the response in case Gemini includes markdown code blocks
-    const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    // Extract the JSON array from the response
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]");
+    
+    if (start === -1 || end === -1) {
+      console.error("No JSON array found in AI response:", text);
+      return NextResponse.json({ error: "AI did not return a valid JSON array.", details: text }, { status: 500 });
+    }
+
+    const cleanedText = text.substring(start, end + 1).trim();
 
     try {
       const outline = JSON.parse(cleanedText);

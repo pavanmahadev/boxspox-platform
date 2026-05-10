@@ -45,13 +45,13 @@ export function CourseForm({ initialData, instructorId }: CourseFormProps) {
     title: initialData?.title || "",
     slug: initialData?.slug || "",
     description: initialData?.description || "",
-    category: initialData?.category || "web-development",
+    category: initialData?.category || "git",
     difficulty: initialData?.difficulty || "beginner",
-    status: initialData?.status || "draft",
+    status: initialData?.status || "published",
     icon: initialData?.icon || "📚",
     gradient: initialData?.gradient || "linear-gradient(135deg, #0F6E56 0%, #15B8A6 100%)",
     image_url: initialData?.image_url || "",
-    duration: initialData?.duration || "",
+    duration: initialData?.duration || "4 hours",
     price: initialData?.price || 0,
   });
 

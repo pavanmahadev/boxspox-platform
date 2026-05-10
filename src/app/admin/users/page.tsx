@@ -117,14 +117,21 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
         background: "var(--bg-card)", 
         borderRadius: "20px", 
         border: "1px solid var(--border-primary)", 
-        boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+        boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+        overflowX: "auto"
       }}>
+        <style>{`
+          @media (max-width: 640px) {
+            .table-cell-hide-mobile { display: none !important; }
+            .mobile-flex-actions { display: flex; flex-direction: column; gap: 8px; }
+          }
+        `}</style>
         <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0, textAlign: "left" }}>
           <thead style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-primary)" }}>
             <tr>
               <th style={{ padding: "18px 24px", fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "1px", borderTopLeftRadius: "20px" }}>User Profile</th>
-              <th style={{ padding: "18px 24px", fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "1px" }}>System Role</th>
-              <th style={{ padding: "18px 24px", fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "1px" }}>Joined Date</th>
+              <th className="table-cell-hide-mobile" style={{ padding: "18px 24px", fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "1px" }}>System Role</th>
+              <th className="table-cell-hide-mobile" style={{ padding: "18px 24px", fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "1px" }}>Joined Date</th>
               <th style={{ padding: "18px 24px", fontSize: "11px", fontWeight: 800, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderTopRightRadius: "20px" }}>Actions</th>
             </tr>
           </thead>
@@ -161,7 +168,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: "18px 24px" }}>
+                  <td className="table-cell-hide-mobile" style={{ padding: "18px 24px" }}>
                     <span style={{ 
                       padding: "6px 10px", 
                       borderRadius: "8px", 
@@ -179,7 +186,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                       {profile.role}
                     </span>
                   </td>
-                  <td style={{ padding: "18px 24px", color: "var(--text-tertiary)", fontSize: "13px", fontWeight: 500 }}>
+                  <td className="table-cell-hide-mobile" style={{ padding: "18px 24px", color: "var(--text-tertiary)", fontSize: "13px", fontWeight: 500 }}>
                     {new Date(profile.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                   </td>
                   <td style={{ padding: "18px 24px", textAlign: "right" }}>

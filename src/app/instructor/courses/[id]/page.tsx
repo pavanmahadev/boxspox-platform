@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { CourseForm } from "@/components/admin/CourseForm";
 import { CourseCurriculum } from "@/components/admin/CourseCurriculum";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, GraduationCap } from "lucide-react";
 import { InstructorLessonStats } from "@/components/instructor/InstructorLessonStats";
 
 export default async function InstructorCourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -47,18 +47,30 @@ export default async function InstructorCourseDetailPage({ params }: { params: P
           </h1>
           <p style={{ color: "var(--text-tertiary)", fontWeight: 600 }}>Manage course details, modules, and lessons.</p>
         </div>
-        <Link 
-          href={`/tutorials/${course.slug}`} 
-          target="_blank"
-          style={{ 
-            display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", 
-            background: "var(--bg-secondary)", borderRadius: "10px", color: "var(--text-primary)",
-            textDecoration: "none", fontWeight: 700, border: "1px solid var(--border-primary)",
-            fontSize: "13px"
-          }}
-        >
-          <ExternalLink size={16} /> View as Student
-        </Link>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <Link 
+            href={`/instructor/courses/${id}/exam`}
+            style={{ 
+              display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", 
+              background: "var(--brand-primary)", borderRadius: "10px", color: "white",
+              textDecoration: "none", fontWeight: 700, fontSize: "13px"
+            }}
+          >
+            <GraduationCap size={16} /> Exam Builder
+          </Link>
+          <Link 
+            href={`/tutorials/${course.slug}`} 
+            target="_blank"
+            style={{ 
+              display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", 
+              background: "var(--bg-secondary)", borderRadius: "10px", color: "var(--text-primary)",
+              textDecoration: "none", fontWeight: 700, border: "1px solid var(--border-primary)",
+              fontSize: "13px"
+            }}
+          >
+            <ExternalLink size={16} /> View as Student
+          </Link>
+        </div>
       </div>
 
       <InstructorLessonStats courseId={id} />

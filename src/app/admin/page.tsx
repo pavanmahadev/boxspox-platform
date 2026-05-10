@@ -13,66 +13,94 @@ import { createClient } from "@/utils/supabase/server";
 import { RealtimeActivityFeed } from "@/components/admin/RealtimeActivityFeed";
 
 export default async function AdminDashboard() {
+  console.log("===> AdminDashboard called");
   const supabase = await createClient();
 
-  // Fetch basic stats
-  const [
-    { count: userCount },
-    { count: courseCount },
-    { count: enrollmentCount },
-    { count: progressCount },
-    { count: _reviewCount },
-    { count: _certCount },
-  ] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("courses").select("*", { count: "exact", head: true }),
-    supabase.from("enrollments").select("*", { count: "exact", head: true }),
-    supabase.from("user_progress").select("*", { count: "exact", head: true }),
-    supabase.from("course_reviews").select("*", { count: "exact", head: true }),
-    supabase.from("certificates").select("*", { count: "exact", head: true }),
-  ]);
+  let userCount = 0;
+  let courseCount = 0;
+  let enrollmentCount = 0;
+  let progressCount = 0;
+  let activityLogs: any[] = [];
+  let recentSignups: any[] = [];
+  let chartData: number[] = [0, 0, 0, 0, 0, 0, 0];
+  let last7Days: string[] = [];
 
-  // Fetch real activity logs with profile data
-  const { data: activityLogs } = await supabase
-    .from("activity_logs")
-    .select("*, profiles!inner(id, full_name, email, role)")
-    .order("created_at", { ascending: false })
-    .limit(8);
+  try {
+    // Fetch basic stats
+    const [
+      { count: uCount },
+      { count: cCount },
+      { count: eCount },
+      { count: pCount },
+    ] = await Promise.all([
+      supabase.from("profiles").select("*", { count: "exact", head: true }),
+      supabase.from("courses").select("*", { count: "exact", head: true }),
+      supabase.from("enrollments").select("*", { count: "exact", head: true }),
+      supabase.from("user_progress").select("*", { count: "exact", head: true }),
+    ]);
 
-  // Fetch recent signups
-  const { data: recentSignups } = await supabase
-    .from("profiles")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(5);
+    userCount = uCount || 0;
+    courseCount = cCount || 0;
+    enrollmentCount = eCount || 0;
+    progressCount = pCount || 0;
 
-  // Fetch registration data for the last 7 days
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    return d.toISOString().split('T')[0];
-  });
+    // Fetch real activity logs with profile data
+    const { data: logs } = await supabase
+      .from("activity_logs")
+      .select("*, profiles!inner(id, full_name, email, role)")
+      .order("created_at", { ascending: false })
+      .limit(8);
+    
+    activityLogs = logs || [];
 
-  const { data: registrationData } = await supabase
-    .rpc('get_daily_registrations', { days_count: 7 });
+    // Fetch recent signups
+    const { data: signups } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(5);
+    
+    recentSignups = signups || [];
 
-  const chartData = last7Days.map(date => {
-    const dayData = (registrationData as any[])?.find(d => d.date === date);
-    return dayData ? dayData.count : 0;
-  });
+    // Fetch registration data for the last 7 days
+    last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return d.toISOString().split('T')[0];
+    });
+
+    const { data: registrationData } = await supabase
+      .rpc('get_daily_registrations', { days_count: 7 });
+
+    chartData = last7Days.map(date => {
+      const dayData = (registrationData as any[])?.find(d => d.date === date);
+      return dayData ? dayData.count : 0;
+    });
+
+  } catch (error: any) {
+    console.error("===> Error in AdminDashboard data fetching:", error);
+    return (
+      <div style={{ padding: "40px", color: "red" }}>
+        <h2>Error loading dashboard data</h2>
+        <p>{error.message || "Unknown error"}</p>
+      </div>
+    );
+  }
 
   const maxReg = Math.max(...chartData, 1);
 
   const stats = [
-    { label: "Total Users", value: userCount || 0, icon: <Users size={18} />, color: "#3B82F6", change: "Registered" },
-    { label: "Active Courses", value: courseCount || 0, icon: <BookOpen size={18} />, color: "#10B981", change: "Published" },
-    { label: "Enrollments", value: enrollmentCount || 0, icon: <TrendingUp size={18} />, color: "#7C3AED", change: "All time" },
-    { label: "Lessons Finished", value: progressCount || 0, icon: <CheckCircle size={18} />, color: "#F59E0B", change: "Completions" },
+    { label: "Total Users", value: userCount, icon: <Users size={18} />, color: "#3B82F6", change: "Registered" },
+    { label: "Active Courses", value: courseCount, icon: <BookOpen size={18} />, color: "#10B981", change: "Published" },
+    { label: "Enrollments", value: enrollmentCount, icon: <TrendingUp size={18} />, color: "#7C3AED", change: "All time" },
+    { label: "Lessons Finished", value: progressCount, icon: <CheckCircle size={18} />, color: "#F59E0B", change: "Completions" },
   ];
+
+  console.log("===> AdminDashboard rendering", { statsCount: stats.length, activityCount: activityLogs.length });
 
   return (
     <div style={{ paddingBottom: "40px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px", flexWrap: "wrap", gap: "16px" }}>
+      <div className="flex-responsive" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px", gap: "16px" }}>
         <div>
           <h1 style={{ fontSize: "24px", fontWeight: 800, color: "var(--text-primary)", marginBottom: "4px" }}>
             System Overview
@@ -80,7 +108,7 @@ export default async function AdminDashboard() {
           <p style={{ color: "var(--text-tertiary)", fontSize: "14px", fontWeight: 500 }}>Real-time metrics for the Boxspox ecosystem.</p>
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
-          <button style={{ 
+          <button className="hide-mobile" style={{ 
             background: "var(--bg-card)", 
             color: "var(--text-primary)", 
             padding: "10px 20px", 
@@ -110,11 +138,11 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: "20px", marginBottom: "32px" }}>
+      <div className="responsive-grid-stats" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px", marginBottom: "32px" }}>
         {stats.map((stat) => (
           <div key={stat.label} style={{ 
             background: "var(--bg-card)", 
-            padding: "24px", 
+            padding: "20px", 
             borderRadius: "16px", 
             border: "1px solid var(--border-primary)",
             boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
@@ -134,12 +162,12 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Activity and Charts */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 500px), 1fr))", gap: "24px", marginBottom: "32px" }}>
+      <div className="responsive-grid-main" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: "24px", marginBottom: "32px" }}>
         
         {/* Performance Chart Placeholder */}
-        <div style={{ background: "var(--bg-card)", borderRadius: "16px", border: "1px solid var(--border-primary)", padding: "24px" }}>
+        <div style={{ background: "var(--bg-card)", borderRadius: "16px", border: "1px solid var(--border-primary)", padding: "20px" }}>
           <h2 style={{ fontSize: "16px", fontWeight: 800, marginBottom: "24px" }}>User Registrations (Last 7 Days)</h2>
-          <div style={{ height: "200px", display: "flex", alignItems: "flex-end", gap: "12px", padding: "0 10px" }}>
+          <div style={{ height: "200px", display: "flex", alignItems: "flex-end", gap: "8px", padding: "0 5px" }}>
             {chartData.map((count, i) => (
               <div key={i} style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div style={{ 
@@ -159,20 +187,20 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Audit Trail */}
-        <div style={{ background: "var(--bg-card)", borderRadius: "16px", border: "1px solid var(--border-primary)", padding: "24px" }}>
+        <div style={{ background: "var(--bg-card)", borderRadius: "16px", border: "1px solid var(--border-primary)", padding: "20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
             <h2 style={{ fontSize: "16px", fontWeight: 800 }}>Audit Trail</h2>
             <Link href="/admin/activity" style={{ color: "#2563EB", fontSize: "13px", fontWeight: 700, textDecoration: "none" }}>View History</Link>
           </div>
-          <RealtimeActivityFeed initialLogs={activityLogs || []} />
+          <RealtimeActivityFeed initialLogs={activityLogs} />
         </div>
 
       </div>
 
       {/* Recent Signups Section */}
-      <div style={{ background: "var(--bg-card)", borderRadius: "16px", border: "1px solid var(--border-primary)", padding: "24px" }}>
+      <div style={{ background: "var(--bg-card)", borderRadius: "16px", border: "1px solid var(--border-primary)", padding: "20px" }}>
         <h2 style={{ fontSize: "16px", fontWeight: 800, marginBottom: "20px" }}>New Registrations</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
           {recentSignups && recentSignups.length > 0 ? (
             recentSignups.map((user) => (
               <div key={user.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", background: "var(--bg-secondary)", borderRadius: "12px" }}>
@@ -209,6 +237,24 @@ export default async function AdminDashboard() {
           </Link>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .flex-responsive {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+          .hide-mobile {
+            display: none !important;
+          }
+          .responsive-grid-stats {
+            grid-template-columns: 1fr !important;
+          }
+          .responsive-grid-main {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -62,6 +62,7 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
           .hide-on-mobile { display: none !important; }
           .table-cell-hide-mobile { display: none !important; }
         }
+        .course-link-hover:hover { color: var(--brand-primary) !important; text-decoration: underline !important; }
       `}</style>
 
       {/* Filters Bar */}
@@ -81,14 +82,14 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
         overflowX: "auto",
         boxShadow: "var(--shadow-sm)"
       }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", minWidth: "600px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
           <thead style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-primary)" }}>
             <tr>
               <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Course</th>
-              <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Category</th>
+              <th className="table-cell-hide-mobile" style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Category</th>
               <th className="table-cell-hide-mobile" style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Duration</th>
               <th className="table-cell-hide-mobile" style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Price</th>
-              <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Curriculum</th>
+              <th className="table-cell-hide-mobile" style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Curriculum</th>
               <th className="table-cell-hide-mobile" style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Created</th>
               <th style={{ padding: "16px 24px", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "right" }}>Actions</th>
             </tr>
@@ -114,7 +115,9 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
                     </div>
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "14px" }}>{course.title}</div>
+                        <Link href={`/admin/courses/${course.id}`} style={{ fontWeight: 800, color: "var(--text-primary)", fontSize: "15px", textDecoration: "none" }} className="course-link-hover">
+                          {course.title}
+                        </Link>
                         <span style={{ 
                           fontSize: "9px", 
                           padding: "2px 6px", 
@@ -132,7 +135,7 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
                     </div>
                   </div>
                 </td>
-                <td style={{ padding: "16px 24px" }}>
+                <td className="table-cell-hide-mobile" style={{ padding: "16px 24px" }}>
                   <span style={{ 
                     padding: "4px 8px", 
                     borderRadius: "6px", 
@@ -151,7 +154,7 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
                 <td className="table-cell-hide-mobile" style={{ padding: "16px 24px", color: "var(--text-tertiary)", fontSize: "13px", fontWeight: 500 }}>
                   {course.price ? `$${course.price}` : "Free"}
                 </td>
-                <td style={{ padding: "16px 24px" }}>
+                <td className="table-cell-hide-mobile" style={{ padding: "16px 24px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
                     <Layers size={14} color="#9CA3AF" /> {course.modules?.length || 0} Modules
                   </div>

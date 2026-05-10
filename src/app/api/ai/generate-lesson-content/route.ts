@@ -1,17 +1,39 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(req: Request) {
   try {
-    const { lessonTitle, moduleTitle, courseTitle } = await req.json();
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
 
-    if (!GEMINI_API_KEY) {
-      return NextResponse.json({ error: "API key not configured" }, { status: 500 });
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // Check if user is admin or instructor
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single();
+
+    if (!profile || (profile.role !== "admin" && profile.role !== "instructor")) {
+      return NextResponse.json({ error: "Unauthorized. Only admins and instructors can use this feature." }, { status: 403 });
+    }
+
+    const { lessonTitle, moduleTitle, courseTitle } = await req.json();
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+    if (!GROQ_API_KEY) {
+      return NextResponse.json({ error: "Groq API key not configured. Please add GROQ_API_KEY to your .env file." }, { status: 500 });
+    }
+
+    // Groq is compatible with the OpenAI SDK
+    const openai = new OpenAI({
+      apiKey: GROQ_API_KEY,
+      baseURL: "https://api.groq.com/openai/v1",
+    });
 
     const prompt = `You are an expert technical writer and instructor for the Boxspox platform.
 Generate a comprehensive, engaging, and easy-to-understand lesson content for a tutorial.
@@ -30,8 +52,27 @@ Requirements:
 
 Generate the lesson content now:`;
 
-    const result = await model.generateContent(prompt);
-    const content = result.response.text();
+    const response = await openai.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "user", content: prompt }
+      ],
+    });
+
+    const content = response.choices[0].message.content;
+    const usage = response.usage;
+
+    // Log usage to database
+    if (usage) {
+      await supabase.from("ai_usage").insert({
+        user_id: session.user.id,
+        feature: "generate-lesson-content",
+        model: "llama-3.3-70b-versatile",
+        prompt_tokens: usage.prompt_tokens,
+        completion_tokens: usage.completion_tokens,
+        total_tokens: usage.total_tokens,
+      });
+    }
 
     return NextResponse.json({ content });
   } catch (error: any) {

@@ -340,8 +340,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
         position: "sticky",
         top: "108px",
         zIndex: 500,
-        background: "rgba(255,255,255,0.85)",
-        backdropFilter: "blur(12px)",
+        background: "#FFFFFF",
         borderBottom: "1px solid var(--border-primary)",
         padding: "12px 20px",
         display: "flex",
@@ -482,6 +481,31 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
                   </Link>
                 ))
               )}
+
+              {/* Final Exam Module */}
+              <div style={{ marginTop: "16px", borderTop: "1px solid #E2E8F0", paddingTop: "16px" }}>
+                <Link
+                  href={`/tutorials/${course.slug}/exam`}
+                  onClick={() => setMobileNavOpen(false)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "12px 16px",
+                    borderRadius: "10px",
+                    textDecoration: "none",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    color: "white",
+                    background: "var(--brand-primary)",
+                    boxShadow: "0 4px 12px rgba(15, 110, 86, 0.2)",
+                    transition: "transform 0.2s"
+                  }}
+                >
+                  <span style={{ fontSize: "16px" }}>🏆</span>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Final Certification Exam</span>
+                </Link>
+              </div>
             </div>
           </div>
         </aside>
@@ -495,7 +519,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
         )}
 
         {/* Main Content Area */}
-        <main style={{ padding: "clamp(32px, 8vw, 60px) var(--container-padding)", maxWidth: "1000px", margin: "0 auto", width: "100%" }}>
+        <main style={{ padding: "clamp(32px, 8vw, 60px) var(--container-padding)", maxWidth: "1000px", margin: "0 auto", width: "100%", minWidth: 0 }}>
           {/* Presence and Header */}
           <div style={{ marginBottom: "32px" }}>
             <PresenceIndicator lessonId={lesson.id} user={user} />
@@ -530,30 +554,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
                     .lesson-title { font-size: 1.75rem !important; }
                   }
                 `}</style>
-                <button 
-                  onClick={handleToggleHinglish}
-                  disabled={isTranslating}
-                  style={{
-                    padding: "10px 16px", borderRadius: "12px", fontWeight: 700, fontSize: "12px", cursor: "pointer",
-                    background: hinglishMode ? "var(--brand-primary)" : "var(--bg-tertiary)",
-                    color: hinglishMode ? "white" : "var(--text-primary)",
-                    border: "none", display: "flex", alignItems: "center", gap: "8px", transition: "all 0.2s",
-                    flex: 1
-                  }}
-                >
-                  {isTranslating ? <Loader2 size={14} className="animate-spin" /> : <Globe size={14} />}
-                  Hinglish Mode
-                </button>
-                <button 
-                  onClick={() => setAiModalOpen(true)}
-                  style={{
-                    padding: "10px 16px", borderRadius: "12px", fontWeight: 700, fontSize: "12px", cursor: "pointer",
-                    background: "#111827", color: "white", border: "none", display: "flex", alignItems: "center", gap: "8px",
-                    flex: 1
-                  }}
-                >
-                  <Zap size={14} color="#10B981" /> Ask AI
-                </button>
+
 
               </div>
             </div>
@@ -779,8 +780,8 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
         .prose-enhanced p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--text-secondary); font-size: 1.05rem; }
         .prose-enhanced ul, .prose-enhanced ol { margin-bottom: 2rem; padding-left: 1.5rem; }
         .prose-enhanced li { margin-bottom: 0.75rem; color: var(--text-secondary); }
-        .prose-enhanced pre { background: #1e293b; color: #f8fafc; padding: 1.5rem; border-radius: 16px; overflow-x: auto; margin: 2rem 0; font-family: var(--font-mono); font-size: 0.9rem; border: 1px solid #334155; max-width: 100%; white-space: pre-wrap; word-break: break-all; }
-        .prose-enhanced code:not(pre code) { background: var(--bg-tertiary); color: var(--brand-primary); padding: 2px 6px; border-radius: 6px; font-weight: 600; font-size: 0.9em; }
+        .prose-enhanced pre { background: #1e293b; color: #f8fafc; padding: 1.5rem; border-radius: 16px; overflow-x: auto; margin: 2rem 0; font-family: var(--font-mono); font-size: 0.9rem; border: 1px solid #334155; max-width: 100%; white-space: pre; -webkit-overflow-scrolling: touch; }
+        .prose-enhanced code:not(pre code) { background: var(--bg-tertiary); color: var(--brand-primary); padding: 2px 6px; border-radius: 6px; font-weight: 600; font-size: 0.9em; word-break: break-word; }
         
         .hidden-mobile { display: inline-block; }
         .show-mobile-only { display: none; }

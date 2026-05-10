@@ -473,15 +473,15 @@ export function Navbar() {
                 <div style={{ display: "flex", gap: "8px" }}>
                   <div style={{ flex: 1, background: "white", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
                     <span style={{ fontSize: "10px", fontWeight: 700, color: "#64748B", display: "block", textTransform: "uppercase", marginBottom: "4px" }}>XP</span>
-                    <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>70</span>
+                    <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>{user?.xp ?? 0}</span>
                   </div>
                   <div style={{ flex: 1, background: "white", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
                     <span style={{ fontSize: "10px", fontWeight: 700, color: "#64748B", display: "block", textTransform: "uppercase", marginBottom: "4px" }}>Coins</span>
-                    <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>1000</span>
+                    <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>{user?.coins ?? 0}</span>
                   </div>
                   <div style={{ flex: 1, background: "white", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "10px", textAlign: "center" }}>
                     <span style={{ fontSize: "10px", fontWeight: 700, color: "#64748B", display: "block", textTransform: "uppercase", marginBottom: "4px" }}><Zap size={12} style={{ display: "inline", verticalAlign: "middle" }} /> Streak</span>
-                    <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>1</span>
+                    <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A" }}>{user?.streak ?? 0}</span>
                   </div>
                 </div>
               </div>
@@ -621,23 +621,20 @@ export function Navbar() {
           to { transform: translateY(0); opacity: 1; }
         }
         .show-tablet-only { display: none !important; }
+        .show-mobile-only { display: none !important; }
+        
         @media (max-width: 1024px) {
           .nav-links-desktop { display: none !important; }
-          .mobile-menu-toggle { display: block !important; }
           .nav-actions-desktop { display: none !important; }
+          .mobile-menu-toggle { display: block !important; }
+          .show-mobile-only { display: flex !important; align-items: center; justify-content: center; }
+          .show-tablet-only { display: inline-block !important; }
         }
 
         @media (max-width: 640px) {
           .logo-text { font-size: 1.1rem !important; }
           .learn-btn { padding: 4px 8px !important; }
           .hidden-mobile { display: none !important; }
-          .nav-actions-desktop { 
-            display: flex !important; 
-            gap: 4px !important;
-          }
-          /* Show only critical actions on mobile */
-          .nav-actions-desktop > button:not(:first-child) { display: none !important; }
-          .nav-actions-desktop > a { display: none !important; }
         }
       `}</style>
     </header>

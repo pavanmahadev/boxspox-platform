@@ -55,20 +55,28 @@ export default function AdminSettingsPage() {
 
   React.useEffect(() => {
     const fetchSettings = async () => {
-      const { data } = await supabase.from("site_settings").select("*").limit(1).single();
-      if (data) {
-        setSettings({
-          ...data,
-          logo_url: data.logo_url || "",
-          primary_color: data.primary_color || "#0F6E56",
-          maintenance_mode: data.maintenance_mode || false,
-          social_github: data.social_github || "",
-          social_twitter: data.social_twitter || "",
-          social_linkedin: data.social_linkedin || "",
-          social_youtube: data.social_youtube || ""
-        });
+      try {
+        const { data, error } = await supabase.from("site_settings").select("*").limit(1).maybeSingle();
+        if (error) {
+          console.error("Error fetching settings:", error);
+        }
+        if (data) {
+          setSettings({
+            ...data,
+            logo_url: data.logo_url || "",
+            primary_color: data.primary_color || "#0F6E56",
+            maintenance_mode: data.maintenance_mode || false,
+            social_github: data.social_github || "",
+            social_twitter: data.social_twitter || "",
+            social_linkedin: data.social_linkedin || "",
+            social_youtube: data.social_youtube || ""
+          });
+        }
+      } catch (err) {
+        console.error("Settings load exception:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchSettings();
   }, []);
@@ -143,9 +151,9 @@ export default function AdminSettingsPage() {
         <p style={{ color: "var(--text-tertiary)", fontSize: "14px", fontWeight: 500 }}>Global platform configuration and system preferences.</p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "250px 1fr", gap: "40px" }}>
+      <div className="settings-layout">
         {/* Settings Nav */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        <div className="settings-nav">
           {tabs.map((item) => (
             <button 
               key={item.name} 
@@ -179,7 +187,7 @@ export default function AdminSettingsPage() {
                 <h2 style={{ fontSize: "18px", fontWeight: 800, marginBottom: "24px" }}>General Settings</h2>
                 
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                  <div className="settings-grid-2col">
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                       <label style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)" }}>Platform Name</label>
                       <input 
@@ -201,7 +209,7 @@ export default function AdminSettingsPage() {
                     </div>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                  <div className="settings-grid-2col">
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                       <label style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "6px" }}><ImageIcon size={14} /> Logo URL</label>
                       <input 
@@ -232,7 +240,7 @@ export default function AdminSettingsPage() {
                     </div>
                   </div>
 
-                  <div style={{ padding: "20px", background: settings.maintenance_mode ? "#FEF2F2" : "#F0FDF4", borderRadius: "12px", border: `1px solid ${settings.maintenance_mode ? "#FECACA" : "#BBF7D0"}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div className="maintenance-card" style={{ background: settings.maintenance_mode ? "#FEF2F2" : "#F0FDF4", border: `1px solid ${settings.maintenance_mode ? "#FECACA" : "#BBF7D0"}` }}>
                     <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                       <AlertTriangle size={20} color={settings.maintenance_mode ? "#EF4444" : "#22C55E"} />
                       <div>
@@ -275,7 +283,7 @@ export default function AdminSettingsPage() {
                   {/* Social Links Section */}
                   <div style={{ marginTop: "12px" }}>
                     <h3 style={{ fontSize: "14px", fontWeight: 800, marginBottom: "16px", color: "var(--text-primary)" }}>Social Media Links</h3>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                    <div className="settings-grid-2col">
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                         <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "6px" }}><GithubIcon style={{ width: "14px", height: "14px" }} /> GitHub</label>
                         <input 
@@ -419,6 +427,20 @@ export default function AdminSettingsPage() {
       </div>
 
       <style>{`
+        .settings-layout { display: grid; grid-template-columns: 250px 1fr; gap: 40px; }
+        .settings-nav { display: flex; flex-direction: column; gap: 4px; }
+        .settings-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .maintenance-card { padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+        @media (max-width: 768px) {
+          .settings-layout { grid-template-columns: 1fr; gap: 24px; }
+          .settings-nav { flex-direction: row; overflow-x: auto; padding-bottom: 8px; margin-bottom: 8px; }
+          .settings-nav button { white-space: nowrap; flex: 1; justify-content: center; }
+          .settings-grid-2col { grid-template-columns: 1fr; gap: 16px; }
+          .maintenance-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+          .maintenance-card button { width: 100%; padding: 12px; }
+        }
+
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(5px); }
           to { opacity: 1; transform: translateY(0); }

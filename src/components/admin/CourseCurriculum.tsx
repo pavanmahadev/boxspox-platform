@@ -54,12 +54,12 @@ function SortableLessonItem({ lesson, index, module, handleOpenQuiz, setEditingL
   };
 
   return (
-    <div ref={setNodeRef} style={{ ...style, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", background: "var(--bg-card)", border: "1px solid var(--border-primary)", borderRadius: "8px", marginBottom: "8px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+    <div ref={setNodeRef} className="lesson-row" style={{ ...style, padding: "12px 16px", background: "var(--bg-card)", border: "1px solid var(--border-primary)", borderRadius: "8px", marginBottom: "8px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "100%" }}>
         <div {...attributes} {...listeners} style={{ cursor: "grab", display: "flex", alignItems: "center" }}>
           <GripVertical size={14} color="#D1D5DB" />
         </div>
-        <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)" }}>
+        <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", flexShrink: 0 }}>
           {index + 1}
         </div>
         <span style={{ fontSize: "14px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{lesson.title}</span>
@@ -67,15 +67,15 @@ function SortableLessonItem({ lesson, index, module, handleOpenQuiz, setEditingL
         {lesson.lesson_type === 'coding' && <FileCode size={14} color="#9CA3AF" />}
         {lesson.lesson_type === 'quiz' && <HelpCircle size={14} color="#9CA3AF" />}
       </div>
-      <div style={{ display: "flex", gap: "8px" }}>
+      <div className="lesson-actions">
         <button onClick={() => handleOpenQuiz(lesson)} onPointerDown={(e) => e.stopPropagation()} draggable={false} title="Manage Quiz" style={{ background: "none", border: "none", color: lesson.lesson_type === 'quiz' ? "var(--brand-primary)" : "var(--text-tertiary)", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 700 }}>
-          <HelpCircle size={14} /> {lesson.lesson_type === 'quiz' ? "Quiz" : "Add Quiz"}
+          <HelpCircle size={14} /> <span className="hide-mobile-text">{lesson.lesson_type === 'quiz' ? "Quiz" : "Add Quiz"}</span>
         </button>
         <button onClick={() => handleGenerateLessonContent(lesson, module)} onPointerDown={(e) => e.stopPropagation()} draggable={false} title="Generate Content" style={{ background: "none", border: "none", color: "var(--brand-primary)", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 700 }}>
-          <Zap size={14} /> AI Content
+          <Zap size={14} /> <span className="hide-mobile-text">AI Content</span>
         </button>
-        <button onClick={() => setEditingLesson(lesson)} onPointerDown={(e) => e.stopPropagation()} draggable={false} style={{ background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer" }}><Edit2 size={14} /></button>
-        <button onClick={() => handleDeleteLesson(lesson.id)} onPointerDown={(e) => e.stopPropagation()} draggable={false} style={{ background: "none", border: "none", color: "#EF4444", cursor: "pointer" }}><Trash2 size={14} /></button>
+        <button onClick={() => setEditingLesson(lesson)} onPointerDown={(e) => e.stopPropagation()} draggable={false} style={{ background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer", padding: "4px" }}><Edit2 size={14} /></button>
+        <button onClick={() => handleDeleteLesson(lesson.id)} onPointerDown={(e) => e.stopPropagation()} draggable={false} style={{ background: "none", border: "none", color: "#EF4444", cursor: "pointer", padding: "4px" }}><Trash2 size={14} /></button>
       </div>
     </div>
   );
@@ -459,23 +459,59 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
   if (loading) return <div style={{ padding: "40px", textAlign: "center" }}>Loading curriculum...</div>;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }} className="curriculum-container">
+      <style>{`
+        .curriculum-header { display: flex; justify-content: space-between; align-items: center; }
+        .curriculum-header-actions { display: flex; gap: 12px; }
+        .module-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-primary); }
+        .module-actions { display: flex; gap: 8px; }
+        .lesson-row { display: flex; justify-content: space-between; align-items: center; }
+        .lesson-actions { display: flex; gap: 8px; }
+        .show-mobile-only { display: none; }
+        
+        @media (max-width: 768px) {
+          .curriculum-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+          .curriculum-header-actions { flex-wrap: wrap; width: 100%; }
+          .curriculum-header-actions button { flex: 1; justify-content: center; text-align: center; white-space: nowrap; }
+          
+          .module-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+          .module-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+          
+          .lesson-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+          .lesson-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; background: var(--bg-secondary); padding: 8px; border-radius: 8px; }
+          .hide-mobile-text { display: none !important; }
+          .show-mobile-only { display: inline !important; }
+          .modal-grid-2col { grid-template-columns: 1fr !important; gap: 16px !important; }
+          .quiz-header-grid { grid-template-columns: 1fr !important; }
+          .quiz-options-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 480px) {
+           .curriculum-header-actions button { width: 100%; flex: none; }
+        }
+        .modal-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        .quiz-header-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+        .quiz-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      `}</style>
+      <div className="curriculum-header">
         <h2 style={{ fontSize: "18px", fontWeight: 800 }}>Course Curriculum</h2>
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div className="curriculum-header-actions">
           <button 
             onClick={handleGenerateOutline}
             disabled={isGeneratingOutline}
             style={{ padding: "8px 16px", background: "#10B981", color: "white", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
           >
-            {isGeneratingOutline ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />} Generate Outline with AI
+            {isGeneratingOutline ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />} 
+            <span className="hide-mobile-text">Generate Outline with AI</span>
+            <span className="show-mobile-only">AI Outline</span>
           </button>
           <button 
             onClick={handleGenerateAllContent}
             disabled={isGeneratingContent}
             style={{ padding: "8px 16px", background: "#0F6E56", color: "white", borderRadius: "8px", border: "none", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
           >
-            {isGeneratingContent ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />} Generate Content for All
+            {isGeneratingContent ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />} 
+            <span className="hide-mobile-text">Generate Content for All</span>
+            <span className="show-mobile-only">AI Content</span>
           </button>
           <button 
             onClick={() => setEditingModule({ title: "", description: "" })}
@@ -488,18 +524,18 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
 
       {modules.map((mod, mIndex) => (
         <div key={mod.id} style={{ background: "var(--bg-card)", borderRadius: "12px", border: "1px solid var(--border-primary)", overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px", background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-primary)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => toggleModule(mod.id)}>
-              <GripVertical size={16} color="#9CA3AF" />
-              {expandedModules.includes(mod.id) ? <ChevronDown size={16} color="#6B7280" /> : <ChevronRight size={16} color="#6B7280" />}
-              <span style={{ fontWeight: 700, fontSize: "15px" }}>Module {mIndex + 1}: {mod.title}</span>
+          <div className="module-header">
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", width: "100%" }} onClick={() => toggleModule(mod.id)}>
+              <GripVertical size={16} color="#9CA3AF" style={{ flexShrink: 0 }} />
+              {expandedModules.includes(mod.id) ? <ChevronDown size={16} color="#6B7280" style={{ flexShrink: 0 }} /> : <ChevronRight size={16} color="#6B7280" style={{ flexShrink: 0 }} />}
+              <span style={{ fontWeight: 700, fontSize: "15px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Module {mIndex + 1}: {mod.title}</span>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button onClick={() => setEditingLesson({ module_id: mod.id, title: "", lesson_type: "text" })} style={{ background: "none", border: "none", color: "var(--brand-primary)", fontSize: "13px", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
+            <div className="module-actions">
+              <button onClick={() => setEditingLesson({ module_id: mod.id, title: "", lesson_type: "text" })} style={{ background: "none", border: "none", color: "var(--brand-primary)", fontSize: "13px", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", padding: "4px 8px" }}>
                 <Plus size={14} /> Add Lesson
               </button>
-              <button onClick={() => setEditingModule(mod)} style={{ background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer" }}><Edit2 size={16} /></button>
-              <button onClick={() => handleDeleteModule(mod.id)} style={{ background: "none", border: "none", color: "#EF4444", cursor: "pointer" }}><Trash2 size={16} /></button>
+              <button onClick={() => setEditingModule(mod)} style={{ background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer", padding: "4px 8px" }}><Edit2 size={16} /></button>
+              <button onClick={() => handleDeleteModule(mod.id)} style={{ background: "none", border: "none", color: "#EF4444", cursor: "pointer", padding: "4px 8px" }}><Trash2 size={16} /></button>
             </div>
           </div>
 
@@ -572,7 +608,7 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginBottom: "32px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "16px" }}>
+              <div className="quiz-header-grid">
                 <div>
                   <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "6px", display: "block" }}>Quiz Title</label>
                   <input 
@@ -622,7 +658,7 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
                       </button>
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div className="quiz-options-grid">
                       {q.options.map((opt, oIdx) => (
                         <div key={oIdx} style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                           <input 
@@ -674,10 +710,10 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
       {/* Lesson Modal */}
       {editingLesson && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "var(--bg-card)", padding: "32px", borderRadius: "16px", width: "800px", maxWidth: "90%", maxHeight: "90vh", overflowY: "auto" }}>
+          <div style={{ background: "var(--bg-card)", padding: "24px", borderRadius: "16px", width: "800px", maxWidth: "95%", maxHeight: "90vh", overflowY: "auto" }}>
             <h3 style={{ fontSize: "18px", fontWeight: 800, marginBottom: "20px" }}>{editingLesson.id ? "Edit Lesson" : "New Lesson"}</h3>
             
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
+            <div className="modal-grid-2col">
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 <div>
                   <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "6px", display: "block" }}>Lesson Title</label>
