@@ -75,7 +75,7 @@ export default function TermsPage() {
               <Scale size={40} color="var(--text-tertiary)" style={{ marginBottom: "20px" }} />
               <h3 style={{ fontWeight: 800, marginBottom: "12px" }}>Legal Notice</h3>
               <p style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>Boxspox provides its services &quot;as is&quot; and disclaims all warranties to the fullest extent permitted by law.</p>
-              <Link href="mailto:legal@boxspox.com" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>legal@boxspox.com</Link>
+              <Link href="mailto:legal@boxspox.in" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>legal@boxspox.in</Link>
             </div>
 
           </div>

@@ -1,75 +1,105 @@
 "use client";
 
-import { Sandpack } from "@codesandbox/sandpack-react";
-import { atomDark } from "@codesandbox/sandpack-themes";
+import React, { useEffect } from "react";
+import { 
+  SandpackProvider, 
+  SandpackLayout, 
+  SandpackCodeEditor, 
+  SandpackPreview,
+  useSandpack 
+} from "@codesandbox/sandpack-react";
+import { 
+  atomDark, 
+  aquaBlue, 
+  monokaiPro, 
+  nightOwl,
+  githubLight
+} from "@codesandbox/sandpack-themes";
+
+const themesMap = {
+  atomDark,
+  aquaBlue,
+  monokaiPro,
+  nightOwl,
+  githubLight
+};
 
 interface SandpackEditorProps {
   files?: Record<string, string>;
-  template?: "vanilla" | "react" | "nextjs" | "vue";
+  template?: "vanilla" | "react";
   height?: string | number;
+  themeName?: keyof typeof themesMap;
 }
 
-const defaultFiles = {
-  "/index.js": `// Welcome to the interactive coding tutorial!
-// Try editing this code to see the results in real-time.
+function AutoSaver({ template }: { template: string }) {
+  const { sandpack } = useSandpack();
+  const { files } = sandpack;
 
-console.log("Hello, World!");
+  useEffect(() => {
+    if (!files || Object.keys(files).length === 0) return;
+    
+    // Safety check: ensure the sandpack files actually belong to the current template
+    const isReactFiles = "/src/App.js" in files;
+    if (template === "react" && !isReactFiles) return; // Skip saving if React files aren't loaded yet
+    if (template === "vanilla" && isReactFiles) return; // Skip saving if Vanilla still contains React files
 
-document.getElementById("app").innerHTML = \`
-  <h1>Hello, Learner! 🚀</h1>
-  <p>Edit this text in index.js to see it update immediately.</p>
-\`;
-`,
-  "/index.html": `<!DOCTYPE html>
-<html>
-  <head>
-    <title>Parcel Sandbox</title>
-    <meta charset="UTF-8" />
-    <style>
-      body {
-        font-family: sans-serif;
-        padding: 20px;
-        background: #1e1e1e;
-        color: white;
-      }
-      h1 { color: #6366f1; }
-    </style>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script src="index.js"></script>
-  </body>
-</html>`,
-};
+    localStorage.setItem(`boxspox_playground_${template}`, JSON.stringify(files));
+  }, [files, template]);
+
+  return null;
+}
 
 export default function SandpackEditor({
-  files = defaultFiles,
+  files,
   template = "vanilla",
-  height = "400px",
+  height = "600px",
+  themeName = "atomDark"
 }: SandpackEditorProps) {
+  const selectedTheme = themesMap[themeName] || atomDark;
+
   return (
-    <div className="sandpack-wrapper rounded-xl overflow-hidden border border-gray-800 shadow-2xl mt-6 mb-8">
-      <div className="bg-gray-900 px-4 py-2 border-b border-gray-800 flex items-center gap-2">
-        <div className="flex gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-red-500"></div>
-          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+    <div className="sandpack-wrapper rounded-2xl overflow-hidden border border-border-primary shadow-2xl bg-bg-card flex flex-col h-full">
+      <div className="bg-bg-secondary px-4 py-3 border-b border-border-primary flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+            <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+            <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+          </div>
+          <span className="text-xs font-mono text-text-tertiary ml-2 font-semibold tracking-wider uppercase">Interactive Workspace</span>
         </div>
-        <span className="text-xs font-mono text-gray-400 ml-2">Try It Yourself</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary uppercase tracking-wide">
+            Auto-Saving Active
+          </span>
+        </div>
       </div>
-      <Sandpack
+      
+      <SandpackProvider
         template={template}
-        theme={atomDark}
+        theme={selectedTheme}
         files={files}
         options={{
-          showNavigator: false,
-          showLineNumbers: true,
-          editorHeight: height,
-          wrapContent: true,
-          showTabs: true,
-          editorWidthPercentage: 55,
+          recompileMode: "immediate",
+          initMode: "immediate"
         }}
-      />
+      >
+        <SandpackLayout className="border-none">
+          <SandpackCodeEditor
+            showTabs
+            showLineNumbers
+            showInlineErrors
+            wrapContent
+            style={{ height }}
+          />
+          <SandpackPreview
+            showNavigator={false}
+            showOpenInCodeSandbox={false}
+            style={{ height, background: "var(--bg-card)" }}
+          />
+        </SandpackLayout>
+        <AutoSaver template={template} />
+      </SandpackProvider>
     </div>
   );
 }

@@ -13,6 +13,6 @@ export default function robots(): MetadataRoute.Robots {
         '/api/',
       ],
     },
-    sitemap: 'https://boxspox.com/sitemap.xml',
+    sitemap: 'https://boxspox.in/sitemap.xml',
   }
 }

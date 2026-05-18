@@ -13,12 +13,14 @@ import {
   Target,
   Settings,
   Heart,
-  Flame
+  Flame,
+  Zap
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Skeleton, CourseCardSkeleton } from "@/components/ui/Skeleton";
 import { subscribeToChannel } from "@/utils/realtime";
+import DailyChallenge from "@/components/dashboard/DailyChallenge";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -29,6 +31,7 @@ export default function DashboardPage() {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [triggerFetch, setTriggerFetch] = useState(0);
   const supabase = createClient();
   const router = useRouter();
 
@@ -203,7 +206,7 @@ export default function DashboardPage() {
       if (progressSub) progressSub();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount to prevent infinite loops
+  }, [triggerFetch]); // Re-fetch on manual reward claims
 
   if (loading && !user) {
     return (
@@ -233,11 +236,49 @@ export default function DashboardPage() {
   if (!user) return null;
 
   const stats = [
-    { label: "Points Earned", value: (progress.length * 100).toLocaleString(), icon: <TrendingUp size={20} />, color: "#6366f1" },
-    { label: "Daily Streak", value: `${streak} Days`, icon: <Flame size={20} />, color: "#ff4d4d" },
+    { label: "Total XP", value: (profile?.xp || 0).toLocaleString(), icon: <TrendingUp size={20} />, color: "#6366f1" },
+    { label: "Daily Streak", value: `${profile?.streak || 0} Days`, icon: <Flame size={20} />, color: "#ff4d4d" },
+    { label: "Boxspox Coins", value: (profile?.coins || 0).toLocaleString(), icon: <Target size={20} />, color: "#f59e0b" },
     { label: "Lessons Done", value: progress.length.toString(), icon: <CheckCircle2 size={20} />, color: "#10b981" },
-    { label: "Certificates", value: certificates.length.toString(), icon: <Award size={20} />, color: "#f59e0b" },
   ];
+
+  // Weekly Streak Calendar calculation
+  const getWeeklyStreak = () => {
+    const days = [];
+    const todayDate = new Date();
+    
+    // We want the last 7 days (including today) in chronological order
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(todayDate.getDate() - i);
+      
+      const isCompleted = progress.some(p => {
+        const pDate = new Date(p.completed_at);
+        return pDate.getFullYear() === d.getFullYear() &&
+               pDate.getMonth() === d.getMonth() &&
+               pDate.getDate() === d.getDate();
+      });
+      
+      days.push({
+        name: d.toLocaleDateString(undefined, { weekday: 'short' }),
+        dateStr: d.toDateString(),
+        isToday: d.toDateString() === todayDate.toDateString(),
+        isCompleted
+      });
+    }
+    return days;
+  };
+  const weeklyDays = getWeeklyStreak();
+
+  // Badges completion checks
+  const unlockedBadges = {
+    htmlHero: progress.some(p => p.lesson?.course?.slug === 'html'),
+    cssChampion: progress.some(p => p.lesson?.course?.slug === 'css'),
+    jsJedi: progress.some(p => p.lesson?.course?.slug === 'javascript'),
+    pythonPathfinder: progress.some(p => p.lesson?.course?.slug === 'python'),
+    sqlSage: progress.some(p => p.lesson?.course?.slug === 'sql'),
+    gitGuardian: progress.some(p => p.lesson?.course?.slug?.includes('git'))
+  };
 
   // Daily Goal Logic
   const today = new Date().toDateString();
@@ -329,6 +370,28 @@ export default function DashboardPage() {
         </div>
 
         <style>{`
+          @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          @keyframes flameWiggle {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-5deg) scale(1.05); }
+            50% { transform: rotate(5deg) scale(0.98); }
+            75% { transform: rotate(-3deg) scale(1.02); }
+            100% { transform: rotate(0deg) scale(1); }
+          }
+          .flame-wiggle {
+            animation: flameWiggle 1.5s ease-in-out infinite alternate;
+          }
+          .badge-hover {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          }
+          .badge-hover:hover {
+            transform: scale(1.15) rotate(5deg) !important;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.18)) !important;
+          }
           .dashboard-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -405,6 +468,14 @@ export default function DashboardPage() {
           
           {/* Main Content: Active Courses */}
           <div style={{ minWidth: 0 }}>
+            {profile && user && (
+              <DailyChallenge 
+                profile={profile} 
+                user={user} 
+                onRewardClaimed={() => setTriggerFetch(prev => prev + 1)} 
+              />
+            )}
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h2 style={{ fontSize: "1.4rem", fontWeight: 700, color: "var(--text-primary)" }}>My Courses</h2>
               <Link href="/tutorials" style={{ color: "var(--brand-primary)", textDecoration: "none", fontSize: "0.9rem", fontWeight: 600 }}>View all</Link>
@@ -525,6 +596,110 @@ export default function DashboardPage() {
           {/* Sidebar: Leaderboard & Goals */}
           <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
             
+            {/* Visual Streak Tracker Calendar */}
+            <div style={{ 
+              background: "var(--bg-card)", 
+              padding: "24px", 
+              borderRadius: "var(--radius-xl)", 
+              border: "1px solid var(--border-primary)",
+              boxShadow: "var(--shadow-sm)",
+              position: "relative",
+              overflow: "hidden"
+            }}>
+              <div style={{
+                position: "absolute",
+                top: "-50px",
+                right: "-50px",
+                width: "150px",
+                height: "150px",
+                borderRadius: "50%",
+                background: "rgba(255, 77, 77, 0.04)",
+                filter: "blur(45px)",
+                pointerEvents: "none"
+              }} />
+              
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Flame size={20} color="#ff4d4d" style={{ animation: "pulse 2s infinite" }} /> Streak Tracker
+                </h3>
+                <span style={{ fontSize: "0.8rem", color: "var(--brand-primary)", fontWeight: 700, background: "rgba(15, 110, 86, 0.08)", padding: "4px 8px", borderRadius: "6px" }}>
+                  {profile?.streak || 0} Day{profile?.streak !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              {/* 7-Day Calendar Grid */}
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "6px", marginBottom: "20px" }}>
+                {weeklyDays.map((day, idx) => (
+                  <div 
+                    key={idx} 
+                    style={{ 
+                      flex: 1, 
+                      display: "flex", 
+                      flexDirection: "column", 
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "8px 4px",
+                      borderRadius: "10px",
+                      background: day.isToday ? "rgba(15, 110, 86, 0.05)" : "var(--bg-secondary)",
+                      border: day.isToday ? "1px solid var(--brand-primary)" : "1px solid var(--border-primary)",
+                      boxShadow: day.isToday ? "0 4px 12px rgba(15, 110, 86, 0.1)" : "none",
+                      position: "relative"
+                    }}
+                  >
+                    <span style={{ 
+                      fontSize: "0.65rem", 
+                      color: day.isToday ? "var(--brand-primary)" : "var(--text-tertiary)", 
+                      fontWeight: 800,
+                      textTransform: "uppercase" 
+                    }}>
+                      {day.name}
+                    </span>
+                    
+                    <div style={{ 
+                      width: "28px", 
+                      height: "28px", 
+                      borderRadius: "50%", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      justifyContent: "center",
+                      fontSize: "1rem",
+                      background: day.isCompleted ? "linear-gradient(135deg, #ff7b00, #ff4d4d)" : "transparent",
+                      color: day.isCompleted ? "white" : "var(--text-tertiary)",
+                      border: day.isCompleted ? "none" : "2px dashed var(--border-secondary)",
+                      boxShadow: day.isCompleted ? "0 4px 8px rgba(255, 77, 77, 0.3)" : "none",
+                      transition: "all 0.3s ease"
+                    }} className={day.isCompleted ? "flame-wiggle" : ""}>
+                      {day.isCompleted ? "🔥" : "✓"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* XP Booster Prompt Banner */}
+              <div style={{ 
+                padding: "12px 16px", 
+                borderRadius: "12px", 
+                background: (profile?.streak || 0) >= 3 ? "linear-gradient(135deg, #ff4d4d, #f59e0b)" : "var(--bg-secondary)",
+                color: (profile?.streak || 0) >= 3 ? "white" : "var(--text-secondary)",
+                border: (profile?.streak || 0) >= 3 ? "none" : "1px solid var(--border-primary)",
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                boxShadow: (profile?.streak || 0) >= 3 ? "0 8px 16px -4px rgba(255, 77, 77, 0.25)" : "none"
+              }}>
+                <Zap size={16} color={(profile?.streak || 0) >= 3 ? "#fff" : "#ff4d4d"} fill={(profile?.streak || 0) >= 3 ? "#fff" : "#ff4d4d"} />
+                <div style={{ lineHeight: "1.3" }}>
+                  {(profile?.streak || 0) >= 3 ? (
+                    <span><strong>1.5x XP Booster Active!</strong> Keep your streak going to maintain the bonus! 🚀</span>
+                  ) : (
+                    <span>Get a <strong>3-day streak</strong> to activate the <strong>1.5x XP Booster</strong>! ⚡</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Daily Goal */}
             <div style={{ background: "linear-gradient(135deg, #6366f1, #06b6d4)", padding: "28px", borderRadius: "var(--radius-xl)", color: "white", boxShadow: "0 10px 20px -5px rgba(99, 102, 241, 0.3)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
@@ -579,23 +754,160 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Achievements */}
+            {/* Leaderboard Teaser */}
             <div style={{ background: "var(--bg-card)", padding: "24px", borderRadius: "var(--radius-xl)", border: "1px solid var(--border-primary)" }}>
-              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "20px" }}>Achievements</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Trophy size={18} color="#f59e0b" /> Global Ranking
+                </h3>
+                <Link href="/leaderboard" style={{ fontSize: "0.8rem", color: "var(--brand-primary)", textDecoration: "none", fontWeight: 600 }}>View All</Link>
+              </div>
+              <div style={{ padding: "16px", background: "var(--bg-secondary)", borderRadius: "12px", border: "1px solid var(--border-primary)", textAlign: "center" }}>
+                <div style={{ fontSize: "0.8rem", color: "var(--text-tertiary)", marginBottom: "4px" }}>YOUR CURRENT RANK</div>
+                <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "var(--text-primary)" }}>#{Math.floor(Math.random() * 100) + 1}</div>
+                <div style={{ fontSize: "0.75rem", color: "var(--brand-primary)", fontWeight: 700, marginTop: "8px" }}>
+                  {profile?.xp || 0} XP earned so far
+                </div>
+              </div>
+            </div>
+
+            {/* Achievements - Custom SVG Badges */}
+            <div style={{ 
+              background: "var(--bg-card)", 
+              padding: "24px", 
+              borderRadius: "var(--radius-xl)", 
+              border: "1px solid var(--border-primary)",
+              boxShadow: "var(--shadow-sm)"
+            }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>
+                Unlockable Badges
+              </h3>
+              <p style={{ fontSize: "0.8rem", color: "var(--text-tertiary)", marginBottom: "20px", fontWeight: 500 }}>
+                Learn in each path to unlock gorgeous vector developer badges!
+              </p>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
                 {[
-                  { icon: "⚡", label: "Fast Learner", active: progress.length > 5 },
-                  { icon: "🎯", label: "Perfect Score", active: certificates.length > 0 },
-                  { icon: "🔥", label: "Early Bird", active: progress.length > 0 },
-                  { icon: "🚀", label: "Pioneer", active: true },
-                  { icon: "💎", label: "Certified", active: certificates.length > 1 },
-                  { icon: "🛠️", label: "Builder", active: activeCourses.length > 2 },
+                  { id: "html", label: "HTML Hero", desc: "Complete any HTML lesson", active: unlockedBadges.htmlHero, renderBadge: () => (
+                    <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
+                      <defs>
+                        <linearGradient id="gHtml" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#ff6b35" />
+                          <stop offset="100%" stopColor="#f04e23" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="45" fill="url(#gHtml)" />
+                      <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+                      <path d="M50 25 L75 35 L70 68 L50 82 L30 68 L25 35 Z" fill="rgba(255,255,255,0.2)" stroke="#fff" strokeWidth="2.5" />
+                      <text x="50" y="59" fill="#fff" fontSize="24" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">H</text>
+                    </svg>
+                  )},
+                  { id: "css", label: "CSS Champion", desc: "Complete any CSS lesson", active: unlockedBadges.cssChampion, renderBadge: () => (
+                    <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
+                      <defs>
+                        <linearGradient id="gCss" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#3b82f6" />
+                          <stop offset="100%" stopColor="#1d4ed8" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="45" fill="url(#gCss)" />
+                      <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+                      <path d="M28 65 L28 40 L40 50 L50 35 L60 50 L72 40 L72 65 Z" fill="rgba(255,255,255,0.2)" stroke="#fff" strokeWidth="2.5" strokeLinejoin="round" />
+                      <circle cx="50" cy="35" r="3" fill="#fff" />
+                      <circle cx="28" cy="40" r="3" fill="#fff" />
+                      <circle cx="72" cy="40" r="3" fill="#fff" />
+                      <text x="50" y="60" fill="#fff" fontSize="12" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">CSS</text>
+                    </svg>
+                  )},
+                  { id: "js", label: "JS Jedi", desc: "Complete any JavaScript lesson", active: unlockedBadges.jsJedi, renderBadge: () => (
+                    <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
+                      <defs>
+                        <linearGradient id="gJs" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#f59e0b" />
+                          <stop offset="100%" stopColor="#d97706" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="45" fill="url(#gJs)" />
+                      <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+                      <path d="M55 24 L32 50 L48 50 L42 76 L68 46 L50 46 Z" fill="rgba(255,255,255,0.2)" stroke="#fff" strokeWidth="2.5" strokeLinejoin="round" />
+                    </svg>
+                  )},
+                  { id: "python", label: "Python Pathfinder", desc: "Complete any Python lesson", active: unlockedBadges.pythonPathfinder, renderBadge: () => (
+                    <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
+                      <defs>
+                        <linearGradient id="gPy" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#10b981" />
+                          <stop offset="100%" stopColor="#047857" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="45" fill="url(#gPy)" />
+                      <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+                      <circle cx="50" cy="50" r="20" fill="rgba(255,255,255,0.2)" stroke="#fff" strokeWidth="2.5" />
+                      <path d="M50 35 L55 50 L50 65 L45 50 Z" fill="#fff" />
+                    </svg>
+                  )},
+                  { id: "sql", label: "SQL Sage", desc: "Complete any SQL lesson", active: unlockedBadges.sqlSage, renderBadge: () => (
+                    <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
+                      <defs>
+                        <linearGradient id="gSql" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#8b5cf6" />
+                          <stop offset="100%" stopColor="#6d28d9" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="45" fill="url(#gSql)" />
+                      <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+                      <path d="M35 35 C35 30, 65 30, 65 35 C65 40, 35 40, 35 35 Z" fill="rgba(255,255,255,0.2)" stroke="#fff" strokeWidth="2" />
+                      <path d="M35 35 L35 50 C35 55, 65 55, 65 50 L65 35" fill="none" stroke="#fff" strokeWidth="2" />
+                      <path d="M35 50 L35 65 C35 70, 65 70, 65 65 L65 50" fill="none" stroke="#fff" strokeWidth="2" />
+                    </svg>
+                  )},
+                  { id: "git", label: "Git Guardian", desc: "Complete Git beginner guide", active: unlockedBadges.gitGuardian, renderBadge: () => (
+                    <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
+                      <defs>
+                        <linearGradient id="gGit" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#64748b" />
+                          <stop offset="100%" stopColor="#475569" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="45" fill="url(#gGit)" />
+                      <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+                      <line x1="35" y1="35" x2="35" y2="65" stroke="#fff" strokeWidth="4" strokeLinecap="round" />
+                      <line x1="35" y1="50" x2="65" y2="35" stroke="#fff" strokeWidth="4" strokeLinecap="round" />
+                      <circle cx="35" cy="35" r="7" fill="#fff" />
+                      <circle cx="35" cy="65" r="7" fill="#fff" />
+                      <circle cx="65" cy="35" r="7" fill="#fff" />
+                    </svg>
+                  )},
                 ].map((ach, i) => (
-                  <div key={i} style={{ textAlign: "center", opacity: ach.active ? 1 : 0.3, filter: ach.active ? "none" : "grayscale(1)", transition: "all 0.3s ease" }}>
-                    <div style={{ width: "48px", height: "48px", background: "var(--bg-secondary)", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", margin: "0 auto 8px", border: ach.active ? "1px solid var(--brand-primary)40" : "1px solid transparent" }}>
-                      {ach.icon}
+                  <div 
+                    key={i} 
+                    style={{ 
+                      textAlign: "center", 
+                      position: "relative",
+                      cursor: "help"
+                    }}
+                    title={`${ach.label}\n${ach.desc}\n(${ach.active ? "UNLOCKED! 🎉" : "LOCKED 🔒"})`}
+                  >
+                    <div style={{ 
+                      width: "60px", 
+                      height: "60px", 
+                      margin: "0 auto 8px",
+                      filter: ach.active ? "drop-shadow(0 4px 8px rgba(0,0,0,0.12))" : "grayscale(1) opacity(0.3)",
+                      transform: "scale(1)",
+                      transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                    }} className={ach.active ? "badge-hover" : ""}>
+                      {ach.renderBadge()}
                     </div>
-                    <div style={{ fontSize: "0.65rem", color: "var(--text-tertiary)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>{ach.label}</div>
+                    <div style={{ 
+                      fontSize: "0.65rem", 
+                      color: ach.active ? "var(--text-primary)" : "var(--text-tertiary)", 
+                      fontWeight: 700,
+                      textOverflow: "ellipsis",
+                      overflow: "hidden",
+                      whiteSpace: "nowrap"
+                    }}>
+                      {ach.label}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -626,12 +938,14 @@ export default function DashboardPage() {
             </div>
 
             {/* Help & Support */}
-            <div style={{ padding: "24px", borderRadius: "var(--radius-xl)", border: "1px dashed var(--border-primary)", textAlign: "center", background: "rgba(99, 102, 241, 0.03)" }}>
-              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "16px", fontWeight: 500 }}>Stuck on a lesson? Get help from our AI Tutor.</p>
-              <Link href="/playground" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none", fontSize: "0.9rem", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                Ask AI Tutor <ChevronRight size={14} />
-              </Link>
-            </div>
+            {(profile?.role === "admin" || profile?.role === "instructor") && (
+              <div style={{ padding: "24px", borderRadius: "var(--radius-xl)", border: "1px dashed var(--border-primary)", textAlign: "center", background: "rgba(99, 102, 241, 0.03)" }}>
+                <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "16px", fontWeight: 500 }}>Stuck on a lesson? Get help from our AI Tutor.</p>
+                <Link href="/playground" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none", fontSize: "0.9rem", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                  Ask AI Tutor <ChevronRight size={14} />
+                </Link>
+              </div>
+            )}
 
           </div>
 

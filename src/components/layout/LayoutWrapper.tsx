@@ -18,6 +18,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false); // Default to false to show content immediately
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasAiAccess, setHasAiAccess] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -29,7 +30,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
-          if (profile?.role === "admin") setIsAdmin(true);
+          setIsAdmin(profile?.role === "admin");
+          setHasAiAccess(profile?.role === "admin" || profile?.role === "instructor");
         }
       } catch (err) {
         console.warn("Status check failed:", err);
@@ -42,8 +44,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
         setIsAdmin(profile?.role === "admin");
+        setHasAiAccess(profile?.role === "admin" || profile?.role === "instructor");
       } else {
         setIsAdmin(false);
+        setHasAiAccess(false);
       }
     });
 
@@ -65,7 +69,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <main style={{ flex: 1, position: "relative", zIndex: 1 }}>{children}</main>
       <Footer />
       <MobileNav />
-      <AITutor />
+      {hasAiAccess && <AITutor />}
     </div>
   );
 }

@@ -190,15 +190,15 @@ export function Footer() {
             }
           `}</style>
           <div style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500 }}>
-            © {currentYear} {settings?.platform_name || "BOXSPOX"}. All rights reserved.
+            Â© {currentYear} {settings?.platform_name || "BOXSPOX"}. All rights reserved.
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }} className="footer-bottom-links">
-            <Link href={`mailto:${settings?.admin_email || "hello@boxspox.com"}`} style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-tertiary)", textDecoration: "none", fontSize: "14px", fontWeight: 500 }}>
-              <Mail size={16} /> {settings?.admin_email || "hello@boxspox.com"}
+            <Link href={`mailto:${settings?.admin_email || "hello@boxspox.in"}`} style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-tertiary)", textDecoration: "none", fontSize: "14px", fontWeight: 500 }}>
+              <Mail size={16} /> {settings?.admin_email || "hello@boxspox.in"}
             </Link>
             <div style={{ width: "1px", height: "14px", background: "#E5E7EB" }} className="footer-divider" />
             <div style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500 }}>
-              Made with ❤️ by GreenNetspark
+              Made with â¤ï¸ by GreenNetspark
             </div>
           </div>
         </div>

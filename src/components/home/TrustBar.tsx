@@ -45,7 +45,9 @@ export function TrustBar() {
               <div key={i} className="logo-item" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 5vw, 60px)" }}>
                 <img 
                   src={logo.url} 
-                  alt={logo.name} 
+                  alt={`${logo.name} logo technology`} 
+                  loading="lazy"
+                  decoding="async"
                   style={{ 
                     height: "clamp(24px, 5vw, 44px)", 
                     width: "auto", 

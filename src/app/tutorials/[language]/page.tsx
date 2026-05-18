@@ -1,7 +1,21 @@
 import { createClient } from "@/utils/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { CourseContent } from "@/components/tutorials/CourseContent";
+import { CourseSchema } from "@/components/seo/CourseSchema";
+import { BreadcrumbSchema } from "@/components/seo/BreadcrumbSchema";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // Revalidate every hour
+
+export async function generateStaticParams() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+  const { data } = await supabase.from("courses").select("slug").eq("status", "published");
+  return (data || []).map((c: any) => ({
+    language: c.slug,
+  }));
+}
+
 import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -12,15 +26,25 @@ export async function generateMetadata({ params }: { params: Promise<{ language:
   
   const { data: course } = await supabase
     .from("courses")
-    .select("title, description")
+    .select("title, description, slug")
     .eq("slug", language)
     .single();
 
   if (!course) return { title: "Course Not Found | Boxspox" };
 
+  const canonicalUrl = `https://boxspox.in/tutorials/${course.slug}`;
+
   return {
     title: `Master ${course.title} - Full Interactive Course | Boxspox`,
     description: course.description || `Learn ${course.title} from scratch with our project-based curriculum, interactive editor, and AI tutors.`,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `Master ${course.title} | Boxspox`,
+      description: course.description || `Learn ${course.title} with interactive tutorials.`,
+      url: canonicalUrl,
+    }
   };
 }
 
@@ -124,9 +148,22 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
 
   // Fallback to overview if no lessons exist yet
   const gradient = course.gradient || "linear-gradient(135deg, #6366f1, #a855f7)";
+  
+  const breadcrumbItems = [
+    { name: "Home", url: "https://boxspox.in/" },
+    { name: "Tutorials", url: "https://boxspox.in/tutorials" },
+    { name: course.title, url: `https://boxspox.in/tutorials/${course.slug}` }
+  ];
 
   return (
     <div style={{ paddingTop: "calc(var(--nav-height) + var(--subnav-height) + 20px)" }}>
+      <CourseSchema 
+        name={course.title}
+        description={course.description || `Learn ${course.title}`}
+        url={`https://boxspox.in/tutorials/${course.slug}`}
+      />
+      <BreadcrumbSchema items={breadcrumbItems} />
+      
       <CourseContent 
         course={course} 
         modules={modules || []}

@@ -231,11 +231,39 @@ export default async function ExamPage({
     });
 
     if (passed) {
-      const { data: cert } = await supabase
+      let cert = null;
+      
+      // Check if a certificate already exists for this user and course
+      const { data: existingCert } = await supabase
         .from("certificates")
-        .insert({ user_id: user.id, course_id: course.id })
-        .select()
-        .single();
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("course_id", course.id)
+        .maybeSingle();
+
+      if (existingCert) {
+        cert = existingCert;
+      } else {
+        const { data: newCert, error: insertError } = await supabase
+          .from("certificates")
+          .insert({ user_id: user.id, course_id: course.id })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error("[Exam] Certificate Insert Error:", insertError);
+          // Fallback select in case of race conditions
+          const { data: fallbackCert } = await supabase
+            .from("certificates")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("course_id", course.id)
+            .maybeSingle();
+          cert = fallbackCert;
+        } else {
+          cert = newCert;
+        }
+      }
 
       if (cert) {
         await supabase
@@ -249,6 +277,8 @@ export default async function ExamPage({
           .eq("course_id", course.id);
 
         redirect(`/certificates/${cert.id}?just_passed=true&score=${examScore}`);
+      } else {
+        throw new Error("Failed to issue or retrieve certificate. Please contact support.");
       }
     } else {
       // Go to the FAILED results screen — NOT back to the live exam

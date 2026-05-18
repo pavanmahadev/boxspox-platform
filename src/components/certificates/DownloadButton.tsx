@@ -65,7 +65,7 @@ export default function DownloadButton({
       }
 
       // Force-download via a temporary anchor element
-      const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+      const blobUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = blobUrl;
       anchor.download = `Boxspox-Certificate-${courseName.replace(/[^a-zA-Z0-9]/g, "-")}.pdf`;

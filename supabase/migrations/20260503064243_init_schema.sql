@@ -17,7 +17,7 @@ CREATE TABLE public.modules (
   order_index INTEGER NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
-
+ok
 -- Create Lessons Table
 CREATE TABLE public.lessons (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

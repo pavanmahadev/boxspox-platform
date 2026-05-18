@@ -34,8 +34,8 @@ import { getCurrentUserAction } from "@/app/tutorials/actions";
 
 const navLinks = [
   { name: "Tutorials", href: "/tutorials" },
-  { name: "References", href: "#" },
-  { name: "Exercises", href: "#" },
+  { name: "Leaderboard", href: "/leaderboard" },
+  { name: "Jobs", href: "/jobs/apply" },
   { name: "Certificates", href: "/certifications" },
 ];
 
@@ -92,6 +92,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [settings, setSettings] = useState<any>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [jobsOpen, setJobsOpen] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
   const { showToast } = useToast();
   const supabase = createClient();
@@ -248,6 +249,53 @@ export function Navbar() {
             <Link href="/playground" style={{ textDecoration: "none", color: "var(--text-secondary)", fontWeight: 600, fontSize: "0.9rem", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--brand-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>
               Playground
             </Link>
+
+            <div style={{ position: "relative" }} onMouseEnter={() => setJobsOpen(true)} onMouseLeave={() => setJobsOpen(false)}>
+              <button
+                style={{
+                  background: "none",
+                  border: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  cursor: "pointer",
+                  color: "var(--text-secondary)",
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  transition: "color 0.2s"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = "var(--brand-primary)"}
+                onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}
+              >
+                Jobs
+                <ChevronDown size={12} style={{ transform: jobsOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+              </button>
+
+              {jobsOpen && (
+                <div style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: "0",
+                  marginTop: "8px",
+                  width: "250px",
+                  background: "var(--bg-primary)",
+                  borderRadius: "8px",
+                  border: "1px solid var(--border-primary)",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                  overflow: "hidden",
+                  zIndex: 1100
+                }}>
+                  <div style={{ height: "4px", background: "#0F6E56" }} />
+                  <div style={{ padding: "8px", display: "flex", flexDirection: "column" }}>
+                    <Link href="/jobs" style={{ ...profileLinkStyle, fontWeight: 700, color: "var(--brand-primary)" }} onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-secondary)"} onMouseLeave={(e) => e.currentTarget.style.background = "none"}>🎯 Explore Careers Hub</Link>
+                    <Link href="/jobs/hiring-2026" style={profileLinkStyle} onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-secondary)"} onMouseLeave={(e) => e.currentTarget.style.background = "none"}>Hiring Program for 2026 Graduates</Link>
+                    <Link href="/jobs/apply" style={profileLinkStyle} onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-secondary)"} onMouseLeave={(e) => e.currentTarget.style.background = "none"}>Apply Now!</Link>
+                    <Link href="/jobs/post" style={profileLinkStyle} onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-secondary)"} onMouseLeave={(e) => e.currentTarget.style.background = "none"}>Post Jobs</Link>
+                    <Link href="/jobs/updates" style={profileLinkStyle} onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-secondary)"} onMouseLeave={(e) => e.currentTarget.style.background = "none"}>Jobs Updates</Link>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div style={{ width: "1px", height: "20px", background: "var(--border-primary)" }} className="nav-links-desktop" />
@@ -534,6 +582,18 @@ export function Navbar() {
                   <LogOut size={16} color="#EF4444" /> Logout
                 </button>
               )}
+            </div>
+          </div>
+
+          {/* Jobs Section */}
+          <div style={{ background: "white", padding: "16px", borderRadius: "16px", border: "1px solid #E2E8F0" }}>
+            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#0F172A", marginBottom: "12px" }}>Jobs</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <Link href="/jobs" onClick={() => setMobileMenuOpen(false)} style={{ textDecoration: "none", color: "var(--brand-primary)", fontSize: "14px", fontWeight: 700 }}>🎯 Explore Careers Hub</Link>
+              <Link href="/jobs/hiring-2026" onClick={() => setMobileMenuOpen(false)} style={{ textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>Hiring Program for 2026 Graduates</Link>
+              <Link href="/jobs/apply" onClick={() => setMobileMenuOpen(false)} style={{ textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>Apply Now!</Link>
+              <Link href="/jobs/post" onClick={() => setMobileMenuOpen(false)} style={{ textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>Post Jobs</Link>
+              <Link href="/jobs/updates" onClick={() => setMobileMenuOpen(false)} style={{ textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>Jobs Updates</Link>
             </div>
           </div>
         </div>

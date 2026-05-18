@@ -20,9 +20,13 @@ import {
   X,
   Mail,
   User,
-  Code2
+  Code2,
+  Bookmark,
+  Copy,
+  Check
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { FAQSection } from "@/components/ui/FAQSection";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
@@ -105,6 +109,10 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizResults, setQuizResults] = useState<any>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
+  const [xpToast, setXpToast] = useState<{ xp: number; coins: number } | null>(null);
+  const hasAiAccess = user?.role === "admin" || user?.role === "instructor";
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -167,20 +175,24 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
         if (error) throw error;
         showToast("Progress removed", "info");
       } else {
-        const { error } = await supabase.from("user_progress").upsert({ 
+        const { error } = await supabase.from("user_progress").insert({ 
           user_id: user.id, 
           lesson_id: lesson.id, 
           course_id: course.id,
           completed_at: new Date().toISOString()
-        }, { onConflict: 'user_id,lesson_id' });
+        });
 
         if (error) throw error;
         
-        showToast("Lesson marked as complete!", "success");
+        // Show XP reward popup
+        setXpToast({ xp: 50, coins: 10 });
+        setTimeout(() => setXpToast(null), 3500);
+        
+        showToast("Lesson complete! +50 XP earned! 🎉", "success");
         broadcastAnnouncement(`${user.email?.split('@')[0]} just completed "${lesson.title}"!`, 'success');
         
         if (nextLesson) {
-           setTimeout(() => router.push(`/tutorials/${course.slug}/${nextLesson.slug}`), 1500);
+           setTimeout(() => router.push(`/tutorials/${course.slug}/${nextLesson.slug}`), 2000);
         }
       }
     } catch (err: any) {
@@ -258,6 +270,15 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
   };
 
   const handleToggleHinglish = async () => {
+    if (!user) {
+      showToast("Please log in to translate this lesson.", "error");
+      router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    if (!hasAiAccess) {
+      showToast("AI features are not available on the free tier.", "error");
+      return;
+    }
     if (hinglishMode) {
       setHinglishMode(false);
       return;
@@ -273,16 +294,89 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
         body: JSON.stringify({ content: lesson.content })
       });
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       if (data.translated) setHinglishContent(data.translated);
-    } catch (err) {
-      showToast("Translation failed", "error");
+    } catch (err: any) {
+      console.warn("AI Translation Error:", err);
+      showToast(err.message || "Translation failed", "error");
     } finally {
       setIsTranslating(false);
     }
   };
 
+  const handleToggleBookmark = async () => {
+    if (!user) {
+      showToast("Please login to save tutorials", "error");
+      return;
+    }
+    
+    const newStatus = !isBookmarked;
+    setIsBookmarked(newStatus);
+    
+    try {
+      // Assuming a saved_tutorials table exists. If not, it will fail gracefully.
+      if (newStatus) {
+        await supabase.from("saved_tutorials").insert({ user_id: user.id, lesson_id: lesson.id });
+        showToast("Tutorial saved to bookmarks!", "success");
+      } else {
+        await supabase.from("saved_tutorials").delete().eq("user_id", user.id).eq("lesson_id", lesson.id);
+        showToast("Removed from bookmarks", "info");
+      }
+    } catch (err) {
+      console.warn("Bookmark failed (table might not exist yet):", err);
+    }
+  };
+
+  const handleGenerateAIQuiz = async () => {
+    if (!user) {
+      showToast("Please log in to generate an AI quiz.", "error");
+      router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    if (!hasAiAccess) {
+      showToast("AI features are not available on the free tier.", "error");
+      return;
+    }
+    if (isGeneratingQuiz) return;
+    setIsGeneratingQuiz(true);
+    
+    try {
+      const res = await fetch("/api/ai/generate-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          lessonTitle: lesson.title, 
+          lessonContent: lesson.content 
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (data.error) throw new Error(data.error);
+      
+      // Inject AI Quiz into state and open modal
+      setQuiz(data);
+      setQuizOpen(true);
+      showToast("AI Quiz generated successfully!", "success");
+    } catch (err: any) {
+      console.warn("AI Quiz Error:", err);
+      showToast(err.message || "Failed to generate AI quiz", "error");
+    } finally {
+      setIsGeneratingQuiz(false);
+    }
+  };
+
   const handleAskAI = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      showToast("Please log in to ask the AI Tutor.", "error");
+      router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    if (!hasAiAccess) {
+      showToast("AI features are not available on the free tier.", "error");
+      return;
+    }
     if (!aiQuestion.trim() || aiLoading) return;
 
     const userMessage = { role: "user", content: aiQuestion };
@@ -302,15 +396,26 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
         })
       });
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       if (data.answer) setAiHistory(prev => [...prev, { role: "assistant", content: data.answer }]);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.warn("AI Ask Error:", err);
+      showToast(err.message || "Failed to ask AI Tutor", "error");
     } finally {
       setAiLoading(false);
     }
   };
 
   const handleGenerateSummary = async () => {
+    if (!user) {
+      showToast("Please log in to summarize this lesson.", "error");
+      router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    if (!hasAiAccess) {
+      showToast("AI features are not available on the free tier.", "error");
+      return;
+    }
     if (aiSummary) return;
     
     setIsSummarizing(true);
@@ -321,9 +426,11 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
         body: JSON.stringify({ lessonContent: lesson.content })
       });
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       if (data.summary) setAiSummary(data.summary);
-    } catch (err) {
-      showToast("Failed to generate summary", "error");
+    } catch (err: any) {
+      console.warn("AI Summary Error:", err);
+      showToast(err.message || "Failed to generate summary", "error");
     } finally {
       setIsSummarizing(false);
     }
@@ -531,9 +638,38 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
                   <ChevronRight size={14} />
                   <Link href={`/tutorials/${course.slug}`} style={{ color: "inherit", textDecoration: "none" }} className="breadcrumb-truncate">{course.title}</Link>
                 </div>
-                <h1 className="lesson-title" style={{ fontSize: "var(--h1-size)", fontWeight: 900, color: "var(--text-primary)", marginBottom: "16px", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
-                  {lesson.title}
-                </h1>
+                
+                <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", flexWrap: "wrap" }}>
+                  <h1 className="lesson-title" style={{ fontSize: "var(--h1-size)", fontWeight: 900, color: "var(--text-primary)", letterSpacing: "-1.5px", lineHeight: 1.1, margin: 0 }}>
+                    {lesson.title}
+                  </h1>
+                  <button 
+                    onClick={handleToggleBookmark}
+                    title={isBookmarked ? "Remove Bookmark" : "Save Tutorial"}
+                    style={{
+                      background: isBookmarked ? "rgba(15, 110, 86, 0.1)" : "transparent",
+                      border: isBookmarked ? "1px solid rgba(15, 110, 86, 0.3)" : "1px solid var(--border-primary)",
+                      color: isBookmarked ? "var(--brand-primary)" : "var(--text-secondary)",
+                      borderRadius: "50%",
+                      width: "36px",
+                      height: "36px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                  >
+                    <Bookmark size={18} fill={isBookmarked ? "currentColor" : "none"} />
+                  </button>
+                </div>
+
                 <div style={{ display: "flex", alignItems: "center", gap: "16px", color: "var(--text-secondary)", fontSize: "14px", fontWeight: 600, flexWrap: "wrap" }}>
                   <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     {lesson.lesson_type === 'video' ? <Video size={16} /> : <BookOpen size={16} />} 
@@ -546,17 +682,26 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "12px", width: "100%" }} className="lesson-header-actions">
-                <style>{`
-                  @media (max-width: 640px) {
-                    .lesson-header-actions { flex-direction: column !important; }
-                    .lesson-header-actions button { width: 100% !important; justify-content: center !important; }
-                    .lesson-title { font-size: 1.75rem !important; }
-                  }
-                `}</style>
-
-
-              </div>
+              {hasAiAccess && (
+                <div style={{ display: "flex", gap: "12px", width: "100%" }} className="lesson-header-actions">
+                  <style>{`
+                    @media (max-width: 640px) {
+                      .lesson-header-actions { flex-direction: column !important; }
+                      .lesson-header-actions button { width: 100% !important; justify-content: center !important; }
+                      .lesson-title { font-size: 1.75rem !important; }
+                    }
+                  `}</style>
+                  <button
+                    onClick={handleGenerateAIQuiz}
+                    disabled={isGeneratingQuiz}
+                    className="btn-secondary"
+                    style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, justifyContent: "center" }}
+                  >
+                    {isGeneratingQuiz ? <Loader2 size={16} className="animate-spin" /> : <HelpCircle size={16} />} 
+                    {isGeneratingQuiz ? "Generating..." : "Generate AI Quiz"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -570,64 +715,123 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
              />
           </div>
 
-          {aiSummary && (
-            <div style={{ marginTop: "40px", padding: "24px", background: "var(--bg-secondary)", borderRadius: "16px", border: "1px solid var(--border-primary)", marginBottom: "40px" }}>
-              <h3 style={{ fontSize: "16px", fontWeight: 800, marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
-                <FileText size={18} color="var(--brand-primary)" /> AI Key Takeaways
-              </h3>
-              <div className="prose-enhanced">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{aiSummary}</ReactMarkdown>
-              </div>
-            </div>
-          )}
+           {hasAiAccess && aiSummary && (
+             <div style={{ marginTop: "40px", padding: "24px", background: "var(--bg-secondary)", borderRadius: "16px", border: "1px solid var(--border-primary)", marginBottom: "40px" }}>
+               <h3 style={{ fontSize: "16px", fontWeight: 800, marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                 <FileText size={18} color="var(--brand-primary)" /> AI Key Takeaways
+               </h3>
+               <div className="prose-enhanced">
+                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{aiSummary}</ReactMarkdown>
+               </div>
+             </div>
+           )}
 
-          {/* Footer Navigation */}
+          {/* Prominent Footer Navigation (W3Schools Style) */}
           <div className="lesson-nav-buttons" style={{ 
-            marginTop: "80px", 
-            padding: "48px 0", 
-            borderTop: "1px solid var(--border-primary)",
+            marginTop: "60px", 
             display: "flex",
-            gap: "16px",
-            flexWrap: "wrap"
+            gap: "20px",
+            flexWrap: "wrap",
+            width: "100%"
           }}>
             <style>{`
               @media (max-width: 640px) {
                 .lesson-nav-buttons { flex-direction: column !important; }
-                .lesson-nav-buttons > * { width: 100% !important; }
               }
             `}</style>
-            <div style={{ display: "flex", gap: "12px", flex: 1 }}>
-              {prevLesson && (
-                <Link
-                  href={`/tutorials/${course.slug}/${prevLesson.slug}`}
-                  className="btn-secondary"
-                  style={{ padding: "14px 16px", borderRadius: "14px", flex: 1, justifyContent: "center", fontSize: "14px", whiteSpace: "nowrap" }}
-                >
-                  <ChevronLeft size={18} /> Previous
-                </Link>
-              )}
-              
-              {/* Completed button removed. Certificates require exams. */}
-            </div>
-
-            {nextLesson && (
+            
+            {prevLesson ? (
               <Link
-                href={`/tutorials/${course.slug}/${nextLesson.slug}`}
-                className="btn-primary"
+                href={`/tutorials/${course.slug}/${prevLesson.slug}`}
                 style={{ 
-                  padding: "14px 24px", 
-                  borderRadius: "14px", 
-                  background: "var(--brand-primary)", 
-                  justifyContent: "center",
-                  boxShadow: "0 10px 20px -5px rgba(15, 110, 86, 0.4)",
-                  border: "none",
-                  color: "white",
-                  fontWeight: 800,
-                  flex: 1,
-                  whiteSpace: "nowrap"
+                  flex: 1, 
+                  display: "flex", 
+                  alignItems: "center", 
+                  padding: "24px", 
+                  background: "var(--bg-secondary)", 
+                  border: "1px solid var(--border-primary)", 
+                  borderRadius: "16px",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "var(--brand-primary)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "var(--border-primary)";
+                  e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                Next <ChevronRight size={20} />
+                <div style={{ background: "var(--bg-tertiary)", padding: "10px", borderRadius: "12px", marginRight: "16px" }}>
+                  <ChevronLeft size={24} color="var(--text-primary)" />
+                </div>
+                <div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Previous</div>
+                  <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--text-primary)" }}>{prevLesson.title}</div>
+                </div>
+              </Link>
+            ) : <div style={{ flex: 1 }} />}
+
+            {nextLesson ? (
+              <Link
+                href={`/tutorials/${course.slug}/${nextLesson.slug}`}
+                style={{ 
+                  flex: 1, 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "flex-end",
+                  textAlign: "right",
+                  padding: "24px", 
+                  background: "rgba(15, 110, 86, 0.05)", 
+                  border: "1px solid rgba(15, 110, 86, 0.2)", 
+                  borderRadius: "16px",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(15, 110, 86, 0.1)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(15, 110, 86, 0.05)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--brand-primary)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Next Topic</div>
+                  <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--text-primary)" }}>{nextLesson.title}</div>
+                </div>
+                <div style={{ background: "var(--brand-primary)", padding: "10px", borderRadius: "12px", marginLeft: "16px" }}>
+                  <ChevronRight size={24} color="white" />
+                </div>
+              </Link>
+            ) : (
+              <Link
+                href={`/tutorials/${course.slug}/exam`}
+                style={{ 
+                  flex: 1, 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "flex-end",
+                  textAlign: "right",
+                  padding: "24px", 
+                  background: "var(--brand-primary)", 
+                  borderRadius: "16px",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 10px 25px -5px rgba(15, 110, 86, 0.4)"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
+                onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+              >
+                <div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.8)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Course Completed</div>
+                  <div style={{ fontSize: "16px", fontWeight: 800, color: "white" }}>Take Final Exam</div>
+                </div>
+                <div style={{ background: "rgba(255,255,255,0.2)", padding: "10px", borderRadius: "12px", marginLeft: "16px" }}>
+                  <ChevronRight size={24} color="white" />
+                </div>
               </Link>
             )}
           </div>
@@ -661,6 +865,52 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
               <Discussion lessonId={lesson.id} currentUserId={user.id} />
             </div>
           )}
+
+          {/* FAQ Section */}
+          <div style={{ marginTop: "40px" }}>
+            <FAQSection 
+              title={`Frequently Asked Questions`}
+              faqs={[
+                {
+                  question: `What is the best way to learn ${course.title}?`,
+                  answer: `The best way to learn ${course.title} is through hands-on practice. Ensure you use our Sandpack code editor provided in the lessons to write your own code, break it, and fix it.`
+                },
+                {
+                  question: `Is this ${course.title} tutorial for beginners?`,
+                  answer: `Yes, this Boxspox tutorial is designed to take you from a complete beginner to an advanced developer. We recommend going through the modules sequentially.`
+                },
+                {
+                  question: `How do I get a certificate for ${course.title}?`,
+                  answer: `Once you complete all lessons in this track, you will unlock the Final Certification Exam. Pass the exam to earn a verified Boxspox certificate that you can share on your resume and LinkedIn.`
+                }
+              ]}
+            />
+          </div>
+
+          {/* Navigation Buttons */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "60px", paddingTop: "40px", borderTop: "1px solid var(--border-primary)" }}>
+            {(() => {
+              const currentIndex = allLessons.findIndex(l => l.id === lesson.id);
+              const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
+              const nextLesson = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
+              
+              return (
+                <>
+                  {prevLesson ? (
+                    <Link href={`/tutorials/${course.slug}/${prevLesson.slug}`} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", fontSize: "15px", fontWeight: 700, textDecoration: "none", color: "var(--text-primary)", border: "2px solid var(--border-primary)", borderRadius: "12px", background: "var(--bg-card)", transition: "all 0.2s" }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-primary)"; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-primary)"; e.currentTarget.style.color = "var(--text-primary)"; }}>
+                      <ChevronLeft size={20} /> <span className="hide-on-mobile">Previous: </span> {prevLesson.title}
+                    </Link>
+                  ) : <div />}
+                  {nextLesson ? (
+                    <Link href={`/tutorials/${course.slug}/${nextLesson.slug}`} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", fontSize: "15px", fontWeight: 700, textDecoration: "none", color: "white", background: "var(--brand-primary)", borderRadius: "12px", border: "none", transition: "transform 0.2s, box-shadow 0.2s" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 10px 20px rgba(16, 185, 129, 0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+                      <span className="hide-on-mobile">Next: </span> {nextLesson.title} <ChevronRight size={20} />
+                    </Link>
+                  ) : <div />}
+                </>
+              );
+            })()}
+          </div>
+
         </main>
 
         <aside className="right-sidebar" style={{ borderLeft: "1px solid var(--border-primary)", padding: "40px 24px", background: "var(--bg-secondary)", overflowY: "auto", position: "sticky", top: "108px", height: "calc(100vh - 108px)" }}>
@@ -773,6 +1023,45 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
         />
       )}
 
+      {/* XP Reward Popup */}
+      <AnimatePresence>
+        {xpToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 60, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -40, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            style={{
+              position: "fixed",
+              bottom: "100px",
+              right: "24px",
+              zIndex: 9999,
+              background: "linear-gradient(135deg, #0F6E56, #10b981)",
+              color: "white",
+              padding: "20px 28px",
+              borderRadius: "24px",
+              boxShadow: "0 20px 60px rgba(16,185,129,0.4)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+              minWidth: "200px",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: "40px", lineHeight: 1 }}>🎉</div>
+            <div style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.5px" }}>Lesson Complete!</div>
+            <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "4px" }}>
+              <span style={{ background: "rgba(255,255,255,0.2)", padding: "6px 14px", borderRadius: "20px", fontWeight: 800, fontSize: "15px" }}>
+                ⚡ +{xpToast.xp} XP
+              </span>
+              <span style={{ background: "rgba(255,255,255,0.2)", padding: "6px 14px", borderRadius: "20px", fontWeight: 800, fontSize: "15px" }}>
+                🪙 +{xpToast.coins}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <style>{`
         .prose-enhanced h1 { font-size: 2.5rem; font-weight: 900; color: var(--text-primary); margin: 3rem 0 1.5rem; letter-spacing: -1px; }
         .prose-enhanced h2 { font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 2.5rem 0 1.25rem; border-bottom: 2px solid var(--border-primary); padding-bottom: 0.5rem; }
@@ -799,6 +1088,60 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
           .hide-on-mobile { display: none !important; }
         }
       `}</style>
+    </div>
+  );
+}
+
+function CodeBlock({ children }: any) {
+  const [copied, setCopied] = useState(false);
+  
+  // Extract text content from the children
+  const getText = (node: any): string => {
+    if (typeof node === "string") return node;
+    if (Array.isArray(node)) return node.map(getText).join("");
+    if (node && node.props && node.props.children) return getText(node.props.children);
+    return "";
+  };
+
+  const handleCopy = () => {
+    const text = getText(children);
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button 
+        onClick={handleCopy}
+        style={{
+          position: "absolute",
+          top: "12px",
+          right: "12px",
+          background: "rgba(255, 255, 255, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          color: copied ? "#10B981" : "#94a3b8",
+          padding: "6px",
+          borderRadius: "6px",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "all 0.2s"
+        }}
+        onMouseEnter={(e) => {
+          if (!copied) e.currentTarget.style.color = "white";
+          e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)";
+        }}
+        onMouseLeave={(e) => {
+          if (!copied) e.currentTarget.style.color = "#94a3b8";
+          e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+        }}
+        title="Copy code"
+      >
+        {copied ? <Check size={16} /> : <Copy size={16} />}
+      </button>
+      <pre>{children}</pre>
     </div>
   );
 }
@@ -835,6 +1178,9 @@ function LessonRenderer({ content, lessonType, videoUrl, codeTemplate }: any) {
           },
           img: ({node, ...props}) => {
             return <img {...props} style={{ ...props.style, maxWidth: "100%", height: "auto", borderRadius: "12px", margin: "1.5rem 0" }} alt={props.alt || "Lesson image"} />;
+          },
+          pre: ({node, ...props}) => {
+            return <CodeBlock {...props} />;
           }
         }}
       >

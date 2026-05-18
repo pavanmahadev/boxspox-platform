@@ -63,9 +63,21 @@ export async function fetchUserProgressAction() {
     throw new Error(error.message);
   }
   
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+    
   const completedIds = completions ? completions.map((c: any) => c.lesson_id) : [];
   
-  return { user, completedIds };
+  return { 
+    user: {
+      ...user,
+      role: profile?.role || "user"
+    }, 
+    completedIds 
+  };
 }
 
 export async function getCurrentUserAction() {

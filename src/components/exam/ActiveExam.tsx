@@ -142,6 +142,7 @@ export default function ActiveExam({ course, questions, timeLimitMinutes, submit
   const [answers, setAnswers] = useState<any>({});
   const [timeLeft, setTimeLeft] = useState(timeLimitMinutes * 60);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -181,7 +182,14 @@ export default function ActiveExam({ course, questions, timeLimitMinutes, submit
   const handleSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    await submitAction(answers);
+    setErrorMsg(null);
+    try {
+      await submitAction(answers);
+    } catch (err: any) {
+      console.error("Grading failed:", err);
+      setErrorMsg(err.message || "Failed to grade exam. Please try again or contact support.");
+      setIsSubmitting(false);
+    }
   };
 
   if (!questions || questions.length === 0) return null;
@@ -252,6 +260,13 @@ export default function ActiveExam({ course, questions, timeLimitMinutes, submit
           />
 
         </div>
+
+        {errorMsg && (
+          <div style={{ marginTop: "24px", padding: "16px", borderRadius: "12px", background: "#FEF2F2", border: "1px solid #FECACA", color: "#DC2626", fontWeight: 600, fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <AlertTriangle size={18} />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
         {/* Navigation Footer */}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: "32px" }}>

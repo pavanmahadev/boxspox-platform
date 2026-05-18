@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
-  const baseUrl = 'https://boxspox.com'
+  const baseUrl = 'https://boxspox.in'
 
   // 1. Fetch all courses
   const { data: courses } = await supabase
@@ -14,6 +14,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { data: paths } = await supabase
     .from('learning_paths')
     .select('slug, created_at')
+
+  // 3. Fetch all lessons with their course slug
+  const { data: lessons } = await supabase
+    .from('lessons')
+    .select(`
+      slug, 
+      created_at,
+      module:modules (
+        course:courses (
+          slug
+        )
+      )
+    `)
 
   const courseUrls = (courses || []).map((course) => ({
     url: `${baseUrl}/tutorials/${course.slug}`,
@@ -28,6 +41,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }))
+
+  const lessonUrls = (lessons || []).map((lesson: any) => {
+    const courseSlug = lesson.module?.course?.slug || 'unknown';
+    return {
+      url: `${baseUrl}/tutorials/${courseSlug}/${lesson.slug}`,
+      lastModified: new Date(lesson.created_at || Date.now()),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    };
+  })
 
   const staticUrls = [
     {
@@ -50,5 +73,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  return [...staticUrls, ...courseUrls, ...pathUrls]
+  return [...staticUrls, ...courseUrls, ...pathUrls, ...lessonUrls]
 }

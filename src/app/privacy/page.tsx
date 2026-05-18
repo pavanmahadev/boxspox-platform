@@ -70,7 +70,7 @@ export default function PrivacyPage() {
                   <Trash2 color="#ef4444" size={24} style={{ marginTop: "4px" }} />
                   <div>
                     <p style={{ fontWeight: 700, color: "#ef4444", marginBottom: "4px" }}>Right to be Forgotten</p>
-                    <p style={{ fontSize: "0.9rem" }}>If you wish to delete your data, please visit your account settings or contact us at privacy@boxspox.com.</p>
+                    <p style={{ fontSize: "0.9rem" }}>If you wish to delete your data, please visit your account settings or contact us at privacy@boxspox.in.</p>
                   </div>
                 </div>
               </div>
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
             <div style={{ padding: "40px", borderRadius: "24px", background: "var(--bg-card)", border: "1px solid var(--border-primary)", textAlign: "center" }}>
               <h3 style={{ fontWeight: 800, marginBottom: "12px" }}>Questions about our privacy policy?</h3>
               <p style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>We&apos;re here to help you understand how your data is handled.</p>
-              <Link href="mailto:privacy@boxspox.com" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>privacy@boxspox.com</Link>
+              <Link href="mailto:privacy@boxspox.in" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>privacy@boxspox.in</Link>
             </div>
 
           </div>

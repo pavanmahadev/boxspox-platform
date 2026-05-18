@@ -1,9 +1,35 @@
 import { createClient } from "@/utils/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { LessonContent } from "@/components/tutorials/LessonContent";
+import { ArticleSchema } from "@/components/seo/ArticleSchema";
+import { BreadcrumbSchema } from "@/components/seo/BreadcrumbSchema";
 import Link from "next/link";
 import { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // Revalidate every hour
+
+export async function generateStaticParams() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+  // Fetch common course/lesson combinations to pre-render
+  // This is a subset of the sitemap
+  const { data } = await supabase
+    .from("lessons")
+    .select(`
+      slug,
+      module:modules!inner(
+        course:courses!inner(slug)
+      )
+    `)
+    .limit(100);
+
+  return (data || []).map((l: any) => ({
+    language: l.module.course.slug,
+    slug: l.slug,
+  }));
+}
+
 
 export async function generateMetadata({ params }: { params: Promise<{ language: string; slug: string }> }): Promise<Metadata> {
   const { language, slug } = await params;
@@ -29,10 +55,20 @@ export async function generateMetadata({ params }: { params: Promise<{ language:
   if (!lesson) return { title: "Lesson Not Found | Boxspox" };
 
   const courseTitle = (lesson.module as any)?.course?.title;
+  const canonicalUrl = `https://boxspox.in/tutorials/${language}/${slug}`;
 
   return {
     title: `${lesson.title} - ${courseTitle || 'Course'} | Boxspox Academy`,
     description: lesson.description || `Master ${lesson.title} with interactive examples and AI-powered tutoring on Boxspox.`,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${lesson.title} - ${courseTitle || 'Course'} | Boxspox Academy`,
+      description: lesson.description || `Master ${lesson.title} with interactive examples.`,
+      url: canonicalUrl,
+      type: "article",
+    }
   };
 }
 
@@ -113,8 +149,22 @@ export default async function LessonPage({
   // Fallback gradient if not in DB
   const gradient = course.gradient || "linear-gradient(135deg, #6366f1, #a855f7)";
 
+  const breadcrumbItems = [
+    { name: "Home", url: "https://boxspox.in/" },
+    { name: "Tutorials", url: "https://boxspox.in/tutorials" },
+    { name: course.title, url: `https://boxspox.in/tutorials/${course.slug}` },
+    { name: lesson.title, url: `https://boxspox.in/tutorials/${course.slug}/${lesson.slug}` }
+  ];
+
   return (
     <>
+      <ArticleSchema 
+        headline={lesson.title}
+        description={(lesson as any).description || `Learn ${lesson.title}`}
+        url={`https://boxspox.in/tutorials/${course.slug}/${lesson.slug}`}
+      />
+      <BreadcrumbSchema items={breadcrumbItems} />
+      
       <LessonContent 
         course={course} 
         lesson={lesson} 

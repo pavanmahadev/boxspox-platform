@@ -1,5 +1,6 @@
 import { Hero } from "@/components/home/Hero";
 import { TrustBar } from "@/components/home/TrustBar";
+import { RealtimeStats } from "@/components/home/RealtimeStats";
 import { FeaturedCourses } from "@/components/home/FeaturedCourses";
 import { createClient } from "@/utils/supabase/server";
 import dynamic from "next/dynamic";
@@ -10,6 +11,8 @@ const EditorPreview = dynamic(() => import("@/components/home/EditorPreview").th
 const LearningPaths = dynamic(() => import("@/components/home/LearningPaths").then(mod => mod.LearningPaths), { ssr: true });
 const ProjectsPreview = dynamic(() => import("@/components/home/ProjectsPreview").then(mod => mod.ProjectsPreview), { ssr: true });
 const AIFeature = dynamic(() => import("@/components/home/AIFeature").then(mod => mod.AIFeature), { ssr: true });
+
+export const revalidate = 3600; // Cache for 1 hour to improve TTFB
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -35,6 +38,7 @@ export default async function HomePage() {
     <>
       <Hero />
       <TrustBar />
+      <RealtimeStats />
       <FeaturedCourses courses={courses} />
       <EditorPreview />
       <LearningPaths />

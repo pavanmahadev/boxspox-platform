@@ -121,7 +121,7 @@ export default function CareersPage() {
           <div style={{ marginTop: "60px", textAlign: "center", padding: "40px", background: "var(--bg-secondary)", borderRadius: "24px" }}>
             <h3 style={{ fontWeight: 800, marginBottom: "8px" }}>Don&apos;t see a fit?</h3>
             <p style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>We&apos;re always looking for talented people. Send us an open application.</p>
-            <Link href="mailto:careers@boxspox.com" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>careers@boxspox.com</Link>
+            <Link href="mailto:careers@boxspox.in" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>careers@boxspox.in</Link>
           </div>
         </div>
       </section>

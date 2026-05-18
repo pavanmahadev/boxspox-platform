@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ChevronRight, Clock, Star, BookOpen } from "lucide-react";
+import { ChevronRight, ChevronLeft, Clock, Star, BookOpen } from "lucide-react";
 
 const fallbackImage = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80";
 
@@ -39,9 +39,51 @@ const defaultCourses = [
 
 export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
   const displayCourses = dbCourses && dbCourses.length > 0 ? dbCourses : defaultCourses;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const cards = container.querySelectorAll('.course-card');
+      
+      if (cards.length === 0) return;
+      
+      const containerLeft = container.getBoundingClientRect().left;
+      
+      let currentIdx = 0;
+      for (let i = 0; i < cards.length; i++) {
+        const cardLeft = cards[i].getBoundingClientRect().left;
+        // Find the card that is closest to the left edge of the container
+        if (Math.abs(cardLeft - containerLeft) < 50) {
+          currentIdx = i;
+          break;
+        }
+      }
+      
+      let targetIdx = direction === "right" ? currentIdx + 1 : currentIdx - 1;
+      
+      // Clamp target index
+      targetIdx = Math.max(0, Math.min(targetIdx, cards.length - 1));
+      
+      const targetCard = cards[targetIdx];
+      const targetScrollLeft = targetCard.getBoundingClientRect().left - containerLeft + container.scrollLeft;
+      
+      container.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
+    }
+  };
   
   return (
     <section style={{ padding: "var(--section-spacing) 0", background: "var(--bg-primary)" }}>
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        @media (max-width: 640px) {
+          .course-card {
+            flex: 0 0 280px !important;
+          }
+        }
+      `}</style>
       <div className="section-container">
         <div style={{ 
           display: "flex", 
@@ -60,25 +102,103 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
               Hand-picked tutorials to help you start your coding journey today.
             </p>
           </div>
-          <Link href="/tutorials" style={{
-            color: "var(--brand-primary)",
-            fontWeight: 700,
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            fontSize: "14px",
-            marginBottom: "8px"
-          }}>
-            View All Tutorials <ChevronRight size={18} />
-          </Link>
+          
+          <div style={{ display: "flex", alignItems: "center", gap: "24px", marginBottom: "8px" }}>
+            <Link href="/tutorials" style={{
+              color: "var(--brand-primary)",
+              fontWeight: 700,
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              fontSize: "14px"
+            }}>
+              View All Tutorials <ChevronRight size={18} />
+            </Link>
+            
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button 
+                onClick={() => scroll("left")}
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-primary)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "var(--text-primary)",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "var(--brand-primary)";
+                  e.currentTarget.style.color = "var(--brand-primary)";
+                  e.currentTarget.style.transform = "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "var(--border-primary)";
+                  e.currentTarget.style.color = "var(--text-primary)";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button 
+                onClick={() => scroll("right")}
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-primary)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "var(--text-primary)",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "var(--brand-primary)";
+                  e.currentTarget.style.color = "var(--brand-primary)";
+                  e.currentTarget.style.transform = "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "var(--border-primary)";
+                  e.currentTarget.style.color = "var(--text-primary)";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))",
-          gap: "var(--container-padding)"
-        }}>
+        <div 
+          ref={scrollContainerRef}
+          className="hide-scrollbar"
+          style={{
+            display: "flex",
+            gap: "32px",
+            overflowX: "auto",
+            scrollBehavior: "smooth",
+            scrollSnapType: "x mandatory",
+            paddingBottom: "16px",
+            paddingTop: "16px",
+            margin: "-16px",
+            paddingLeft: "16px",
+            paddingRight: "16px",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none"
+          }}
+        >
           {displayCourses.map((course: any, i: number) => {
             const duration = (course.duration || "—").replace("minitis", "minutes");
             const rating = course.rating || ["4.8", "4.9", "4.7", "4.6", "5.0", "4.8", "4.9", "4.7"][i % 8];
@@ -87,6 +207,7 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
             return (
               <motion.div
                 key={course.slug || i}
+                className="course-card"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1, duration: 0.6 }}
@@ -101,7 +222,9 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
                   transition: "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
                   boxShadow: "0 10px 30px -10px rgba(0,0,0,0.04)",
                   cursor: "pointer",
-                  position: "relative"
+                  position: "relative",
+                  flex: "0 0 340px",
+                  scrollSnapAlign: "start"
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-16px) scale(1.02)";
@@ -114,52 +237,51 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
                   e.currentTarget.style.borderColor = "var(--border-primary)";
                 }}
               >
-                <div style={{ height: "240px", overflow: "hidden", position: "relative" }}>
+                <div style={{ 
+                  height: "200px", 
+                  overflow: "hidden", 
+                  position: "relative",
+                  background: "linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "16px"
+                }}>
                   <img 
                     src={image} 
-                    alt={course.title} 
-                    style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)" }}
+                    alt={`${course.title} course thumbnail`} 
+                    loading="lazy"
+                    decoding="async"
+                    style={{ 
+                      maxWidth: "100%", 
+                      maxHeight: "100%", 
+                      objectFit: "contain", 
+                      transition: "transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)" 
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
                     onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = fallbackImage;
                     }}
                   />
-                  <div style={{
-                    position: "absolute",
-                    top: "20px",
-                    left: "20px",
-                    background: "rgba(255, 255, 255, 0.95)",
-                    backdropFilter: "blur(12px)",
-                    padding: "8px 16px",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                    fontWeight: 800,
-                    color: "var(--brand-primary)",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px"
-                  }}>
-                    <span style={{ width: "6px", height: "6px", background: "var(--brand-primary)", borderRadius: "50%" }} />
-                    {course.difficulty || course.level}
-                  </div>
+
                 </div>
 
-                <div style={{ padding: "32px", flex: 1, display: "flex", flexDirection: "column" }}>
-                  <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+                <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
                     <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--brand-primary)", textTransform: "uppercase", letterSpacing: "1px", background: "rgba(15, 110, 86, 0.08)", padding: "4px 10px", borderRadius: "6px" }}>
                       {course.category || "Development"}
+                    </span>
+                    <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--brand-secondary, #3b82f6)", textTransform: "uppercase", letterSpacing: "1px", background: "rgba(59, 130, 246, 0.08)", padding: "4px 10px", borderRadius: "6px" }}>
+                      {course.difficulty || course.level}
                     </span>
                   </div>
                   
                   <h3 style={{ 
-                    fontSize: "24px", 
+                    fontSize: "20px", 
                     fontWeight: 900, 
                     color: "var(--text-primary)", 
-                    marginBottom: "16px",
+                    marginBottom: "12px",
                     lineHeight: 1.2,
                     fontFamily: "var(--font-heading)"
                   }}>
@@ -168,9 +290,9 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
                   
                   <p style={{ 
                     color: "var(--text-secondary)", 
-                    fontSize: "15px", 
-                    lineHeight: 1.6, 
-                    marginBottom: "32px",
+                    fontSize: "14px", 
+                    lineHeight: 1.5, 
+                    marginBottom: "20px",
                     display: "-webkit-box",
                     WebkitLineClamp: 3,
                     WebkitBoxOrient: "vertical",

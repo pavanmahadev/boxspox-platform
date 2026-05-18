@@ -95,6 +95,7 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
   const [previewMarkdown, setPreviewMarkdown] = useState(false);
   const [isGeneratingOutline, setIsGeneratingOutline] = useState(false);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -215,14 +216,14 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
   };
 
   const handleGenerateOutline = async () => {
-    if (modules.length > 0) {
-      if (!confirm("You already have modules in this course. Generating a new outline will ADD more modules and may create duplicates. If you want to start fresh, please delete the existing modules first.\n\nDo you still want to proceed and ADD more modules?")) return;
-    } else {
-      if (!confirm("This will generate a course outline with AI and insert it into the database. Continue?")) return;
-    }
-    
-    setIsGeneratingOutline(true);
-    try {
+    setConfirmDialog({
+      title: "Generate AI Outline",
+      message: modules.length > 0 
+        ? "You already have modules in this course. Generating a new outline will ADD more modules and may create duplicates. If you want to start fresh, please delete the existing modules first. Do you still want to proceed and ADD more modules?"
+        : "This will generate a course outline with AI and insert it into the database. Continue?",
+      onConfirm: async () => {
+        setIsGeneratingOutline(true);
+        try {
       const { data: course } = await supabase
         .from("courses")
         .select("title")
@@ -269,16 +270,20 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
     } finally {
       setIsGeneratingOutline(false);
     }
+      }
+    });
   };
 
   const handleGenerateAllContent = async () => {
-    if (!confirm("This will generate content for all lessons with 'Content coming soon!'. It may take several minutes. Do you want to proceed?")) return;
-    
-    setIsGeneratingContent(true);
-    let successCount = 0;
-    let failCount = 0;
+    setConfirmDialog({
+      title: "Generate AI Content",
+      message: "This will generate content for all lessons with 'Content coming soon!'. It may take several minutes. Do you want to proceed?",
+      onConfirm: async () => {
+        setIsGeneratingContent(true);
+        let successCount = 0;
+        let failCount = 0;
 
-    try {
+        try {
       const { data: course } = await supabase
         .from("courses")
         .select("title")
@@ -325,6 +330,8 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
     } finally {
       setIsGeneratingContent(false);
     }
+      }
+    });
   };
 
   const toggleModule = (id: string) => {
@@ -358,14 +365,19 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
   };
 
   const handleDeleteModule = async (id: string) => {
-    if (!confirm("Are you sure? This will delete all lessons inside this module.")) return;
-    try {
-      await supabase.from("modules").delete().eq("id", id);
-      showToast("Module deleted", "success");
-      fetchCurriculum();
-    } catch (err: any) {
-      showToast(err.message, "error");
-    }
+    setConfirmDialog({
+      title: "Delete Module",
+      message: "Are you sure? This will delete all lessons inside this module.",
+      onConfirm: async () => {
+        try {
+          await supabase.from("modules").delete().eq("id", id);
+          showToast("Module deleted", "success");
+          fetchCurriculum();
+        } catch (err: any) {
+          showToast(err.message, "error");
+        }
+      }
+    });
   };
 
   const handleSaveLesson = async () => {
@@ -410,14 +422,19 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
   };
 
   const handleDeleteLesson = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this lesson?")) return;
-    try {
-      await supabase.from("lessons").delete().eq("id", id);
-      showToast("Lesson deleted", "success");
-      fetchCurriculum();
-    } catch (err: any) {
-      showToast(err.message, "error");
-    }
+    setConfirmDialog({
+      title: "Delete Lesson",
+      message: "Are you sure you want to delete this lesson?",
+      onConfirm: async () => {
+        try {
+          await supabase.from("lessons").delete().eq("id", id);
+          showToast("Lesson deleted", "success");
+          fetchCurriculum();
+        } catch (err: any) {
+          showToast(err.message, "error");
+        }
+      }
+    });
   };
 
   const handleGenerateLessonContent = async (lesson: Lesson, mod: Module) => {
@@ -565,6 +582,20 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
           )}
         </div>
       ))}
+
+      {/* Confirm Dialog */}
+      {confirmDialog && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "var(--bg-card)", padding: "24px", borderRadius: "16px", width: "400px", maxWidth: "90%" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 800, marginBottom: "16px" }}>{confirmDialog.title}</h3>
+            <p style={{ color: "var(--text-secondary)", marginBottom: "24px", fontSize: "14px", lineHeight: 1.5 }}>{confirmDialog.message}</p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+              <button onClick={() => setConfirmDialog(null)} style={{ padding: "8px 16px", background: "var(--bg-tertiary)", color: "var(--text-primary)", borderRadius: "8px", border: "none", fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => { confirmDialog.onConfirm(); setConfirmDialog(null); }} style={{ padding: "8px 16px", background: "var(--brand-primary)", color: "white", borderRadius: "8px", border: "none", fontWeight: 600, cursor: "pointer" }}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Module Modal */}
       {editingModule && (

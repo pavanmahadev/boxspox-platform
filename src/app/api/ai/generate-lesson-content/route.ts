@@ -61,7 +61,7 @@ Requirements:
 Generate the lesson content now:`;
 
     const response = await openai.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "llama-3.1-8b-instant",
       messages: [
         { role: "user", content: prompt }
       ],
@@ -84,7 +84,7 @@ Generate the lesson content now:`;
         await supabase.from("ai_usage").insert({
           user_id: user.id,
           feature: "generate-lesson-content",
-          model: "llama-3.3-70b-versatile",
+          model: "llama-3.1-8b-instant",
           prompt_tokens: usage.prompt_tokens,
           completion_tokens: usage.completion_tokens,
           total_tokens: usage.total_tokens,

@@ -10,32 +10,9 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 
-// Simple in-memory rate limiter
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 5; // 5 PDFs per minute per IP
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const clientData = rateLimitMap.get(ip);
-
-  if (!clientData) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return false;
-  }
-
-  if (now > clientData.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return false;
-  }
-
-  if (clientData.count >= MAX_REQUESTS_PER_WINDOW) {
-    return true;
-  }
-
-  clientData.count += 1;
-  return false;
-}
+// Rate Limit Settings
+const RATE_LIMIT_WINDOW_MINUTES = 60; // 1 hour
+const MAX_REQUESTS_PER_WINDOW = 10; // 10 PDFs per hour per user
 
 // PDF Styles
 const styles = StyleSheet.create({
@@ -43,50 +20,60 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    padding: 60,
+    padding: 40,
     backgroundColor: "#ffffff",
   },
   border: {
-    border: "12pt solid #0f6e56",
+    border: "10pt solid #0f6e56",
     borderRadius: 4,
     width: "100%",
     height: "100%",
     flexDirection: "column",
     alignItems: "center",
+    justifyContent: "space-between",
+    padding: 30,
+  },
+  content: {
+    flexDirection: "column",
+    alignItems: "center",
     justifyContent: "center",
-    padding: 40,
+    marginTop: 15,
+    width: "100%",
   },
   logo: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
     marginBottom: 16,
     letterSpacing: 3,
     color: "#333333",
   },
   title: {
-    fontSize: 36,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#0f6e56",
     textTransform: "uppercase",
-    letterSpacing: 5,
-    marginBottom: 24,
+    letterSpacing: 4,
+    marginBottom: 20,
+    textAlign: "center",
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#666666",
-    marginBottom: 12,
+    marginBottom: 10,
+    textAlign: "center",
   },
   name: {
-    fontSize: 44,
+    fontSize: 36,
     fontWeight: "bold",
     color: "#1a1a1a",
-    marginBottom: 16,
+    marginBottom: 12,
     fontStyle: "italic",
+    textAlign: "center",
   },
   course: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 40,
+    marginBottom: 20,
     textAlign: "center",
     color: "#333333",
   },
@@ -94,22 +81,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    position: "absolute",
-    bottom: 50,
-    left: 60,
-    right: 60,
-    paddingHorizontal: 20,
+    borderTop: "1px solid #e2e8f0",
+    paddingTop: 16,
   },
   footerItem: {
-    textAlign: "center",
+    flexDirection: "column",
+    alignItems: "center",
+    flex: 1,
   },
   footerLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: "#999999",
+    textTransform: "uppercase",
+    letterSpacing: 1,
     marginBottom: 4,
   },
   footerValue: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "bold",
     color: "#333333",
   },
@@ -136,24 +124,28 @@ function CertificateDocument({
       React.createElement(
         View,
         { style: styles.border },
-        React.createElement(Text, { style: styles.logo }, "BOXSPOX ACADEMY"),
         React.createElement(
-          Text,
-          { style: styles.title },
-          "Certificate of Completion"
+          View,
+          { style: styles.content },
+          React.createElement(Text, { style: styles.logo }, "BOXSPOX ACADEMY"),
+          React.createElement(
+            Text,
+            { style: styles.title },
+            "Certificate of Completion"
+          ),
+          React.createElement(
+            Text,
+            { style: styles.subtitle },
+            "This is to certify that"
+          ),
+          React.createElement(Text, { style: styles.name }, recipientName),
+          React.createElement(
+            Text,
+            { style: styles.subtitle },
+            "has successfully completed the professional course"
+          ),
+          React.createElement(Text, { style: styles.course }, courseName)
         ),
-        React.createElement(
-          Text,
-          { style: styles.subtitle },
-          "This is to certify that"
-        ),
-        React.createElement(Text, { style: styles.name }, recipientName),
-        React.createElement(
-          Text,
-          { style: styles.subtitle },
-          "has successfully completed the professional course"
-        ),
-        React.createElement(Text, { style: styles.course }, courseName),
         React.createElement(
           View,
           { style: styles.footer },
@@ -202,20 +194,8 @@ function CertificateDocument({
 }
 
 export async function GET(request: NextRequest) {
-  // Rate Limiting
-  const ip = request.headers.get("x-forwarded-for") || "unknown-ip";
-  if (isRateLimited(ip)) {
-    console.warn(`[CertAPI] Rate limit exceeded for IP: ${ip}`);
-    return new NextResponse("Too Many Requests. Please try again later.", {
-      status: 429,
-      headers: {
-        "Retry-After": "60",
-        "Content-Type": "text/plain",
-      },
-    });
-  }
-
   const certId = request.nextUrl.searchParams.get("id");
+  
   try {
     if (!certId) {
       console.error("[CertAPI] No ID provided in query params");
@@ -234,6 +214,31 @@ export async function GET(request: NextRequest) {
       console.error("[CertAPI] Auth error or no requester:", authError);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // NEW ROBUST DB-BACKED RATE LIMITING
+    const oneHourAgo = new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000).toISOString();
+    const { count: requestCount } = await supabase
+      .from("activity_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", requester.id)
+      .eq("action", "certificate_download")
+      .gte("created_at", oneHourAgo);
+
+    if (requestCount !== null && requestCount >= MAX_REQUESTS_PER_WINDOW) {
+      console.warn(`[CertAPI] DB Rate limit exceeded for User: ${requester.id}`);
+      return new NextResponse("Rate limit exceeded. You can only download 10 certificates per hour.", {
+        status: 429,
+        headers: { "Content-Type": "text/plain" },
+      });
+    }
+
+    // Log the attempt
+    await supabase.from("activity_logs").insert({
+      user_id: requester.id,
+      action: "certificate_download",
+      target_type: "certificate",
+      target_id: certId
+    });
 
     const { data: cert, error: certError } = await supabase
       .from("certificates")
@@ -282,7 +287,9 @@ export async function GET(request: NextRequest) {
       .eq("course_id", cert.course_id)
       .single();
 
-    if (!enrollment?.final_exam_passed && !isAdmin) {
+    const isInstructor = profile?.role === "instructor";
+
+    if (!enrollment?.final_exam_passed && !isAdmin && !isOwner && !isInstructor) {
       console.warn(`[CertAPI] Security Blocked: ${requester.email} attempted to download certificate without passing final exam.`);
       return NextResponse.json(
         { error: "Forbidden: You must pass the Final Certification Exam to download this certificate." },
@@ -321,13 +328,15 @@ export async function GET(request: NextRequest) {
 
     console.log("[CertAPI] PDF generated successfully");
 
-    const fileName = `Certificate-${recipientName.replace(/\s+/g, "-")}.pdf`;
+    const safeRecipient = recipientName.replace(/[^a-zA-Z0-9]/g, "-");
+    const safeCourse = courseName.replace(/[^a-zA-Z0-9]/g, "-");
+    const safeFileName = `Certificate-${safeRecipient}-${safeCourse}.pdf`;
 
     return new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Disposition": `attachment; filename="${safeFileName}"; filename*=UTF-8''${encodeURIComponent(safeFileName)}`,
         "Content-Length": pdfBuffer.length.toString(),
         "Cache-Control": "private, max-age=3600",
       },
