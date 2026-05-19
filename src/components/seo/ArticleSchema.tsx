@@ -10,6 +10,7 @@ interface ArticleSchemaProps {
   imageUrl?: string;
   datePublished?: string;
   dateModified?: string;
+  schemaType?: string;
 }
 
 export function ArticleSchema({
@@ -21,11 +22,12 @@ export function ArticleSchema({
   url,
   imageUrl = "https://boxspox.in/og-image.png",
   datePublished,
-  dateModified
+  dateModified,
+  schemaType = "Article"
 }: ArticleSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
-    '@type': 'TechArticle', // Or Article, but TechArticle is good for tutorials
+    '@type': schemaType,
     headline: headline,
     description: description,
     image: [imageUrl],

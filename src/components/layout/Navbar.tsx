@@ -22,7 +22,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
-  ShoppingCart
+  ShoppingCart,
+  FileText
 } from "lucide-react";
 import { subscribeToChannel } from "@/utils/realtime";
 import { SearchModal } from "@/components/layout/SearchModal";
@@ -216,8 +217,8 @@ export function Navbar() {
             </span>
           </Link>
 
-          <button
-            onClick={() => setTutorialsOpen(!tutorialsOpen)}
+          <Link
+            href="/learn"
             className="learn-btn"
             style={{
               background: "none",
@@ -227,6 +228,7 @@ export function Navbar() {
               gap: "6px",
               cursor: "pointer",
               color: "var(--text-primary)",
+              textDecoration: "none",
               fontWeight: 700,
               fontSize: "0.85rem",
               padding: "6px 10px",
@@ -235,9 +237,8 @@ export function Navbar() {
             }}
           >
             <BookOpen size={16} />
-            <span className="hidden-mobile">Learn</span>
-            <ChevronDown size={12} color="#6B7280" style={{ transform: tutorialsOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
-          </button>
+            <span className="hidden-mobile">Domains</span>
+          </Link>
         </div>
 
         {/* Center/Right Navigation */}
@@ -245,6 +246,9 @@ export function Navbar() {
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }} className="nav-links-desktop">
             <Link href="/paths" style={{ textDecoration: "none", color: "var(--text-secondary)", fontWeight: 600, fontSize: "0.9rem", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--brand-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>
               Learning Paths
+            </Link>
+            <Link href="/articles" style={{ textDecoration: "none", color: "var(--text-secondary)", fontWeight: 600, fontSize: "0.9rem", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--brand-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>
+              Articles
             </Link>
             <Link href="/playground" style={{ textDecoration: "none", color: "var(--text-secondary)", fontWeight: 600, fontSize: "0.9rem", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--brand-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>
               Playground
@@ -566,8 +570,11 @@ export function Navbar() {
               <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>
                 <LayoutDashboard size={16} color="#64748B" /> Dashboard
               </Link>
-              <Link href="/tutorials" onClick={() => setMobileMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>
-                <BookOpen size={16} color="#64748B" /> Tutorials
+              <Link href="/learn" onClick={() => setMobileMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>
+                <BookOpen size={16} color="#64748B" /> Domains
+              </Link>
+              <Link href="/articles" onClick={() => setMobileMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>
+                <FileText size={16} color="#64748B" /> Articles
               </Link>
               <Link href="/playground" onClick={() => setMobileMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", color: "#0F172A", fontSize: "14px", fontWeight: 600 }}>
                 <Code2 size={16} color="#64748B" /> Tryit Editor

@@ -60,29 +60,39 @@ export function TrendingTutorials() {
           gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
           gap: "16px"
         }}>
-          {trendingItems.map((item, i) => (
-            <motion.div
-              key={item.name}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              whileHover={{ y: -4, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.08)" }}
-            >
-              <Link
-                href={`/tutorials/${item.name.toLowerCase().replace(" ", "-")}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "16px",
-                  padding: "20px",
-                  background: "var(--bg-card)",
-                  borderRadius: "16px",
-                  border: "1px solid var(--border-primary)",
-                  textDecoration: "none",
-                  position: "relative"
-                }}
-              >
+          {trendingItems.map((item, i) => {
+            const categoryMap: Record<string, string> = {
+              "AI": "ai-and-data-science",
+              "Web Dev": "technology",
+              "Programming": "technology",
+              "CS": "technology",
+              "DevOps": "technology",
+              "Java": "technology"
+            };
+            const catSlug = categoryMap[item.category] || "technology";
+            return (
+              <motion.div
+                  key={item.name}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  whileHover={{ y: -4, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.08)" }}
+                >
+                  <Link
+                    href={`/learn/${catSlug}/${item.name.toLowerCase().replace(" ", "-")}`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                      padding: "20px",
+                      background: "var(--bg-card)",
+                      borderRadius: "16px",
+                      border: "1px solid var(--border-primary)",
+                      textDecoration: "none",
+                      position: "relative"
+                    }}
+                  >
                 <span style={{
                   position: "absolute",
                   top: "10px",
@@ -126,7 +136,7 @@ export function TrendingTutorials() {
                 </div>
               </Link>
             </motion.div>
-          ))}
+          ); })}
         </div>
       </div>
     </section>

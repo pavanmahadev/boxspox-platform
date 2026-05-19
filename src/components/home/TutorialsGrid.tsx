@@ -124,7 +124,7 @@ export function TutorialsGrid({ initialCourses }: { initialCourses: any[] }) {
               
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", alignItems: "center", marginBottom: "40px" }}>
                 <Link 
-                  href={`/tutorials/${section.slug}`} 
+                  href={`/learn/technology/${section.slug}`} 
                   className="btn-primary" 
                   style={{ 
                     background: section.btnBg, 

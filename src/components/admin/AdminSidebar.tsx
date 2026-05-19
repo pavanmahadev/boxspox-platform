@@ -18,20 +18,45 @@ import {
   MessageSquare,
   Megaphone,
   Cpu,
-  Briefcase
+  Briefcase,
+  FolderOpen,
+  Activity
 } from "lucide-react";
 
-const menuItems = [
-  { name: "Overview", icon: <LayoutDashboard size={20} />, href: "/admin" },
-  { name: "Courses", icon: <BookOpen size={20} />, href: "/admin/courses" },
-  { name: "Submissions", icon: <FileText size={20} />, href: "/admin/submissions" },
-  { name: "Learning Paths", icon: <TrendingUp size={20} />, href: "/admin/paths" },
-  { name: "Course Reviews", icon: <MessageSquare size={20} />, href: "/admin/reviews" },
-  { name: "User Management", icon: <Users size={20} />, href: "/admin/users" },
-  { name: "Manage Ads", icon: <Megaphone size={20} />, href: "/admin/ads" },
-  { name: "AI Usage", icon: <Cpu size={20} />, href: "/admin/ai-usage" },
-  { name: "Manage Jobs", icon: <Briefcase size={20} />, href: "/admin/jobs" },
-  { name: "Settings", icon: <Settings size={20} />, href: "/admin/settings" },
+const menuSections = [
+  {
+    label: "General",
+    items: [
+      { name: "Overview", icon: <LayoutDashboard size={20} />, href: "/admin" },
+      { name: "Courses", icon: <BookOpen size={20} />, href: "/admin/courses" },
+      { name: "Categories", icon: <FolderOpen size={20} />, href: "/admin/categories" },
+      { name: "Articles", icon: <FileText size={20} />, href: "/admin/articles" },
+      { name: "Learning Paths", icon: <TrendingUp size={20} />, href: "/admin/paths" },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { name: "Submissions", icon: <FileText size={20} />, href: "/admin/submissions" },
+      { name: "Course Reviews", icon: <MessageSquare size={20} />, href: "/admin/reviews" },
+      { name: "User Management", icon: <Users size={20} />, href: "/admin/users" },
+      { name: "Live Activity", icon: <Activity size={20} />, href: "/admin/activity" },
+    ],
+  },
+  {
+    label: "Monetization",
+    items: [
+      { name: "Manage Ads", icon: <Megaphone size={20} />, href: "/admin/ads" },
+      { name: "Manage Jobs", icon: <Briefcase size={20} />, href: "/admin/jobs" },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { name: "AI Usage", icon: <Cpu size={20} />, href: "/admin/ai-usage" },
+      { name: "Settings", icon: <Settings size={20} />, href: "/admin/settings" },
+    ],
+  },
 ];
 
 export function AdminSidebar({ onNavItemClick }: { onNavItemClick?: () => void }) {
@@ -67,38 +92,43 @@ export function AdminSidebar({ onNavItemClick }: { onNavItemClick?: () => void }
         </Link>
       </div>
 
-      {/* Menu */}
-      <nav style={{ flex: 1, padding: "20px 12px" }}>
-        <div style={{ fontSize: "10px", fontWeight: 800, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "12px", padding: "0 12px" }}>General</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={onNavItemClick}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "10px 12px",
-                  borderRadius: "8px",
-                  textDecoration: "none",
-                  color: isActive ? "#111827" : "#6B7280",
-                  background: isActive ? "#F3F4F6" : "transparent",
-                  fontWeight: isActive ? 700 : 600,
-                  fontSize: "13px",
-                  transition: "all 0.1s ease"
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span style={{ color: isActive ? "#111827" : "#9CA3AF" }}>{item.icon}</span>
-                  {item.name}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+      <nav style={{ flex: 1, padding: "20px 12px", overflowY: "auto" }}>
+        {menuSections.map((section) => (
+          <div key={section.label} style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "10px", fontWeight: 800, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px", padding: "0 12px" }}>
+              {section.label}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+              {section.items.map((item) => {
+                const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={onNavItemClick}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "10px 12px",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      color: isActive ? "#111827" : "#6B7280",
+                      background: isActive ? "#F3F4F6" : "transparent",
+                      fontWeight: isActive ? 700 : 600,
+                      fontSize: "13px",
+                      transition: "all 0.1s ease"
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span style={{ color: isActive ? "#111827" : "#9CA3AF" }}>{item.icon}</span>
+                      {item.name}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Footer */}

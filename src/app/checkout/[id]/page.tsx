@@ -38,9 +38,16 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
     .eq("course_id", normalizedId)
     .single();
 
+  const slugify = (s: string) =>
+    (s || "")
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
   if (enrollment?.exam_unlocked) {
     // Already unlocked — go straight to the exam, NOT /tutorials/slug (that causes a redirect loop)
-    redirect(`/tutorials/${course.slug}/exam`);
+    redirect(`/learn/${slugify(course.category || "development")}/${course.slug}/exam`);
   }
 
   return (

@@ -125,7 +125,7 @@ export async function verifyRazorpayPayment(
 
   const { data: course } = await supabase
     .from("courses")
-    .select("slug")
+    .select("slug, category")
     .eq("id", courseId)
     .single();
 
@@ -164,6 +164,16 @@ export async function verifyRazorpayPayment(
     }
   }
 
+  const slugify = (s: string) =>
+    (s || "")
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+  const cat = slugify(course.category || "development");
+  revalidatePath(`/learn/${cat}/${course.slug}`);
+  revalidatePath(`/learn/${cat}/${course.slug}/exam`);
   revalidatePath(`/tutorials/${course.slug}`);
   revalidatePath(`/tutorials/${course.slug}/exam`);
   
@@ -180,7 +190,7 @@ export async function simulatePurchase(courseId: string) {
 
   const { data: course } = await supabase
     .from("courses")
-    .select("slug")
+    .select("slug, category")
     .eq("id", courseId)
     .single();
 
@@ -220,6 +230,16 @@ export async function simulatePurchase(courseId: string) {
     if (error) throw error;
   }
 
+  const slugify = (s: string) =>
+    (s || "")
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+  const cat = slugify(course.category || "development");
+  revalidatePath(`/learn/${cat}/${course.slug}`);
+  revalidatePath(`/learn/${cat}/${course.slug}/exam`);
   revalidatePath(`/tutorials/${course.slug}`);
   revalidatePath(`/tutorials/${course.slug}/exam`);
 

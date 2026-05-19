@@ -7,6 +7,13 @@ import { ChevronRight, ChevronLeft, Clock, Star, BookOpen } from "lucide-react";
 
 const fallbackImage = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80";
 
+const slugify = (s: string) =>
+  (s || "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
 const defaultCourses = [
   {
     title: "Modern Web Development",
@@ -104,7 +111,7 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
           </div>
           
           <div style={{ display: "flex", alignItems: "center", gap: "24px", marginBottom: "8px" }}>
-            <Link href="/tutorials" style={{
+            <Link href="/learn" style={{
               color: "var(--brand-primary)",
               fontWeight: 700,
               textDecoration: "none",
@@ -113,7 +120,7 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
               gap: "4px",
               fontSize: "14px"
             }}>
-              View All Tutorials <ChevronRight size={18} />
+              Explore All Domains <ChevronRight size={18} />
             </Link>
             
             <div style={{ display: "flex", gap: "8px" }}>
@@ -319,7 +326,7 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
                       </div>
                     </div>
                     
-                    <Link href={`/tutorials/${course.slug}`} style={{
+                    <Link href={`/learn/${slugify(course.category || "development")}/${course.slug}`} style={{
                       padding: "12px 24px",
                       borderRadius: "14px",
                       background: "var(--brand-primary)",

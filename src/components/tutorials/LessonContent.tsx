@@ -40,6 +40,9 @@ import { broadcastAnnouncement } from "@/utils/realtime";
 const Discussion = dynamic(() => import("./Discussion"), { ssr: false, loading: () => null });
 const LessonNotes = dynamic(() => import("./LessonNotes"), { ssr: false, loading: () => null });
 import { PresenceIndicator } from "./PresenceIndicator";
+import { VideoPlayer } from "./VideoPlayer";
+import { PDFViewer } from "./PDFViewer";
+import { QuizEngine } from "./QuizEngine";
 
 const SandpackEditor = dynamic<any>(() => import("@/components/editor/SandpackEditor"), {
   ssr: false,
@@ -58,7 +61,9 @@ interface Lesson {
   code_template: string;
   order_index: number;
   video_url?: string;
+  pdf_url?: string;
   lesson_type?: string;
+  content_type?: string;
   duration_minutes?: number;
 }
 
@@ -76,6 +81,7 @@ interface LessonContentProps {
   allLessons: Lesson[];
   gradient: string;
   currentUserId?: string;
+  baseUrl?: string;
   ad?: {
     id: string;
     title: string;
@@ -85,7 +91,7 @@ interface LessonContentProps {
   } | null;
 }
 
-export function LessonContent({ course, lesson, allLessons, ad }: LessonContentProps) {
+export function LessonContent({ course, lesson, allLessons, ad, baseUrl }: LessonContentProps) {
   const [user, setUser] = useState<any>(null);
   const [completedIds, setCompletedIds] = useState<string[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
@@ -192,7 +198,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
         broadcastAnnouncement(`${user.email?.split('@')[0]} just completed "${lesson.title}"!`, 'success');
         
         if (nextLesson) {
-           setTimeout(() => router.push(`/tutorials/${course.slug}/${nextLesson.slug}`), 2000);
+           setTimeout(() => router.push(baseUrl ? `${baseUrl}/${nextLesson.slug}` : `/tutorials/${course.slug}/${nextLesson.slug}`), 2000);
         }
       }
     } catch (err: any) {
@@ -566,7 +572,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
                 allLessons.map((l, idx) => (
                   <Link
                     key={l.id}
-                    href={`/tutorials/${course.slug}/${l.slug}`}
+                    href={baseUrl ? `${baseUrl}/${l.slug}` : `/tutorials/${course.slug}/${l.slug}`}
                     onClick={() => setMobileNavOpen(false)}
                     style={{
                       display: "flex",
@@ -592,7 +598,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
               {/* Final Exam Module */}
               <div style={{ marginTop: "16px", borderTop: "1px solid #E2E8F0", paddingTop: "16px" }}>
                 <Link
-                  href={`/tutorials/${course.slug}/exam`}
+                  href={baseUrl ? `${baseUrl}/exam` : `/tutorials/${course.slug}/exam`}
                   onClick={() => setMobileNavOpen(false)}
                   style={{
                     display: "flex",
@@ -634,9 +640,9 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px", flexWrap: "wrap", gap: "24px" }}>
               <div style={{ flex: "1 1 300px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", color: "var(--text-tertiary)", fontSize: "13px", fontWeight: 600 }}>
-                  <Link href="/tutorials" style={{ color: "inherit", textDecoration: "none" }}>Learn</Link>
+                  <Link href={baseUrl ? baseUrl.split('/').slice(0,3).join('/') : '/tutorials'} style={{ color: "inherit", textDecoration: "none" }}>Learn</Link>
                   <ChevronRight size={14} />
-                  <Link href={`/tutorials/${course.slug}`} style={{ color: "inherit", textDecoration: "none" }} className="breadcrumb-truncate">{course.title}</Link>
+                  <Link href={baseUrl || `/tutorials/${course.slug}`} style={{ color: "inherit", textDecoration: "none" }} className="breadcrumb-truncate">{course.title}</Link>
                 </div>
                 
                 <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px", flexWrap: "wrap" }}>
@@ -709,8 +715,9 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
           <div className="prose-enhanced" style={{ marginBottom: "80px" }}>
              <LessonRenderer 
                content={hinglishMode && hinglishContent ? hinglishContent : lesson.content} 
-               lessonType={lesson.lesson_type} 
+               lessonType={lesson.content_type || lesson.lesson_type} 
                videoUrl={lesson.video_url} 
+               pdfUrl={lesson.pdf_url}
                codeTemplate={lesson.code_template}
              />
           </div>
@@ -742,7 +749,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
             
             {prevLesson ? (
               <Link
-                href={`/tutorials/${course.slug}/${prevLesson.slug}`}
+                href={baseUrl ? `${baseUrl}/${prevLesson.slug}` : `/tutorials/${course.slug}/${prevLesson.slug}`}
                 style={{ 
                   flex: 1, 
                   display: "flex", 
@@ -775,7 +782,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
 
             {nextLesson ? (
               <Link
-                href={`/tutorials/${course.slug}/${nextLesson.slug}`}
+                href={baseUrl ? `${baseUrl}/${nextLesson.slug}` : `/tutorials/${course.slug}/${nextLesson.slug}`}
                 style={{ 
                   flex: 1, 
                   display: "flex", 
@@ -808,7 +815,7 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
               </Link>
             ) : (
               <Link
-                href={`/tutorials/${course.slug}/exam`}
+                href={baseUrl ? `${baseUrl}/exam` : `/tutorials/${course.slug}/exam`}
                 style={{ 
                   flex: 1, 
                   display: "flex", 
@@ -897,12 +904,12 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
               return (
                 <>
                   {prevLesson ? (
-                    <Link href={`/tutorials/${course.slug}/${prevLesson.slug}`} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", fontSize: "15px", fontWeight: 700, textDecoration: "none", color: "var(--text-primary)", border: "2px solid var(--border-primary)", borderRadius: "12px", background: "var(--bg-card)", transition: "all 0.2s" }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-primary)"; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-primary)"; e.currentTarget.style.color = "var(--text-primary)"; }}>
+                    <Link href={baseUrl ? `${baseUrl}/${prevLesson.slug}` : `/tutorials/${course.slug}/${prevLesson.slug}`} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", fontSize: "15px", fontWeight: 700, textDecoration: "none", color: "var(--text-primary)", border: "2px solid var(--border-primary)", borderRadius: "12px", background: "var(--bg-card)", transition: "all 0.2s" }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-primary)"; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-primary)"; e.currentTarget.style.color = "var(--text-primary)"; }}>
                       <ChevronLeft size={20} /> <span className="hide-on-mobile">Previous: </span> {prevLesson.title}
                     </Link>
                   ) : <div />}
                   {nextLesson ? (
-                    <Link href={`/tutorials/${course.slug}/${nextLesson.slug}`} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", fontSize: "15px", fontWeight: 700, textDecoration: "none", color: "white", background: "var(--brand-primary)", borderRadius: "12px", border: "none", transition: "transform 0.2s, box-shadow 0.2s" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 10px 20px rgba(16, 185, 129, 0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+                    <Link href={baseUrl ? `${baseUrl}/${nextLesson.slug}` : `/tutorials/${course.slug}/${nextLesson.slug}`} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", fontSize: "15px", fontWeight: 700, textDecoration: "none", color: "white", background: "var(--brand-primary)", borderRadius: "12px", border: "none", transition: "transform 0.2s, box-shadow 0.2s" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 10px 20px rgba(16, 185, 129, 0.2)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
                       <span className="hide-on-mobile">Next: </span> {nextLesson.title} <ChevronRight size={20} />
                     </Link>
                   ) : <div />}
@@ -1008,7 +1015,36 @@ export function LessonContent({ course, lesson, allLessons, ad }: LessonContentP
 
       {/* Modals */}
       {quizOpen && quiz && (
-        <QuizPlayer quiz={quiz} onClose={() => setQuizOpen(false)} results={quizResults} onSubmit={handleQuizSubmit} onReset={() => setQuizResults(null)} />
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.9)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(16px)" }}>
+           <div style={{ position: "relative", width: "100%", maxWidth: "800px", maxHeight: "90vh", overflowY: "auto", background: "var(--bg-card)", padding: "32px", borderRadius: "32px", border: "1px solid var(--border-primary)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}>
+             <button onClick={() => setQuizOpen(false)} style={{ position: "absolute", top: "24px", right: "24px", zIndex: 10, background: "var(--bg-tertiary)", border: "none", width: "40px", height: "40px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-secondary)" }}>
+               <X size={20} />
+             </button>
+             <QuizEngine 
+                quizId={quiz.id}
+                title={quiz.title}
+                questions={quiz.questions.map((q: any) => ({
+                   id: q.id || Math.random().toString(),
+                   question_text: q.question || q.question_text,
+                   options: q.options.map((o: any) => typeof o === 'object' ? o.text : o),
+                   correct_option_index: q.options.findIndex((o: any) => o.isCorrect) >= 0 ? q.options.findIndex((o: any) => o.isCorrect) : 0,
+                   explanation: q.explanation
+                }))}
+                passingScore={quiz.passing_score || 70}
+                onComplete={(score, passed) => {
+                   setQuizResults({ score, passed });
+                   if (passed) {
+                      showToast(`Quiz Passed! Score: ${score}%`, "success", "Excellent Job!");
+                      if (!isCompleted(lesson.id)) {
+                        handleToggleComplete();
+                      }
+                   } else {
+                      showToast(`Quiz failed (${score}%). Try again to complete the lesson.`, "error", "Keep Trying!");
+                   }
+                }}
+             />
+           </div>
+        </div>
       )}
 
       {aiModalOpen && (
@@ -1146,15 +1182,22 @@ function CodeBlock({ children }: any) {
   );
 }
 
-function LessonRenderer({ content, lessonType, videoUrl, codeTemplate }: any) {
+function LessonRenderer({ content, lessonType, videoUrl, pdfUrl, codeTemplate }: any) {
   // Unescape literal \n strings if they exist
   const formattedContent = content ? content.replace(/\\n/g, "\n") : "";
 
   if (lessonType === 'video' && videoUrl) {
-    const videoId = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/)?.[1];
     return (
-      <div style={{ width: "100%", aspectRatio: "16/9", borderRadius: "24px", overflow: "hidden", background: "black", marginBottom: "48px", boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}>
-        <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${videoId}`} frameBorder="0" allowFullScreen></iframe>
+      <div style={{ marginBottom: "48px" }}>
+        <VideoPlayer url={videoUrl} />
+      </div>
+    );
+  }
+
+  if (lessonType === 'pdf' && pdfUrl) {
+    return (
+      <div style={{ marginBottom: "48px", height: "800px" }}>
+        <PDFViewer url={pdfUrl} title="Course Document" />
       </div>
     );
   }

@@ -31,10 +31,11 @@ interface Lesson {
   title: string;
   slug: string;
   content: string;
-  video_url: string;
+  video_url?: string;
+  pdf_url?: string;
   code_template: string;
   order_index: number;
-  lesson_type?: "text" | "video" | "quiz" | "coding";
+  lesson_type?: "text" | "video" | "quiz" | "coding" | "pdf";
 }
 
 interface Module {
@@ -392,6 +393,7 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
           slug,
           content: editingLesson.content || "",
           video_url: editingLesson.video_url || "",
+          pdf_url: editingLesson.pdf_url || "",
           code_template: editingLesson.code_template || "",
           lesson_type: editingLesson.lesson_type || "text",
         }).eq("id", editingLesson.id);
@@ -404,6 +406,7 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
           slug,
           content: editingLesson.content || "",
           video_url: editingLesson.video_url || "",
+          pdf_url: editingLesson.pdf_url || "",
           code_template: editingLesson.code_template || "",
           lesson_type: editingLesson.lesson_type || "text",
           order_index: moduleLessons.length
@@ -773,6 +776,7 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
                   >
                     <option value="text">Text / Article</option>
                     <option value="video">Video Lesson</option>
+                    <option value="pdf">PDF Document</option>
                     <option value="coding">Coding Challenge</option>
                     <option value="quiz">Interactive Quiz</option>
                   </select>
@@ -799,6 +803,18 @@ export function CourseCurriculum({ courseId }: { courseId: string }) {
                     </div>
                   )}
                 </div>
+                {editingLesson.lesson_type === 'pdf' && (
+                  <div>
+                    <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "6px", display: "block" }}>PDF URL (Google Drive, S3, etc.)</label>
+                    <input 
+                      type="text" 
+                      value={editingLesson.pdf_url || ""} 
+                      onChange={e => setEditingLesson({...editingLesson, pdf_url: e.target.value})}
+                      style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-primary)", outline: "none", background: "var(--bg-card)", color: "var(--text-primary)" }}
+                      placeholder="e.g. https://domain.com/path/to/document.pdf"
+                    />
+                  </div>
+                )}
               </div>
               
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>

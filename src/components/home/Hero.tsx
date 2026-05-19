@@ -72,14 +72,14 @@ export function Hero() {
               maxWidth: "540px",
               fontWeight: 500
             }}>
-              Learn Java, Python, TypeScript, React, and more. Improve your skills with interactive lessons and tell people you are ready for the future.
+              Learn AI, Corporate Law, Business Strategy, React, and more. Improve your skills with interactive lessons and tell people you are ready for the future.
             </p>
 
             <div className="hero-buttons" style={{ display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center" }}>
               <Link href="/register" className="btn-primary hero-btn-primary" style={{ padding: "16px 40px", fontSize: "16px", display: "flex", justifyContent: "center" }}>
                 Start Learning Free <ChevronRight size={18} />
               </Link>
-              <Link href="/tutorials" className="hover-lift hero-btn-secondary" style={{
+              <Link href="/learn" className="hover-lift hero-btn-secondary" style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -93,12 +93,12 @@ export function Hero() {
                 <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Play size={14} fill="currentColor" />
                 </div>
-                Browse Courses
+                Browse Domains
               </Link>
             </div>
           </motion.div>
 
-          {/* Right Visual (Running Tech Cards) */}
+          {/* Right Visual (Running Domain Cards) */}
           <div style={{ 
             position: "relative", 
             height: "450px", 
@@ -125,10 +125,10 @@ export function Hero() {
             <div className="marquee-row" style={{ display: "flex", width: "max-content", animation: "scrollLeft 20s linear infinite" }}>
               <div style={{ display: "flex", gap: "20px", paddingRight: "20px" }}>
                 {[
-                  { name: "Java", logo: "https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg" },
-                  { name: "Python", logo: "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" },
-                  { name: "TypeScript", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Typescript_logo_2020.svg" },
-                  { name: "React", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" },
+                  { name: "Artificial Intelligence", emoji: "🤖" },
+                  { name: "Corporate Law", emoji: "⚖️" },
+                  { name: "Web Development", emoji: "💻" },
+                  { name: "Financial Strategy", emoji: "📈" },
                 ].map((tech, index) => (
                   <div key={index} style={{
                     background: "white",
@@ -139,10 +139,10 @@ export function Hero() {
                     alignItems: "center",
                     gap: "12px",
                     border: "1px solid #f0f0f0",
-                    minWidth: "180px"
+                    minWidth: "max-content"
                   }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <img src={tech.logo} alt={tech.name} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", background: "#f8fafc", borderRadius: "8px" }}>
+                      {tech.emoji}
                     </div>
                     <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{tech.name}</span>
                   </div>
@@ -151,10 +151,10 @@ export function Hero() {
               {/* Duplicate for seamless loop */}
               <div style={{ display: "flex", gap: "20px", paddingRight: "20px" }}>
                 {[
-                  { name: "Java", logo: "https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg" },
-                  { name: "Python", logo: "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" },
-                  { name: "TypeScript", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Typescript_logo_2020.svg" },
-                  { name: "React", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" },
+                  { name: "Artificial Intelligence", emoji: "🤖" },
+                  { name: "Corporate Law", emoji: "⚖️" },
+                  { name: "Web Development", emoji: "💻" },
+                  { name: "Financial Strategy", emoji: "📈" },
                 ].map((tech, index) => (
                   <div key={`dup-${index}`} style={{
                     background: "white",
@@ -165,10 +165,10 @@ export function Hero() {
                     alignItems: "center",
                     gap: "12px",
                     border: "1px solid #f0f0f0",
-                    minWidth: "180px"
+                    minWidth: "max-content"
                   }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <img src={tech.logo} alt={tech.name} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", background: "#f8fafc", borderRadius: "8px" }}>
+                      {tech.emoji}
                     </div>
                     <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{tech.name}</span>
                   </div>
@@ -180,10 +180,10 @@ export function Hero() {
             <div className="marquee-row" style={{ display: "flex", width: "max-content", animation: "scrollRight 20s linear infinite" }}>
               <div style={{ display: "flex", gap: "20px", paddingRight: "20px" }}>
                 {[
-                  { name: "Next.js", logo: "https://upload.wikimedia.org/wikipedia/commons/8/8e/Nextjs-logo.svg" },
-                  { name: "Node.js", logo: "https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg" },
-                  { name: "Docker", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Docker_%28container_engine%29_logo.svg" },
-                  { name: "Git", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Git-logo.svg" },
+                  { name: "Medical Research", emoji: "🔬" },
+                  { name: "Digital Marketing", emoji: "📱" },
+                  { name: "AgriTech Farming", emoji: "🚜" },
+                  { name: "Cybersecurity", emoji: "🛡️" },
                 ].map((tech, index) => (
                   <div key={index} style={{
                     background: "white",
@@ -194,10 +194,10 @@ export function Hero() {
                     alignItems: "center",
                     gap: "12px",
                     border: "1px solid #f0f0f0",
-                    minWidth: "180px"
+                    minWidth: "max-content"
                   }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <img src={tech.logo} alt={tech.name} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", background: "#f8fafc", borderRadius: "8px" }}>
+                      {tech.emoji}
                     </div>
                     <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{tech.name}</span>
                   </div>
@@ -206,10 +206,10 @@ export function Hero() {
               {/* Duplicate for seamless loop */}
               <div style={{ display: "flex", gap: "20px", paddingRight: "20px" }}>
                 {[
-                  { name: "Next.js", logo: "https://upload.wikimedia.org/wikipedia/commons/8/8e/Nextjs-logo.svg" },
-                  { name: "Node.js", logo: "https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg" },
-                  { name: "Docker", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Docker_%28container_engine%29_logo.svg" },
-                  { name: "Git", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Git-logo.svg" },
+                  { name: "Medical Research", emoji: "🔬" },
+                  { name: "Digital Marketing", emoji: "📱" },
+                  { name: "AgriTech Farming", emoji: "🚜" },
+                  { name: "Cybersecurity", emoji: "🛡️" },
                 ].map((tech, index) => (
                   <div key={`dup-${index}`} style={{
                     background: "white",
@@ -220,10 +220,10 @@ export function Hero() {
                     alignItems: "center",
                     gap: "12px",
                     border: "1px solid #f0f0f0",
-                    minWidth: "180px"
+                    minWidth: "max-content"
                   }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <img src={tech.logo} alt={tech.name} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", background: "#f8fafc", borderRadius: "8px" }}>
+                      {tech.emoji}
                     </div>
                     <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{tech.name}</span>
                   </div>

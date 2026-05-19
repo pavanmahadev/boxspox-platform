@@ -3,6 +3,7 @@ import { TrustBar } from "@/components/home/TrustBar";
 import { RealtimeStats } from "@/components/home/RealtimeStats";
 import { FeaturedCourses } from "@/components/home/FeaturedCourses";
 import { createClient } from "@/utils/supabase/server";
+import { CategoryNav } from "@/components/home/CategoryNav";
 import dynamic from "next/dynamic";
 
 const Testimonials = dynamic(() => import("@/components/home/Testimonials").then(mod => mod.Testimonials), { ssr: true });
@@ -37,6 +38,7 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
+      <CategoryNav />
       <TrustBar />
       <RealtimeStats />
       <FeaturedCourses courses={courses} />

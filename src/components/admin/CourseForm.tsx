@@ -6,7 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Save, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/ToastProvider";
-import { CATEGORIES, slugifyCategory } from "./CourseSearch";
+import { DOMAIN_GROUPS, slugifyCategory } from "@/utils/domains";
 import { createCourseAction, updateCourseAction } from "@/app/instructor/courses/actions";
 
 const inputStyle: React.CSSProperties = {
@@ -247,11 +247,22 @@ export function CourseForm({ initialData, instructorId }: CourseFormProps) {
               { value: "archived", label: "📦 Archived" },
             ])}
 
-            {selectField("Category", "category", [
-              { value: "web-development", label: "Web Development" },
-              { value: "mobile-apps", label: "Mobile Apps" },
-              ...CATEGORIES.map(c => ({ value: slugifyCategory(c), label: c }))
-            ])}
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <label style={labelStyle}>Category</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                style={{ ...inputStyle, cursor: "pointer" }}
+              >
+                {Object.entries(DOMAIN_GROUPS).map(([domain, cats]) => (
+                  <optgroup key={domain} label={domain}>
+                    {cats.map(c => (
+                      <option key={slugifyCategory(c)} value={slugifyCategory(c)}>{c}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
 
             {selectField("Difficulty", "difficulty", [
               { value: "beginner", label: "🟢 Beginner" },

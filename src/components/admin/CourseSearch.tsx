@@ -3,23 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, Filter } from "lucide-react";
-
-export const CATEGORIES = Array.from(new Set([
-  "HTML and CSS", "HTML", "CSS", "RWD", "Bootstrap", "Sass", "Colors", "Icons", "SVG", "Canvas", 
-  "Graphics", "UTF-8 and Emojis", "How To", "JavaScript", "React", "jQuery", "Vue", "Angular", 
-  "AngularJS", "JSON", "AJAX", "AppML", "TypeScript", "Next.js", "Backend", "Python", "SQL", 
-  "MySQL", "PHP", "Java", "C", "C++", "C#", "R", "Kotlin", "Rust", "Go", "Django", "PostgreSQL", 
-  "Node.js", "MongoDB", "Git", "Bash", "Data Analytics", "AI", "Generative AI", "ChatGPT-4", 
-  "Machine Learning", "DSA", "Data Science", "NumPy", "Pandas", "SciPy", "Matplotlib", 
-  "Statistics", "Excel", "Google Sheets"
-]));
-
-export const slugifyCategory = (c: string) => 
-  c.toLowerCase()
-   .replace(/#/g, "-sharp")
-   .replace(/\+/g, "-plus")
-   .replace(/[^a-z0-9]+/g, "-")
-   .replace(/(^-|-$)/g, "");
+import { DOMAIN_GROUPS, CATEGORIES, slugifyCategory } from "@/utils/domains";
 
 export function CourseSearch({ initialValue, initialCategory = "" }: { initialValue: string, initialCategory?: string }) {
   const [value, setValue] = useState(initialValue);
@@ -109,7 +93,11 @@ export function CourseSearch({ initialValue, initialCategory = "" }: { initialVa
           }}
         >
           <option value="">All Categories</option>
-          {CATEGORIES.map((c, i) => <option key={`${slugifyCategory(c)}-${i}`} value={slugifyCategory(c)}>{c}</option>)}
+          {Object.entries(DOMAIN_GROUPS).map(([domain, cats]) => (
+            <optgroup key={domain} label={domain}>
+              {cats.map((c, i) => <option key={`${slugifyCategory(c)}-${i}`} value={slugifyCategory(c)}>{c}</option>)}
+            </optgroup>
+          ))}
         </select>
         <Filter size={16} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--text-tertiary)" }} />
       </div>

@@ -20,9 +20,10 @@ interface CourseContentProps {
   lessons: any[];
   gradient: string;
   currentUserId?: string;
+  baseUrl?: string;
 }
 
-export function CourseContent({ course, modules, lessons, gradient, currentUserId }: CourseContentProps) {
+export function CourseContent({ course, modules, lessons, gradient, currentUserId, baseUrl }: CourseContentProps) {
   const [user, setUser] = useState<any>(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrollLoading, setEnrollLoading] = useState(false);
@@ -168,7 +169,7 @@ export function CourseContent({ course, modules, lessons, gradient, currentUserI
                     </h3>
                     <div className="curriculum-list" style={{ display: "flex", flexDirection: "column", gap: "12px", paddingLeft: "40px" }}>
                       {module.lessons?.sort((a: any, b: any) => a.order_index - b.order_index).map((lesson: any) => (
-                        <Link key={lesson.id} href={`/tutorials/${course.slug}/${lesson.slug}`} style={{ textDecoration: "none" }}>
+                        <Link key={lesson.id} href={baseUrl ? `${baseUrl}/${lesson.slug}` : `/tutorials/${course.slug}/${lesson.slug}`} style={{ textDecoration: "none" }}>
                           <div className="hover-lift" style={{ padding: "16px 20px", background: "var(--bg-card)", border: "1px solid var(--border-primary)", borderRadius: "var(--radius-lg)", display: "flex", alignItems: "center", gap: "16px" }}>
                             <div style={{ width: 32, height: 32, borderRadius: "8px", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "var(--brand-primary)" }}>
                               {lesson.lesson_type === 'video' ? <Video size={16} /> :
