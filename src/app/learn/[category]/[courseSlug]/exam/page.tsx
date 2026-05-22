@@ -49,20 +49,67 @@ export default async function LearnExamPage({
   // Already passed — show certificate page
   if (enrollment.final_exam_passed) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-secondary)", padding: "20px" }}>
-        <div style={{ background: "var(--bg-primary)", padding: "60px 40px", borderRadius: "32px", maxWidth: "520px", width: "100%", textAlign: "center", border: "1px solid var(--border-primary)", boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
-          <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "#ECFDF5", color: "#10B981", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
-            <CheckCircle2 size={40} />
+      <div style={{ 
+        minHeight: "100vh", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        background: "radial-gradient(circle at top left, rgba(15, 110, 86, 0.05) 0%, transparent 50%), radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.03) 0%, transparent 50%), var(--bg-secondary)", 
+        padding: "20px" 
+      }}>
+        <div style={{ 
+          background: "var(--bg-primary)", 
+          padding: "60px 40px", 
+          borderRadius: "28px", 
+          maxWidth: "520px", 
+          width: "100%", 
+          textAlign: "center", 
+          border: "1px solid var(--border-primary)", 
+          boxShadow: "0 25px 50px -12px rgba(0,0,0,0.08), 0 0 0 1px rgba(16, 185, 129, 0.05)",
+          position: "relative",
+          overflow: "hidden"
+        }}>
+          {/* Decorative accents */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "6px", background: "linear-gradient(90deg, var(--brand-primary), var(--brand-accent))" }} />
+          
+          <div style={{ 
+            width: "88px", 
+            height: "88px", 
+            borderRadius: "50%", 
+            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.03))", 
+            color: "var(--brand-accent)", 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            margin: "0 auto 28px",
+            border: "1px solid rgba(16, 185, 129, 0.2)",
+            boxShadow: "0 10px 20px -5px rgba(16, 185, 129, 0.1)"
+          }}>
+            <CheckCircle2 size={44} />
           </div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "12px" }}>You Already Passed!</h1>
-          <p style={{ color: "var(--text-secondary)", marginBottom: "32px", lineHeight: 1.6 }}>
-            You passed the {course.title} certification with a score of <strong>{enrollment.final_exam_score}%</strong>.
+          <h1 style={{ fontSize: "30px", fontWeight: 900, marginBottom: "12px", letterSpacing: "-0.5px" }}>You Already Passed!</h1>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "36px", lineHeight: 1.6, fontSize: "15px" }}>
+            Outstanding work! You successfully certified in the professional course <strong>{course.title}</strong> with an impressive score of <strong>{enrollment.final_exam_score}%</strong>.
           </p>
           <Link
             href={`/certificates/${enrollment.certificate_id}`}
-            style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--brand-primary)", color: "white", padding: "14px 28px", borderRadius: "14px", textDecoration: "none", fontWeight: 800 }}
+            style={{ 
+              display: "inline-flex", 
+              alignItems: "center", 
+              justifyContent: "center",
+              gap: "10px", 
+              background: "var(--brand-primary)", 
+              color: "white", 
+              padding: "16px 32px", 
+              borderRadius: "14px", 
+              textDecoration: "none", 
+              fontWeight: 800,
+              fontSize: "15px",
+              boxShadow: "0 10px 25px -5px rgba(15, 110, 86, 0.4)",
+              transition: "transform 0.2s ease, background 0.2s ease"
+            }}
           >
-            View Certificate <ArrowRight size={18} />
+            View Verified Certificate <ArrowRight size={18} />
           </Link>
         </div>
       </div>
@@ -73,28 +120,91 @@ export default async function LearnExamPage({
   if (failed === "true") {
     const failedScore = parseInt(score || "0", 10);
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-secondary)", padding: "20px" }}>
-        <div style={{ background: "var(--bg-primary)", padding: "60px 40px", borderRadius: "32px", maxWidth: "520px", width: "100%", textAlign: "center", border: "1px solid var(--border-primary)", boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
-          <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "#FEF2F2", color: "#DC2626", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
-            <XCircle size={40} />
+      <div style={{ 
+        minHeight: "100vh", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        background: "radial-gradient(circle at top left, rgba(220, 38, 38, 0.02) 0%, transparent 50%), radial-gradient(circle at bottom right, rgba(17, 24, 39, 0.03) 0%, transparent 50%), var(--bg-secondary)", 
+        padding: "20px" 
+      }}>
+        <div style={{ 
+          background: "var(--bg-primary)", 
+          padding: "60px 40px", 
+          borderRadius: "28px", 
+          maxWidth: "520px", 
+          width: "100%", 
+          textAlign: "center", 
+          border: "1px solid var(--border-primary)", 
+          boxShadow: "0 25px 50px -12px rgba(0,0,0,0.08), 0 0 0 1px rgba(220, 38, 38, 0.05)",
+          position: "relative",
+          overflow: "hidden"
+        }}>
+          {/* Decorative accent */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "6px", background: "linear-gradient(90deg, #DC2626, #EF4444)" }} />
+          
+          <div style={{ 
+            width: "88px", 
+            height: "88px", 
+            borderRadius: "50%", 
+            background: "linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.02))", 
+            color: "#DC2626", 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            margin: "0 auto 28px",
+            border: "1px solid rgba(220, 38, 38, 0.15)",
+            boxShadow: "0 10px 20px -5px rgba(220, 38, 38, 0.08)"
+          }}>
+            <XCircle size={44} />
           </div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "12px" }}>Exam Not Passed</h1>
-          <p style={{ color: "var(--text-secondary)", marginBottom: "8px", lineHeight: 1.6 }}>
-            You scored <strong style={{ color: "#DC2626" }}>{failedScore}%</strong>. A score of <strong>80% or higher</strong> is required to pass.
+          <h1 style={{ fontSize: "30px", fontWeight: 900, marginBottom: "12px", letterSpacing: "-0.5px" }}>Exam Not Passed</h1>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "10px", lineHeight: 1.6, fontSize: "15px" }}>
+            You scored <strong style={{ color: "#DC2626" }}>{failedScore}%</strong>. A score of <strong>80% or higher</strong> is required to earn certification.
           </p>
           <p style={{ color: "var(--text-tertiary)", fontSize: "14px", marginBottom: "40px", lineHeight: 1.6 }}>
-            Review the course material and try again whenever you are ready.
+            Review the course material to sharpen your knowledge and try again whenever you are ready.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <Link
               href={`/learn/${category}/${courseSlug}/exam`}
-              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", background: "var(--brand-primary)", color: "white", padding: "16px 28px", borderRadius: "14px", textDecoration: "none", fontWeight: 800 }}
+              prefetch={false}
+              style={{ 
+                display: "inline-flex", 
+                alignItems: "center", 
+                justifyContent: "center", 
+                gap: "10px", 
+                background: "var(--brand-primary)", 
+                color: "white", 
+                padding: "16px 28px", 
+                borderRadius: "14px", 
+                textDecoration: "none", 
+                fontWeight: 800,
+                fontSize: "15px",
+                boxShadow: "0 10px 25px -5px rgba(15, 110, 86, 0.3)",
+                transition: "transform 0.2s ease"
+              }}
             >
               <RotateCcw size={18} /> Retry Exam
             </Link>
             <Link
               href={`/learn/${category}/${courseSlug}`}
-              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", background: "var(--bg-secondary)", color: "var(--text-primary)", padding: "14px 28px", borderRadius: "14px", textDecoration: "none", fontWeight: 700, border: "1px solid var(--border-primary)" }}
+              prefetch={false}
+              style={{ 
+                display: "inline-flex", 
+                alignItems: "center", 
+                justifyContent: "center", 
+                gap: "10px", 
+                background: "var(--bg-secondary)", 
+                color: "var(--text-primary)", 
+                padding: "15px 28px", 
+                borderRadius: "14px", 
+                textDecoration: "none", 
+                fontWeight: 700, 
+                fontSize: "15px",
+                border: "1px solid var(--border-primary)",
+                transition: "background 0.2s ease"
+              }}
             >
               Review Course
             </Link>

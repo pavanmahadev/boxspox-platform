@@ -34,7 +34,7 @@ export default function DownloadButton({
       const url = `/api/certificates/download?id=${encodeURIComponent(certDbId)}`;
       console.log("[CertDownload] Fetching PDF from:", url);
 
-      setStatusMsg("Generating PDF (this takes ~10 seconds)...");
+      setStatusMsg("Generating PDF certificate...");
 
       // Use fetch — cookies are sent automatically for same-origin, so auth works
       const res = await fetch(url, {
@@ -146,7 +146,7 @@ export default function DownloadButton({
             textAlign: "center",
           }}
         >
-          ⏳ Puppeteer is rendering your certificate. This usually takes 10–20 seconds.
+          ⏳ Generating your PDF certificate. This usually takes 3–8 seconds.
         </div>
       )}
 

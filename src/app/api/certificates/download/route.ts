@@ -8,102 +8,214 @@ import {
   Text,
   View,
   StyleSheet,
+  Svg,
+  Circle,
+  Line,
+  Rect,
 } from "@react-pdf/renderer";
 
 // Rate Limit Settings
 const RATE_LIMIT_WINDOW_MINUTES = 60; // 1 hour
 const MAX_REQUESTS_PER_WINDOW = 10; // 10 PDFs per hour per user
 
-// PDF Styles
+// Premium PDF Styles — Boxspox Branding
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    padding: 40,
+    padding: 28,
     backgroundColor: "#ffffff",
+    fontFamily: "Helvetica",
   },
-  border: {
-    border: "10pt solid #0f6e56",
+
+  // Outer border frame (double border effect: outer)
+  outerBorder: {
+    border: "3pt solid #0F6E56",
     borderRadius: 4,
     width: "100%",
     height: "100%",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 30,
+    padding: 8,
   },
-  content: {
+
+  // Inner border frame
+  innerBorder: {
+    border: "1pt solid #10B981",
+    borderRadius: 2,
+    width: "100%",
+    flex: 1,
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 15,
+    justifyContent: "space-between",
+    padding: 32,
+  },
+
+  headerSection: {
+    flexDirection: "column",
+    alignItems: "center",
     width: "100%",
   },
-  logo: {
-    fontSize: 16,
-    fontWeight: "bold",
+
+  // Top accent bar
+  accentBar: {
+    width: 80,
+    height: 3,
+    backgroundColor: "#0F6E56",
     marginBottom: 16,
-    letterSpacing: 3,
-    color: "#333333",
+    borderRadius: 2,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#0f6e56",
-    textTransform: "uppercase",
+
+  // Organization name
+  orgName: {
+    fontSize: 10,
+    fontFamily: "Helvetica-Bold",
+    color: "#64748b",
     letterSpacing: 4,
-    marginBottom: 20,
+    textTransform: "uppercase",
+    marginBottom: 12,
+  },
+
+  // CERTIFICATE OF COMPLETION title
+  certTitle: {
+    fontSize: 22,
+    fontFamily: "Helvetica-Bold",
+    color: "#0F6E56",
+    textTransform: "uppercase",
+    letterSpacing: 5,
+    marginBottom: 6,
     textAlign: "center",
   },
-  subtitle: {
-    fontSize: 12,
-    color: "#666666",
+
+  dividerLine: {
+    width: 200,
+    height: 1,
+    backgroundColor: "#e2e8f0",
+    marginVertical: 14,
+  },
+
+  // "This is to certify that"
+  bodyText: {
+    fontSize: 11,
+    fontFamily: "Helvetica",
+    color: "#64748b",
+    marginBottom: 8,
+    textAlign: "center",
+    letterSpacing: 0.5,
+  },
+
+  // Recipient name
+  recipientName: {
+    fontSize: 34,
+    fontFamily: "Helvetica-BoldOblique",
+    color: "#0f172a",
+    marginBottom: 8,
+    textAlign: "center",
+    letterSpacing: -0.5,
+  },
+
+  // "has successfully completed"
+  completedText: {
+    fontSize: 11,
+    fontFamily: "Helvetica",
+    color: "#64748b",
     marginBottom: 10,
     textAlign: "center",
   },
-  name: {
-    fontSize: 36,
-    fontWeight: "bold",
-    color: "#1a1a1a",
-    marginBottom: 12,
-    fontStyle: "italic",
+
+  // Course name
+  courseName: {
+    fontSize: 20,
+    fontFamily: "Helvetica-Bold",
+    color: "#0f172a",
+    marginBottom: 4,
     textAlign: "center",
+    letterSpacing: -0.3,
   },
-  course: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-    color: "#333333",
-  },
-  footer: {
+
+  // Footer row
+  footerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-end",
     width: "100%",
-    borderTop: "1px solid #e2e8f0",
+    borderTop: "1pt solid #e2e8f0",
     paddingTop: 16,
+    marginTop: 4,
   },
-  footerItem: {
+
+  footerCol: {
     flexDirection: "column",
     alignItems: "center",
     flex: 1,
   },
+
   footerLabel: {
-    fontSize: 9,
-    color: "#999999",
+    fontSize: 7,
+    fontFamily: "Helvetica-Bold",
+    color: "#94a3b8",
     textTransform: "uppercase",
-    letterSpacing: 1,
+    letterSpacing: 1.5,
     marginBottom: 4,
   },
+
   footerValue: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#333333",
+    fontSize: 10,
+    fontFamily: "Helvetica-Bold",
+    color: "#1e293b",
+  },
+
+  // Cert ID uses mono-style
+  certIdText: {
+    fontSize: 9,
+    fontFamily: "Courier-Bold",
+    color: "#0F6E56",
+    letterSpacing: 1,
+  },
+
+  // Signature line
+  signatureLine: {
+    width: 100,
+    height: 1,
+    backgroundColor: "#cbd5e1",
+    marginBottom: 4,
+  },
+
+  // Boxspox "B" logo box
+  logoBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginBottom: 18,
+  },
+
+  logoBox: {
+    width: 28,
+    height: 28,
+    backgroundColor: "#1e293b",
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  logoBoxText: {
+    fontSize: 14,
+    fontFamily: "Helvetica-Bold",
+    color: "#ffffff",
+  },
+
+  logoText: {
+    fontSize: 11,
+    fontFamily: "Helvetica-Bold",
+    color: "#0f172a",
+    letterSpacing: 1,
   },
 });
 
-// Certificate PDF Component
+// Premium Certificate PDF Component
 function CertificateDocument({
   recipientName,
   courseName,
@@ -117,74 +229,111 @@ function CertificateDocument({
 }) {
   return React.createElement(
     Document,
-    null,
+    { title: `Boxspox Academy — ${courseName} Certificate` },
     React.createElement(
       Page,
       { size: "A4", orientation: "landscape", style: styles.page },
+
+      // Outer double-border frame
       React.createElement(
         View,
-        { style: styles.border },
+        { style: styles.outerBorder },
+
+        // Inner border frame
         React.createElement(
           View,
-          { style: styles.content },
-          React.createElement(Text, { style: styles.logo }, "BOXSPOX ACADEMY"),
-          React.createElement(
-            Text,
-            { style: styles.title },
-            "Certificate of Completion"
-          ),
-          React.createElement(
-            Text,
-            { style: styles.subtitle },
-            "This is to certify that"
-          ),
-          React.createElement(Text, { style: styles.name }, recipientName),
-          React.createElement(
-            Text,
-            { style: styles.subtitle },
-            "has successfully completed the professional course"
-          ),
-          React.createElement(Text, { style: styles.course }, courseName)
-        ),
-        React.createElement(
-          View,
-          { style: styles.footer },
+          { style: styles.innerBorder },
+
+          // === HEADER SECTION ===
           React.createElement(
             View,
-            { style: styles.footerItem },
+            { style: styles.headerSection },
+
+            // Boxspox Logo Badge
             React.createElement(
-              Text,
-              { style: styles.footerLabel },
-              "Date Issued"
+              View,
+              { style: styles.logoBadge },
+              React.createElement(
+                View,
+                { style: styles.logoBox },
+                React.createElement(Text, { style: styles.logoBoxText }, "B")
+              ),
+              React.createElement(Text, { style: styles.logoText }, "BOXSPOX ACADEMY")
             ),
-            React.createElement(Text, { style: styles.footerValue }, date)
+
+            // Gold/Teal SVG Seal
+            React.createElement(
+              Svg,
+              { width: 64, height: 64, viewBox: "0 0 64 64", style: { marginBottom: 14 } },
+              // Outer ring
+              React.createElement(Circle, { cx: "32", cy: "32", r: "30", stroke: "#0F6E56", strokeWidth: "2", fill: "none" }),
+              // Middle ring
+              React.createElement(Circle, { cx: "32", cy: "32", r: "25", stroke: "#10B981", strokeWidth: "1", fill: "rgba(15,110,86,0.04)" }),
+              // Inner star / award shape (simplified as circle with cross lines)
+              React.createElement(Circle, { cx: "32", cy: "32", r: "18", fill: "#0F6E56" }),
+              // Award checkmark-star simplified
+              React.createElement(Line, { x1: "24", y1: "32", x2: "29", y2: "37", stroke: "#ffffff", strokeWidth: "2.5", strokeLinecap: "round" }),
+              React.createElement(Line, { x1: "29", y1: "37", x2: "40", y2: "26", stroke: "#ffffff", strokeWidth: "2.5", strokeLinecap: "round" })
+            ),
+
+            // Decorative thin bar
+            React.createElement(View, { style: styles.accentBar }),
+
+            // Org name
+            React.createElement(Text, { style: styles.orgName }, "Boxspox Academy"),
+
+            // Title
+            React.createElement(Text, { style: styles.certTitle }, "Certificate of Completion"),
+
+            // Divider
+            React.createElement(View, { style: styles.dividerLine }),
+
+            // Body copy
+            React.createElement(Text, { style: styles.bodyText }, "This is to certify that"),
+
+            // Recipient name (italic bold — Helvetica-BoldOblique mimics Georgia italic)
+            React.createElement(Text, { style: styles.recipientName }, recipientName),
+
+            // Completion text
+            React.createElement(Text, { style: styles.completedText }, "has successfully completed all requirements, assessments, and examinations for:"),
+
+            // Course name
+            React.createElement(Text, { style: styles.courseName }, courseName),
+
+            // Divider
+            React.createElement(View, { style: { ...styles.dividerLine, marginTop: 14 } })
           ),
+
+          // === FOOTER SECTION ===
           React.createElement(
             View,
-            { style: styles.footerItem },
+            { style: styles.footerRow },
+
+            // Date column
             React.createElement(
-              Text,
-              { style: styles.footerLabel },
-              "Authorized By"
+              View,
+              { style: styles.footerCol },
+              React.createElement(Text, { style: styles.footerLabel }, "Date Issued"),
+              React.createElement(View, { style: styles.signatureLine }),
+              React.createElement(Text, { style: styles.footerValue }, date)
             ),
+
+            // Authorized by (center — signature placeholder)
             React.createElement(
-              Text,
-              { style: styles.footerValue },
-              "Boxspox Academy"
-            )
-          ),
-          React.createElement(
-            View,
-            { style: styles.footerItem },
-            React.createElement(
-              Text,
-              { style: styles.footerLabel },
-              "Certificate ID"
+              View,
+              { style: { ...styles.footerCol, alignItems: "center" } },
+              React.createElement(Text, { style: { ...styles.footerLabel, marginBottom: 10 } }, "Authorized By"),
+              React.createElement(View, { style: styles.signatureLine }),
+              React.createElement(Text, { style: styles.footerValue }, "Boxspox Academy")
             ),
+
+            // Certificate ID column
             React.createElement(
-              Text,
-              { style: styles.footerValue },
-              certificateId
+              View,
+              { style: styles.footerCol },
+              React.createElement(Text, { style: styles.footerLabel }, "Certificate ID"),
+              React.createElement(View, { style: styles.signatureLine }),
+              React.createElement(Text, { style: styles.certIdText }, certificateId)
             )
           )
         )
