@@ -25,15 +25,15 @@ export default async function AdminCategoriesPage() {
     .select("*")
     .order("order_index", { ascending: true });
 
-  // Count courses per category
+  // Count courses per category_id
   const { data: courseCounts } = await supabase
     .from("courses")
-    .select("category")
-    .not("category", "is", null);
+    .select("category_id")
+    .not("category_id", "is", null);
 
   const countMap: Record<string, number> = {};
   (courseCounts || []).forEach((c: any) => {
-    if (c.category) countMap[c.category] = (countMap[c.category] || 0) + 1;
+    if (c.category_id) countMap[c.category_id] = (countMap[c.category_id] || 0) + 1;
   });
 
   return (
@@ -41,7 +41,7 @@ export default async function AdminCategoriesPage() {
       <CategoriesManager
         initialCategories={(categories || []).map((cat: any) => ({
           ...cat,
-          courseCount: countMap[cat.slug] || 0,
+          courseCount: countMap[cat.id] || 0,
         }))}
       />
     </div>

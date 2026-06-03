@@ -19,7 +19,7 @@ export function createClient() {
     key || '',
     {
       auth: {
-        autoRefreshToken: false, // Turn off initially to prevent hanging on load
+        autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
         flowType: 'pkce'

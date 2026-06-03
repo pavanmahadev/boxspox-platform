@@ -55,6 +55,22 @@ export default function CategoriesManager({ initialCategories }: { initialCatego
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"manage" | "seed">("manage");
+  const [seedingCourses, setSeedingCourses] = useState(false);
+
+  const handleSeedCourses = async () => {
+    setSeedingCourses(true);
+    try {
+      const res = await fetch("/api/seed-courses", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to seed courses");
+      showToast(data.message, "success");
+      window.location.reload();
+    } catch (err: any) {
+      showToast(err.message, "error");
+    } finally {
+      setSeedingCourses(false);
+    }
+  };
 
   const openNew = () => {
     setEditing({ name: "", slug: "", description: "", icon: "📚", color: "linear-gradient(135deg, #0F6E56, #15B8A6)", order_index: categories.length });
@@ -160,7 +176,14 @@ export default function CategoriesManager({ initialCategories }: { initialCatego
             Manage learning domains — Technology, MBA, Law, Agriculture, and more.
           </p>
         </div>
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          <button
+            onClick={handleSeedCourses}
+            disabled={seedingCourses}
+            style={{ padding: "10px 20px", borderRadius: "10px", border: "1px solid #10B981", background: seedingCourses ? "#d1fae5" : "#ecfdf5", color: "#065f46", fontWeight: 700, cursor: seedingCourses ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", opacity: seedingCourses ? 0.7 : 1 }}
+          >
+            {seedingCourses ? <Loader2 size={16} className="animate-spin" /> : "📚"} {seedingCourses ? "Seeding..." : "Seed Courses"}
+          </button>
           <button
             onClick={() => setActiveTab(activeTab === "manage" ? "seed" : "manage")}
             style={{ padding: "10px 20px", borderRadius: "10px", border: "1px solid var(--border-primary)", background: "var(--bg-card)", color: "var(--text-primary)", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", fontSize: "14px" }}

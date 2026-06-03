@@ -93,20 +93,9 @@ export default async function LearnCoursePage({ params }: { params: Promise<{ ca
     isEnrolled = !!enrollment;
   }
 
-  const isFree = course.price === 0 || course.price === "0" || course.price === null;
-
   // Authorization Logic: redirect when lessons exist
   if (allLessons.length > 0) {
-    if (isFree || isEnrolled) {
-      redirect(`/learn/${category}/${courseSlug}/${allLessons[0].slug}`);
-    } else {
-      redirect(`/checkout/${course.id}`);
-    }
-  }
-
-  // Paid course with no lessons yet → checkout
-  if (!isFree && !isEnrolled) {
-    redirect(`/checkout/${course.id}`);
+    redirect(`/learn/${category}/${courseSlug}/${allLessons[0].slug}`);
   }
 
   // Fallback to overview if no lessons exist yet

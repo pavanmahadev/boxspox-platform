@@ -95,6 +95,8 @@ export function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [jobsOpen, setJobsOpen] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [hoveredDomain, setHoveredDomain] = useState<string | null>(null);
   const { showToast } = useToast();
   const supabase = createClient();
   const router = useRouter();
@@ -116,7 +118,16 @@ export function Navbar() {
     const getSettings = async () => {
       const { data } = await supabase.from("site_settings").select("*").single();
       if (data) setSettings(data);
+      
+      const { data: dbCourses } = await supabase
+        .from("courses")
+        .select("id, title, slug, category_name")
+        .eq("status", "published")
+        .order("created_at", { ascending: false });
+      if (dbCourses) setCourses(dbCourses);
     };
+
+    getSettings();
 
     const getUserData = async () => {
       const userData = await getCurrentUserAction();
@@ -632,39 +643,42 @@ export function Navbar() {
 
         <div
           id="sub-nav-container"
-          style={{ display: "flex", alignItems: "center", gap: "0", height: "100%", overflowX: "auto", scrollbarWidth: "none", msOverflowStyle: "none", padding: "0 40px" }}
+          style={{ display: "flex", alignItems: "center", gap: "16px", height: "100%", overflowX: "auto", scrollbarWidth: "none", msOverflowStyle: "none", padding: "0 40px" }}
           className="hide-scrollbar"
         >
-          {[
-            "HTML", "CSS", "JAVASCRIPT", "SQL", "PYTHON", "JAVA", "PHP", "BOOTSTRAP", "REACT", "MYSQL", "JQUERY", "C++", "C#", "NODEJS", "TYPESCRIPT", "GIT", "POSTGRESQL", "MONGODB", "AI", "GO", "DSA", "ML", "NEXTJS"
-          ].map((name) => (
-            <Link
-              key={name}
-              href={name === "GIT" ? "/tutorials/git-github-complete-beginner-guide" : `/tutorials/${name.toLowerCase().replace(".", "")}`}
-              style={{
-                color: "rgba(255,255,255,0.8)",
-                textDecoration: "none",
-                fontSize: "0.8rem",
-                fontWeight: 600,
-                whiteSpace: "nowrap",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                padding: "0 12px",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = "#ffffff";
-                e.currentTarget.style.background = "var(--brand-primary)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = "rgba(255,255,255,0.8)";
-                e.currentTarget.style.background = "transparent";
-              }}
-            >
-              {name}
-            </Link>
-          ))}
+          {Array.from(new Set(courses.map(c => c.category_name).filter(Boolean))).map((domainName) => {
+            const domainCourses = courses.filter(c => c.category_name === domainName);
+            const isHovered = hoveredDomain === domainName;
+            
+            return (
+              <div 
+                key={domainName} 
+                style={{ height: "100%", display: "flex", alignItems: "center", position: "relative" }}
+                onMouseEnter={() => setHoveredDomain(domainName)}
+                onMouseLeave={() => setHoveredDomain(null)}
+              >
+                <Link
+                  href={`/learn/${domainName.split(' ')[1]?.toLowerCase() || 'tech'}`}
+                  style={{
+                    color: "rgba(255,255,255,0.8)",
+                    textDecoration: "none",
+                    fontSize: "0.85rem",
+                    fontWeight: 700,
+                    whiteSpace: "nowrap",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "0 12px",
+                    transition: "all 0.2s",
+                    background: isHovered ? "var(--brand-primary)" : "transparent",
+                    color: isHovered ? "#ffffff" : "rgba(255,255,255,0.8)"
+                  }}
+                >
+                  {domainName} <ChevronDown size={14} style={{ marginLeft: "4px", transform: isHovered ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                </Link>
+              </div>
+            );
+          })}
         </div>
 
         <button
@@ -677,6 +691,86 @@ export function Navbar() {
           <ChevronRight size={20} />
         </button>
       </nav>
+      )}
+
+      {/* Global Dropdown for SubNav (Outside overflow hidden!) */}
+      {hoveredDomain && courses.filter(c => c.category_name === hoveredDomain).length > 0 && (
+        <div 
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            width: "100%",
+            background: "var(--bg-primary)",
+            borderBottom: "1px solid var(--border-primary)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+            padding: "24px",
+            zIndex: 1200,
+            animation: "slideDown 0.2s ease",
+            display: "flex",
+            justifyContent: "center"
+          }}
+          onMouseEnter={() => setHoveredDomain(hoveredDomain)}
+          onMouseLeave={() => setHoveredDomain(null)}
+        >
+          <div style={{ maxWidth: "1280px", width: "100%", display: "flex", gap: "32px" }}>
+            <div style={{ flexShrink: 0, width: "250px" }}>
+              <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "8px" }}>
+                {hoveredDomain}
+              </h3>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                Explore our comprehensive library of courses in {hoveredDomain.split(' ')[1] || hoveredDomain}.
+              </p>
+              <Link href={`/learn/${hoveredDomain.split(' ')[1]?.toLowerCase() || 'tech'}`} style={{
+                display: "inline-block", marginTop: "16px", fontSize: "0.85rem", fontWeight: 700, color: "var(--brand-primary)", textDecoration: "none"
+              }}>
+                View all courses →
+              </Link>
+            </div>
+            
+            <div style={{ 
+              flex: 1, 
+              display: "grid", 
+              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
+              gap: "16px",
+              alignContent: "start"
+            }}>
+              {courses.filter(c => c.category_name === hoveredDomain).map(course => (
+                <Link
+                  key={course.id}
+                  href={`/learn/${hoveredDomain.split(' ')[1]?.toLowerCase() || 'tech'}/${course.slug || course.id}`}
+                  style={{
+                    padding: "12px 16px",
+                    background: "var(--bg-secondary)",
+                    color: "var(--text-primary)",
+                    textDecoration: "none",
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                    borderRadius: "8px",
+                    transition: "all 0.2s",
+                    border: "1px solid transparent",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--brand-primary)";
+                    e.currentTarget.style.background = "var(--bg-primary)";
+                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(15,110,86,0.1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "transparent";
+                    e.currentTarget.style.background = "var(--bg-secondary)";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                >
+                  <BookOpen size={16} color="var(--brand-primary)" />
+                  {course.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       <TutorialsMenu isOpen={tutorialsOpen} onClose={() => setTutorialsOpen(false)} />

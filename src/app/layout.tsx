@@ -7,7 +7,7 @@ import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 export const metadata: Metadata = {
   metadataBase: new URL('https://boxspox.in'),
   title: {
-    default: "Boxspox â€” Learn to Code, The Smart Way",
+    default: "Boxspox \u2014 Learn to Code, The Smart Way",
     template: "%s | Boxspox"
   },
   description: "A modern, interactive educational platform for learning web development. Master HTML, CSS, JavaScript, Python, React, and more with hands-on tutorials and a live code editor.",
@@ -26,12 +26,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: '/',
-    languages: {
-      'en-US': '/en-US',
-    },
   },
   openGraph: {
-    title: "Boxspox â€” Learn to Code, The Smart Way",
+    title: "Boxspox \u2014 Learn to Code, The Smart Way",
     description: "Master web development with interactive tutorials and a live code editor. Free tutorials for HTML, CSS, JavaScript, Python, and more.",
     url: "https://boxspox.in",
     siteName: "Boxspox",
@@ -39,7 +36,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: '/og-image.png', // Add a default OG image path
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Boxspox Platform Preview',
@@ -48,7 +45,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Boxspox â€” Learn to Code, The Smart Way",
+    title: "Boxspox \u2014 Learn to Code, The Smart Way",
     description: "A modern, interactive educational platform for learning web development.",
     creator: "@boxspox",
     images: ['/og-image.png'],

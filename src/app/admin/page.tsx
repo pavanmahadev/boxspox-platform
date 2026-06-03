@@ -174,11 +174,11 @@ export default async function AdminDashboard() {
                   width: "100%", 
                   height: `${(count / maxReg) * 100}%`, 
                   minHeight: count > 0 ? "4px" : "0px",
-                  background: i === 6 ? "#111827" : "#F3F4F6", 
+                  background: i === 6 ? "var(--brand-primary)" : "var(--bg-tertiary)", 
                   borderRadius: "6px 6px 0 0",
                   transition: "all 0.3s ease"
                 }} />
-                <span style={{ fontSize: "10px", fontWeight: 700, color: "#9CA3AF", marginTop: "8px" }}>
+                <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-tertiary)", marginTop: "8px" }}>
                   {new Date(last7Days[i]).toLocaleDateString('en-US', { weekday: 'short' })}
                 </span>
               </div>

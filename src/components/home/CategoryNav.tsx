@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const categories = [
   { id: "tech", name: "Technology", emoji: "💻", color: "#0F6E56", slug: "technology", sub: "Web, AI, Cloud, DevOps" },
@@ -15,8 +15,14 @@ const categories = [
   { id: "design", name: "Design & Creative", emoji: "🎨", color: "#EC4899", slug: "design-and-creative", sub: "UI/UX, Figma, Motion" },
 ];
 
-export function CategoryNav() {
+export function CategoryNav({ courses = [] }: { courses?: any[] }) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  const toggleExpand = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    setExpanded(prev => prev === id ? null : id);
+  };
 
   return (
     <section style={{ padding: "80px 24px", maxWidth: "1280px", margin: "0 auto" }}>
@@ -55,76 +61,153 @@ export function CategoryNav() {
         gap: "20px",
         marginBottom: "40px"
       }}>
-        {categories.map((cat) => (
-          <Link href={`/learn/${cat.slug}`} key={cat.id} style={{ textDecoration: "none" }}>
-            <motion.div
-              onHoverStart={() => setHovered(cat.id)}
-              onHoverEnd={() => setHovered(null)}
-              whileHover={{ y: -6, scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-              style={{
-                background: "var(--bg-card)",
-                border: `2px solid ${hovered === cat.id ? cat.color + "60" : "var(--border-primary)"}`,
-                borderRadius: "20px",
-                padding: "24px",
-                cursor: "pointer",
-                position: "relative",
-                overflow: "hidden",
-                boxShadow: hovered === cat.id ? `0 16px 40px -10px ${cat.color}30` : "none",
-                transition: "border-color 0.2s, box-shadow 0.2s",
-              }}
-            >
-              {/* Gradient blob */}
-              <div style={{
-                position: "absolute", top: "-20px", right: "-20px",
-                width: "100px", height: "100px", borderRadius: "50%",
-                background: `${cat.color}12`,
-                pointerEvents: "none"
-              }} />
+        {categories.map((cat) => {
+          const categoryNameInDb = `${cat.emoji} ${cat.name}`;
+          const catCourses = courses.filter(c => c.category_name === categoryNameInDb || c.category_name === cat.name);
+          const isExpanded = expanded === cat.id;
 
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", position: "relative" }}>
-                {/* Icon */}
-                <div style={{
-                  width: "56px", height: "56px", borderRadius: "16px",
-                  background: `${cat.color}15`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "28px", flexShrink: 0,
-                  border: `1px solid ${cat.color}20`
-                }}>
-                  {cat.emoji}
-                </div>
-
-                <div style={{ flex: 1 }}>
-                  <h3 style={{
-                    fontSize: "15px", fontWeight: 800,
-                    color: "var(--text-primary)", marginBottom: "4px"
-                  }}>
-                    {cat.name}
-                  </h3>
-                  <p style={{
-                    fontSize: "12px", color: "var(--text-tertiary)",
-                    fontWeight: 600, lineHeight: 1.4
-                  }}>
-                    {cat.sub}
-                  </p>
-                </div>
-              </div>
-
-              {/* Hover arrow */}
+          return (
+            <div key={cat.id} style={{ display: "flex", flexDirection: "column" }}>
               <motion.div
-                animate={{ opacity: hovered === cat.id ? 1 : 0, x: hovered === cat.id ? 0 : -8 }}
-                transition={{ duration: 0.15 }}
+                onClick={(e: any) => toggleExpand(cat.id, e)}
+                onHoverStart={() => setHovered(cat.id)}
+                onHoverEnd={() => setHovered(null)}
+                whileHover={{ y: -6, scale: 1.02 }}
+                transition={{ duration: 0.2 }}
                 style={{
-                  position: "absolute", bottom: "16px", right: "16px",
-                  color: cat.color, fontWeight: 800, fontSize: "13px",
-                  display: "flex", alignItems: "center", gap: "4px"
+                  background: "var(--bg-card)",
+                  border: `2px solid ${hovered === cat.id || isExpanded ? cat.color + "60" : "var(--border-primary)"}`,
+                  borderRadius: isExpanded ? "20px 20px 0 0" : "20px",
+                  padding: "24px",
+                  cursor: "pointer",
+                  position: "relative",
+                  overflow: "hidden",
+                  boxShadow: hovered === cat.id || isExpanded ? `0 16px 40px -10px ${cat.color}30` : "none",
+                  transition: "border-color 0.2s, box-shadow 0.2s, border-radius 0.2s",
+                  zIndex: 2,
                 }}
               >
-                Explore →
+                {/* Gradient blob */}
+                <div style={{
+                  position: "absolute", top: "-20px", right: "-20px",
+                  width: "100px", height: "100px", borderRadius: "50%",
+                  background: `${cat.color}12`,
+                  pointerEvents: "none"
+                }} />
+
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", position: "relative" }}>
+                  {/* Icon */}
+                  <div style={{
+                    width: "56px", height: "56px", borderRadius: "16px",
+                    background: `${cat.color}15`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "28px", flexShrink: 0,
+                    border: `1px solid ${cat.color}20`
+                  }}>
+                    {cat.emoji}
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{
+                      fontSize: "15px", fontWeight: 800,
+                      color: "var(--text-primary)", marginBottom: "4px"
+                    }}>
+                      {cat.name}
+                    </h3>
+                    <p style={{
+                      fontSize: "12px", color: "var(--text-tertiary)",
+                      fontWeight: 600, lineHeight: 1.4
+                    }}>
+                      {cat.sub}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Hover arrow */}
+                <motion.div
+                  animate={{ opacity: hovered === cat.id || isExpanded ? 1 : 0, x: hovered === cat.id || isExpanded ? 0 : -8 }}
+                  transition={{ duration: 0.15 }}
+                  style={{
+                    position: "absolute", bottom: "16px", right: "16px",
+                    color: cat.color, fontWeight: 800, fontSize: "13px",
+                    display: "flex", alignItems: "center", gap: "4px"
+                  }}
+                >
+                  {isExpanded ? "Close ↑" : "Explore ↓"}
+                </motion.div>
               </motion.div>
-            </motion.div>
-          </Link>
-        ))}
+
+              {/* Dropdown content */}
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: -20 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -20 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      background: "var(--bg-secondary)",
+                      border: `2px solid ${cat.color}40`,
+                      borderTop: "none",
+                      borderRadius: "0 0 20px 20px",
+                      padding: "16px",
+                      zIndex: 1,
+                      overflow: "hidden"
+                    }}
+                  >
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                      {catCourses.length > 0 ? (
+                        catCourses.map(c => (
+                          <Link href={`/learn/${cat.slug}/${c.slug || c.id}`} key={c.id} style={{
+                            background: "var(--bg-primary)",
+                            border: `1px solid ${cat.color}20`,
+                            padding: "6px 12px",
+                            borderRadius: "8px",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            color: "var(--text-primary)",
+                            textDecoration: "none",
+                            transition: "all 0.2s"
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLAnchorElement).style.background = cat.color;
+                            (e.currentTarget as HTMLAnchorElement).style.color = "white";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-primary)";
+                            (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-primary)";
+                          }}
+                          >
+                            {c.title}
+                          </Link>
+                        ))
+                      ) : (
+                        <span style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>
+                          No courses available yet.
+                        </span>
+                      )}
+                      
+                      <Link href={`/learn/${cat.slug}`} style={{
+                        width: "100%",
+                        textAlign: "center",
+                        marginTop: "8px",
+                        padding: "8px",
+                        fontSize: "13px",
+                        fontWeight: 800,
+                        color: cat.color,
+                        textDecoration: "none",
+                        borderTop: `1px solid ${cat.color}20`,
+                        display: "block"
+                      }}>
+                        View Full Domain →
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </div>
 
       {/* CTA */}
@@ -152,5 +235,3 @@ export function CategoryNav() {
     </section>
   );
 }
-
-

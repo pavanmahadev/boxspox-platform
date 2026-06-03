@@ -128,22 +128,10 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
     isEnrolled = !!enrollment;
   }
 
-  const isFree = course.price === 0 || course.price === "0" || course.price === null;
-
   // 3. Authorization Logic: Always redirect when lessons exist
   if (allLessons.length > 0) {
-    if (isFree || isEnrolled) {
-      // Go to the very first lesson
-      redirect(`/tutorials/${language}/${allLessons[0].slug}`);
-    } else {
-      // Paid course, not enrolled → checkout
-      redirect(`/checkout/${course.id}`);
-    }
-  }
-
-  // Paid course with no lessons yet → checkout
-  if (!isFree && !isEnrolled) {
-    redirect(`/checkout/${course.id}`);
+    // Go to the very first lesson
+    redirect(`/tutorials/${language}/${allLessons[0].slug}`);
   }
 
   // Fallback to overview if no lessons exist yet
