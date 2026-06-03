@@ -660,7 +660,6 @@ export function Navbar() {
                 <Link
                   href={`/learn/${domainName.split(' ')[1]?.toLowerCase() || 'tech'}`}
                   style={{
-                    color: "rgba(255,255,255,0.8)",
                     textDecoration: "none",
                     fontSize: "0.85rem",
                     fontWeight: 700,
