@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Clock, ArrowRight, ChevronRight, Code2, ExternalLink, Send, Loader2, Video, FileCode, HelpCircle, FileText } from "lucide-react";
+import { BookOpen, Clock, ArrowRight, ChevronRight, Code2, ExternalLink, Send, Loader2, Video, FileCode, HelpCircle, FileText, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { createClient } from "@/utils/supabase/client";
@@ -101,6 +101,32 @@ export function CourseContent({ course, modules, lessons, gradient, currentUserI
     setSubmitting(false);
   };
 
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const shareData = {
+      title: course.title,
+      text: `Check out ${course.title} on Boxspox!`,
+      url: url,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          console.error("Error sharing:", err);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast("Course link copied to clipboard!", "success");
+      } catch (err) {
+        showToast("Failed to copy link", "error");
+      }
+    }
+  };
+
   return (
     <>
       <div className="section-container" style={{ padding: "40px var(--container-padding) 100px" }}>
@@ -146,6 +172,13 @@ export function CourseContent({ course, modules, lessons, gradient, currentUserI
                   Enrolled Student
                 </div>
               )}
+              <button 
+                onClick={handleShare}
+                className="hover-lift"
+                style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.15)", color: "white", padding: "14px 24px", borderRadius: "100px", border: "1px solid rgba(255,255,255,0.3)", fontWeight: 600, backdropFilter: "blur(10px)", cursor: "pointer", transition: "all 0.2s", fontSize: "1rem" }}
+              >
+                <Share2 size={18} /> Share
+              </button>
               <div style={{ display: "flex", gap: "24px", fontSize: "0.9rem" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><BookOpen size={20} /> {lessons.length} Lessons</span>
                 <span style={{ display: "flex", alignItems: "center", gap: "8px" }}><Clock size={20} /> ~{lessons.length * 15}m</span>

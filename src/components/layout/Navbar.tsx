@@ -67,6 +67,15 @@ const tutorials = [
   { name: "SQL", href: "/tutorials/sql", color: "#00758f" },
 ];
 
+const getCategorySlug = (categoryName: string) => {
+  const nameWithoutEmoji = categoryName.replace(/^[^\s]+ /, "");
+  return nameWithoutEmoji
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+};
+
 const profileLinkStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
@@ -626,6 +635,7 @@ export function Navbar() {
             height: "var(--subnav-height)",
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
             position: "relative",
             padding: "0 4px",
             overflow: "hidden"
@@ -643,9 +653,16 @@ export function Navbar() {
 
         <div
           id="sub-nav-container"
-          style={{ display: "flex", alignItems: "center", gap: "16px", height: "100%", overflowX: "auto", scrollbarWidth: "none", msOverflowStyle: "none", padding: "0 40px" }}
+          style={{ display: "flex", alignItems: "center", gap: "16px", height: "100%", maxWidth: "100%", overflowX: "auto", scrollbarWidth: "none", msOverflowStyle: "none", padding: "0 40px" }}
           className="hide-scrollbar"
         >
+          <style>{`
+            #sub-nav-container::before,
+            #sub-nav-container::after {
+              content: '';
+              margin: auto;
+            }
+          `}</style>
           {Array.from(new Set(courses.map(c => c.category_name).filter(Boolean))).map((domainName) => {
             const domainCourses = courses.filter(c => c.category_name === domainName);
             const isHovered = hoveredDomain === domainName;
@@ -658,7 +675,7 @@ export function Navbar() {
                 onMouseLeave={() => setHoveredDomain(null)}
               >
                 <Link
-                  href={`/learn/${domainName.split(' ')[1]?.toLowerCase() || 'tech'}`}
+                  href={`/learn/${getCategorySlug(domainName)}`}
                   style={{
                     textDecoration: "none",
                     fontSize: "0.85rem",
@@ -712,22 +729,22 @@ export function Navbar() {
           onMouseEnter={() => setHoveredDomain(hoveredDomain)}
           onMouseLeave={() => setHoveredDomain(null)}
         >
-          <div style={{ maxWidth: "1280px", width: "100%", display: "flex", gap: "32px" }}>
-            <div style={{ flexShrink: 0, width: "250px" }}>
+          <div className="mega-menu-container" style={{ maxWidth: "1280px", width: "100%", display: "flex", gap: "32px" }}>
+            <div className="mega-menu-left" style={{ flexShrink: 0, width: "250px" }}>
               <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "8px" }}>
                 {hoveredDomain}
               </h3>
               <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                Explore our comprehensive library of courses in {hoveredDomain.split(' ')[1] || hoveredDomain}.
+                Explore our comprehensive library of courses in {hoveredDomain.replace(/^[^\s]+ /, "") || hoveredDomain}.
               </p>
-              <Link href={`/learn/${hoveredDomain.split(' ')[1]?.toLowerCase() || 'tech'}`} style={{
+              <Link href={`/learn/${getCategorySlug(hoveredDomain)}`} style={{
                 display: "inline-block", marginTop: "16px", fontSize: "0.85rem", fontWeight: 700, color: "var(--brand-primary)", textDecoration: "none"
               }}>
                 View all courses →
               </Link>
             </div>
             
-            <div style={{ 
+            <div className="mega-menu-right" style={{ 
               flex: 1, 
               display: "grid", 
               gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
@@ -737,7 +754,7 @@ export function Navbar() {
               {courses.filter(c => c.category_name === hoveredDomain).map(course => (
                 <Link
                   key={course.id}
-                  href={`/learn/${hoveredDomain.split(' ')[1]?.toLowerCase() || 'tech'}/${course.slug || course.id}`}
+                  href={`/learn/${getCategorySlug(hoveredDomain)}/${course.slug || course.id}`}
                   style={{
                     padding: "12px 16px",
                     background: "var(--bg-secondary)",
@@ -795,6 +812,9 @@ export function Navbar() {
           .logo-text { font-size: 1.1rem !important; }
           .learn-btn { padding: 4px 8px !important; }
           .hidden-mobile { display: none !important; }
+          .mega-menu-container { flex-direction: column !important; gap: 16px !important; }
+          .mega-menu-left { width: 100% !important; }
+          .mega-menu-right { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </header>

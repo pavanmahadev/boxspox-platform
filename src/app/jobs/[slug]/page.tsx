@@ -3,6 +3,8 @@
 import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Briefcase, Calendar, MapPin, Send, Sparkles, UserPlus, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export default function JobPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -189,30 +191,92 @@ function ApplyNow() {
 /*                                  Post Job                                  */
 /* -------------------------------------------------------------------------- */
 function PostJob() {
+  const [title, setTitle] = useState('');
+  const [company, setCompany] = useState('');
+  const [location, setLocation] = useState('');
+  const [team, setTeam] = useState('Engineering');
+  const [type, setType] = useState('Full-time');
+  const [link, setLink] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !company || !location || !link) {
+      showToast('Please fill in all required fields', 'error');
+      return;
+    }
+    
+    setLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.from('jobs').insert([{
+      title: title.trim(),
+      company: company.trim(),
+      team,
+      location: location.trim(),
+      type,
+      link: link.trim()
+    }]);
+
+    setLoading(false);
+    if (error) {
+      showToast(error.message, 'error');
+    } else {
+      showToast('Job listing submitted successfully!', 'success');
+      setTitle('');
+      setCompany('');
+      setLocation('');
+      setLink('');
+      router.push('/jobs');
+    }
+  };
+
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '10px' }}>Post a Job</h1>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '40px' }}>Reach thousands of top-tier developers and designers.</p>
 
-      <form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div>
-          <label style={labelStyle}>Job Title</label>
-          <input type="text" placeholder="e.g. Senior React Developer" style={inputStyle} />
+          <label style={labelStyle}>Job Title *</label>
+          <input required type="text" placeholder="e.g. Senior React Developer" value={title} onChange={(e) => setTitle(e.target.value)} style={inputStyle} />
         </div>
         <div>
-          <label style={labelStyle}>Company Name</label>
-          <input type="text" placeholder="e.g. Acme Inc." style={inputStyle} />
+          <label style={labelStyle}>Company Name *</label>
+          <input required type="text" placeholder="e.g. Acme Inc." value={company} onChange={(e) => setCompany(e.target.value)} style={inputStyle} />
         </div>
         <div>
-          <label style={labelStyle}>Location</label>
-          <input type="text" placeholder="e.g. Remote or New York, NY" style={inputStyle} />
+          <label style={labelStyle}>Location *</label>
+          <input required type="text" placeholder="e.g. Remote or New York, NY" value={location} onChange={(e) => setLocation(e.target.value)} style={inputStyle} />
         </div>
         <div>
-          <label style={labelStyle}>Job Description</label>
-          <textarea placeholder="Describe the role and requirements..." style={{ ...inputStyle, height: '150px', resize: 'vertical' }}></textarea>
+          <label style={labelStyle}>Team / Category</label>
+          <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ ...inputStyle, background: 'var(--bg-card)', color: 'var(--text-primary)' }}>
+            <option value="Engineering">Engineering</option>
+            <option value="Design">Design</option>
+            <option value="Product">Product</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Finance">Finance</option>
+            <option value="Operations">Operations</option>
+          </select>
         </div>
-        <button type="button" className="btn-primary" style={{ padding: '14px', fontSize: '1rem', justifyContent: 'center' }}>
-          <Send size={16} /> Submit Job Listing
+        <div>
+          <label style={labelStyle}>Job Type</label>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={{ ...inputStyle, background: 'var(--bg-card)', color: 'var(--text-primary)' }}>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Contract">Contract</option>
+            <option value="Internship">Internship</option>
+          </select>
+        </div>
+        <div>
+          <label style={labelStyle}>Application Link (URL) *</label>
+          <input required type="url" placeholder="https://careers.company.com/job/123" value={link} onChange={(e) => setLink(e.target.value)} style={inputStyle} />
+        </div>
+        
+        <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '14px', fontSize: '1rem', justifyContent: 'center', opacity: loading ? 0.7 : 1 }}>
+          <Send size={16} /> {loading ? 'Submitting...' : 'Submit Job Listing'}
         </button>
       </form>
     </div>

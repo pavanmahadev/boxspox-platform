@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { BookOpen, Clock, Users, Star, ChevronRight, Filter } from "lucide-react";
 import { DOMAIN_GROUPS } from "@/utils/domains";
+import { ShareCourseButton } from "@/components/ui/ShareCourseButton";
 
 export const dynamic = "force-dynamic";
 
@@ -317,6 +318,13 @@ export default async function LearnCategoryPage({ params }: Props) {
                           ⭐ Featured
                         </div>
                       )}
+                      
+                      <ShareCourseButton 
+                        courseTitle={course.title} 
+                        courseSlug={course.slug} 
+                        category={category} 
+                        isFeatured={course.is_featured} 
+                      />
                       {course.price === 0 && (
                         <div
                           style={{

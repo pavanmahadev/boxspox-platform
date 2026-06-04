@@ -19,14 +19,29 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+let toastIdCounter = 0;
+
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const supabase = createClient();
 
+  const removeToast = React.useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const showToast = React.useCallback((message: string, type: ToastType = "success", title?: string) => {
+    toastIdCounter++;
+    const id = `toast-${toastIdCounter}`;
+    setToasts((prev) => [...prev, { id, message, type, title }]);
+    setTimeout(() => {
+      removeToast(id);
+    }, 5000);
+  }, [removeToast]);
+
   useEffect(() => {
     // Listen for Realtime Announcements
     const announcementChannel = supabase.channel('announcements')
-      .on('broadcast', { event: 'new-announcement' }, (payload: any) => {
+      .on('broadcast', { event: 'new-announcement' }, (payload: { payload: { message: string; type?: ToastType } }) => {
         showToast(payload.payload.message, payload.payload.type || "info", "Platform Update");
       })
       .subscribe();
@@ -34,19 +49,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     return () => {
       supabase.removeChannel(announcementChannel);
     };
-  }, []);
-
-  const showToast = (message: string, type: ToastType = "success", title?: string) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    setToasts((prev) => [...prev, { id, message, type, title }]);
-    setTimeout(() => {
-      removeToast(id);
-    }, 5000);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, [showToast, supabase]);
 
   return (
     <ToastContext.Provider value={{ showToast }}>

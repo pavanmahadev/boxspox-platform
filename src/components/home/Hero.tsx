@@ -1,260 +1,288 @@
 "use client";
 
-import { motion } from "framer-motion";
-import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronRight, Play } from "lucide-react";
+import { ChevronRight, Code, PenTool, Database, ShieldCheck, Play, Sparkles, Briefcase, Scale, Tractor, BrainCircuit } from "lucide-react";
+import { Notch } from "@/components/ui/Notch";
 
-
-
+const DOMAINS = [
+  {
+    id: "mba",
+    label: "Business",
+    icon: <Briefcase size={16} />,
+    title: "MBA & Business",
+    desc: "Explore comprehensive MBA & Business courses.",
+    image: "/images/domains/mba.jpg",
+    color: "#E85D04", // orange
+    link: "/learn/business"
+  },
+  {
+    id: "law",
+    label: "Law",
+    icon: <Scale size={16} />,
+    title: "Law & Legal",
+    desc: "Explore Law & Legal courses.",
+    image: "/images/domains/law.jpg", 
+    color: "#1E3A8A", // dark blue
+    link: "/learn/law"
+  },
+  {
+    id: "technology",
+    label: "Technology",
+    icon: <Code size={16} />,
+    title: "Technology",
+    desc: "Explore Technology courses.",
+    image: "/images/domains/technology.jpg",
+    color: "#059669", // emerald green
+    link: "/learn/technology"
+  },
+  {
+    id: "agriculture",
+    label: "Agriculture",
+    icon: <Tractor size={16} />,
+    title: "Agriculture",
+    desc: "Explore Agriculture courses.",
+    image: "/images/domains/agriculture.jpg",
+    color: "#16A34A", // green
+    link: "/learn/agriculture"
+  },
+  {
+    id: "data",
+    label: "AI & Data",
+    icon: <BrainCircuit size={16} />,
+    title: "AI & Data Science",
+    desc: "Explore AI & Data Science courses.",
+    image: "/images/domains/data.jpg",
+    color: "#6D28D9", // purple
+    link: "/learn/data"
+  },
+  {
+    id: "design",
+    label: "Design",
+    icon: <PenTool size={16} />,
+    title: "Design & Creative",
+    desc: "Explore Design & Creative courses.",
+    image: "/images/domains/design.jpg",
+    color: "#7E22CE", // deep purple
+    link: "/learn/design"
+  },
+  {
+    id: "engineering",
+    label: "Engineering",
+    icon: <Code size={16} />, // Or another icon like Wrench or HardHat if available
+    title: "Engineering",
+    desc: "Explore Engineering courses.",
+    image: "/images/domains/engineering.jpg",
+    color: "#2563EB", // blue
+    link: "/learn/engineering"
+  },
+  {
+    id: "healthcare",
+    label: "Healthcare",
+    icon: <Sparkles size={16} />, // Or another icon like Stethoscope
+    title: "Healthcare",
+    desc: "Explore Healthcare courses.",
+    image: "/images/domains/healthcare.jpg",
+    color: "#0D9488", // teal
+    link: "/learn/healthcare"
+  }
+];
 
 export function Hero() {
+  const [activeDomain, setActiveDomain] = useState(DOMAINS[0].id);
+
+  // Auto-play functionality
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveDomain((currentId) => {
+        const currentIndex = DOMAINS.findIndex(d => d.id === currentId);
+        const nextIndex = (currentIndex + 1) % DOMAINS.length;
+        return DOMAINS[nextIndex].id;
+      });
+    }, 5000); // Automatically change slide every 5 seconds
+
+    // Cleanup interval on unmount or when user manually clicks (activeDomain changes)
+    return () => clearInterval(timer);
+  }, [activeDomain]);
+
+  const currentDomain = DOMAINS.find(d => d.id === activeDomain) || DOMAINS[0];
+
   return (
     <section style={{
-      minHeight: "90vh",
       display: "flex",
       alignItems: "center",
-      padding: "clamp(100px, 15vh, 140px) 0 80px",
+      padding: "120px 24px 40px",
       background: "#FFFFFF",
       position: "relative",
-      overflow: "hidden"
+      overflow: "hidden",
     }}>
-      {/* Background Decorative Elements */}
-      <div style={{
-        position: "absolute",
-        top: "-10%",
-        right: "-5%",
-        width: "50%",
-        aspectRatio: "1/1",
-        background: "radial-gradient(circle, rgba(15, 110, 86, 0.08) 0%, transparent 70%)",
-        borderRadius: "50%",
-        filter: "blur(60px)",
-        zIndex: 0
-      }} />
+      {/* Background Decorative Blob */}
+      <motion.div
+        animate={{ backgroundColor: currentDomain.color }}
+        transition={{ duration: 0.8 }}
+        style={{
+          position: "absolute",
+          top: "20%", right: "-10%",
+          width: "40vw", height: "40vw",
+          borderRadius: "50%",
+          filter: "blur(100px)",
+          opacity: 0.08,
+          zIndex: 0,
+          pointerEvents: "none"
+        }}
+      />
 
-      <div className="section-container" style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 500px), 1fr))", 
-          gap: "60px", 
-          alignItems: "center" 
-        }}>
-          {/* Left Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
+      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: "1280px", margin: "0 auto", boxSizing: "border-box" }}>
+        <div className="hero-grid">
 
+          {/* ── LEFT: text content ── */}
+          <div className="hero-left">
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: "8px",
+              padding: "8px 16px", borderRadius: "50px",
+              background: "rgba(15,110,86,0.1)", color: "#0F6E56",
+              fontWeight: 700, fontSize: "13px", marginBottom: "24px"
+            }}>
+              <Sparkles size={14} /> Master the future of work
+            </div>
 
             <h1 style={{
-              fontSize: "var(--h1-size)",
-              fontWeight: 900,
-              color: "var(--text-primary)",
-              lineHeight: 1.05,
-              letterSpacing: "-2px",
-              marginBottom: "24px",
-              fontFamily: "var(--font-heading)"
+              fontSize: "clamp(32px, 3.5vw, 54px)",
+              fontWeight: 900, lineHeight: 1.1,
+              letterSpacing: "-1.5px", marginBottom: "24px",
+              color: "var(--text-primary)", fontFamily: "var(--font-heading)"
             }}>
-              Master the Most <br />
-              <span style={{ 
+              Master the Most<br />
+              <span style={{
                 background: "linear-gradient(135deg, var(--brand-primary), #10B981)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent"
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
               }}>In-Demand Skills</span>
             </h1>
 
             <p style={{
-              fontSize: "clamp(1.1rem, 2vw, 1.25rem)",
-              color: "var(--text-secondary)",
-              lineHeight: 1.6,
-              marginBottom: "40px",
-              maxWidth: "540px",
-              fontWeight: 500
+              fontSize: "clamp(1rem, 1.6vw, 1.2rem)",
+              color: "var(--text-secondary)", lineHeight: 1.6,
+              marginBottom: "40px", fontWeight: 500
             }}>
-              Learn AI, Corporate Law, Business Strategy, React, and more. Improve your skills with interactive lessons and tell people you are ready for the future.
+              Learn AI, Corporate Law, Business Strategy, React, and more.
+              Improve your skills with interactive lessons and tell people you
+              are ready for the future.
             </p>
 
             <div className="hero-buttons" style={{ display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center" }}>
-              <Link href="/register" className="btn-primary hero-btn-primary" style={{ padding: "16px 40px", fontSize: "16px", display: "flex", justifyContent: "center" }}>
+              <Link href="/register" className="btn-primary" style={{ padding: "16px 40px", fontSize: "16px", display: "inline-flex", alignItems: "center", gap: "8px" }}>
                 Start Learning Free <ChevronRight size={18} />
               </Link>
-              <Link href="/learn" className="hover-lift hero-btn-secondary" style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                color: "var(--text-primary)",
-                textDecoration: "none",
-                fontWeight: 700,
-                fontSize: "15px",
-                padding: "16px 20px"
+              <Link href="/learn" style={{
+                display: "inline-flex", alignItems: "center", gap: "12px",
+                color: "var(--text-primary)", textDecoration: "none",
+                fontWeight: 700, fontSize: "16px",
+                padding: "16px 24px", borderRadius: "12px",
+                background: "var(--bg-secondary)", border: "1px solid var(--border-primary)"
               }}>
-                <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{
+                  width: "32px", height: "32px", borderRadius: "50%",
+                  background: "var(--bg-tertiary)",
+                  display: "flex", alignItems: "center", justifyContent: "center"
+                }}>
                   <Play size={14} fill="currentColor" />
                 </div>
                 Browse Domains
               </Link>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Right Visual (Running Domain Cards) */}
-          <div style={{ 
-            position: "relative", 
-            height: "450px", 
-            display: "flex", 
-            flexDirection: "column",
-            justifyContent: "center",
-            gap: "20px",
-            overflow: "hidden"
-          }}>
-            {/* Background Glow */}
+          {/* ── RIGHT: image card + notch ── */}
+          <div className="hero-right">
+
+            {/* Card — explicit height so it never collapses */}
             <div style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "300px",
-              height: "300px",
-              background: "radial-gradient(circle, rgba(15, 110, 86, 0.1) 0%, transparent 70%)",
-              filter: "blur(40px)",
-              zIndex: 0
-            }} />
-
-            {/* Row 1: Moving Left */}
-            <div className="marquee-row" style={{ display: "flex", width: "max-content", animation: "scrollLeft 20s linear infinite" }}>
-              <div style={{ display: "flex", gap: "20px", paddingRight: "20px" }}>
-                {[
-                  { name: "Artificial Intelligence", emoji: "🤖" },
-                  { name: "Corporate Law", emoji: "⚖️" },
-                  { name: "Web Development", emoji: "💻" },
-                  { name: "Financial Strategy", emoji: "📈" },
-                ].map((tech, index) => (
-                  <div key={index} style={{
-                    background: "white",
-                    padding: "16px 24px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    border: "1px solid #f0f0f0",
-                    minWidth: "max-content"
-                  }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", background: "#f8fafc", borderRadius: "8px" }}>
-                      {tech.emoji}
-                    </div>
-                    <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{tech.name}</span>
-                  </div>
-                ))}
-              </div>
-              {/* Duplicate for seamless loop */}
-              <div style={{ display: "flex", gap: "20px", paddingRight: "20px" }}>
-                {[
-                  { name: "Artificial Intelligence", emoji: "🤖" },
-                  { name: "Corporate Law", emoji: "⚖️" },
-                  { name: "Web Development", emoji: "💻" },
-                  { name: "Financial Strategy", emoji: "📈" },
-                ].map((tech, index) => (
-                  <div key={`dup-${index}`} style={{
-                    background: "white",
-                    padding: "16px 24px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    border: "1px solid #f0f0f0",
-                    minWidth: "max-content"
-                  }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", background: "#f8fafc", borderRadius: "8px" }}>
-                      {tech.emoji}
-                    </div>
-                    <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{tech.name}</span>
-                  </div>
-                ))}
-              </div>
+              width: "100%",
+              borderRadius: "20px",
+              overflow: "hidden",
+              boxShadow: "0 20px 60px -10px rgba(0,0,0,0.2)",
+              lineHeight: 0
+            }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentDomain.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35 }}
+                >
+                  <Link href={currentDomain.link}>
+                    <img
+                      src={currentDomain.image}
+                      alt={currentDomain.title}
+                      style={{ width: "100%", height: "auto", display: "block" }}
+                    />
+                  </Link>
+                </motion.div>
+              </AnimatePresence>
             </div>
 
-            {/* Row 2: Moving Right */}
-            <div className="marquee-row" style={{ display: "flex", width: "max-content", animation: "scrollRight 20s linear infinite" }}>
-              <div style={{ display: "flex", gap: "20px", paddingRight: "20px" }}>
-                {[
-                  { name: "Medical Research", emoji: "🔬" },
-                  { name: "Digital Marketing", emoji: "📱" },
-                  { name: "AgriTech Farming", emoji: "🚜" },
-                  { name: "Cybersecurity", emoji: "🛡️" },
-                ].map((tech, index) => (
-                  <div key={index} style={{
-                    background: "white",
-                    padding: "16px 24px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    border: "1px solid #f0f0f0",
-                    minWidth: "max-content"
-                  }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", background: "#f8fafc", borderRadius: "8px" }}>
-                      {tech.emoji}
-                    </div>
-                    <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{tech.name}</span>
-                  </div>
-                ))}
-              </div>
-              {/* Duplicate for seamless loop */}
-              <div style={{ display: "flex", gap: "20px", paddingRight: "20px" }}>
-                {[
-                  { name: "Medical Research", emoji: "🔬" },
-                  { name: "Digital Marketing", emoji: "📱" },
-                  { name: "AgriTech Farming", emoji: "🚜" },
-                  { name: "Cybersecurity", emoji: "🛡️" },
-                ].map((tech, index) => (
-                  <div key={`dup-${index}`} style={{
-                    background: "white",
-                    padding: "16px 24px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    border: "1px solid #f0f0f0",
-                    minWidth: "max-content"
-                  }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", background: "#f8fafc", borderRadius: "8px" }}>
-                      {tech.emoji}
-                    </div>
-                    <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{tech.name}</span>
-                  </div>
-                ))}
-              </div>
+            {/* Notch */}
+            <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+              <Notch
+                items={DOMAINS.map(d => ({ id: d.id, label: d.label, icon: d.icon }))}
+                activeId={activeDomain}
+                onChange={setActiveDomain}
+                activeColor={currentDomain.color}
+              />
             </div>
           </div>
+
         </div>
       </div>
-      
+
       <style>{`
-        @keyframes scrollLeft {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+        .hero-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 48px;
+          align-items: center;
+          width: 100%;
         }
-        @keyframes scrollRight {
-          0% { transform: translateX(-50%); }
-          100% { transform: translateX(0); }
+        .hero-left {
+          min-width: 0;
         }
-        @media (max-width: 1024px) {
-          section { text-align: center; }
-          .section-container > div { grid-template-columns: 1fr !important; }
-          h1 { margin-left: auto; margin-right: auto; }
-          p { margin-left: auto; margin-right: auto; }
-          .hero-buttons { justify-content: center; }
+        .hero-right {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
         }
-        @media (max-width: 640px) {
-          .hero-buttons { flex-direction: column; width: 100%; }
-          .hero-btn-primary, .hero-btn-secondary { width: 100%; padding: 14px 20px !important; }
+        @media (max-width: 768px) {
+          .hero-grid {
+            grid-template-columns: 1fr;
+            gap: 28px;
+          }
+          .hero-right {
+            order: -1;
+          }
+          .hero-left {
+            text-align: center;
+          }
+          .hero-buttons {
+            justify-content: center;
+          }
+        }
+        @media (max-width: 600px) {
+          .hero-buttons {
+            flex-direction: column;
+            align-items: center;
+          }
+          .hero-buttons a {
+            width: 100%;
+            justify-content: center;
+          }
         }
       `}</style>
     </section>
   );
 }
+
+

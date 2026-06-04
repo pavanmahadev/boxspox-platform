@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { Share2 } from "lucide-react";
 
 const categories = [
   { id: "tech", name: "Technology", emoji: "💻", color: "#0F6E56", slug: "technology", sub: "Web, AI, Cloud, DevOps" },
@@ -25,7 +26,7 @@ export function CategoryNav({ courses = [] }: { courses?: any[] }) {
   };
 
   return (
-    <section style={{ padding: "80px 24px", maxWidth: "1280px", margin: "0 auto" }}>
+    <section style={{ padding: "48px 24px 80px", maxWidth: "1280px", margin: "0 auto" }}>
       {/* Heading */}
       <div style={{ textAlign: "center", marginBottom: "52px" }}>
         <div style={{
@@ -72,7 +73,7 @@ export function CategoryNav({ courses = [] }: { courses?: any[] }) {
                 onClick={(e: any) => toggleExpand(cat.id, e)}
                 onHoverStart={() => setHovered(cat.id)}
                 onHoverEnd={() => setHovered(null)}
-                whileHover={{ y: -6, scale: 1.02 }}
+                whileHover={isExpanded ? {} : { y: -4 }}
                 transition={{ duration: 0.2 }}
                 style={{
                   background: "var(--bg-card)",
@@ -81,19 +82,25 @@ export function CategoryNav({ courses = [] }: { courses?: any[] }) {
                   padding: "24px",
                   cursor: "pointer",
                   position: "relative",
-                  overflow: "hidden",
                   boxShadow: hovered === cat.id || isExpanded ? `0 16px 40px -10px ${cat.color}30` : "none",
                   transition: "border-color 0.2s, box-shadow 0.2s, border-radius 0.2s",
                   zIndex: 2,
                 }}
               >
-                {/* Gradient blob */}
+                {/* Gradient blob clipped safely */}
                 <div style={{
-                  position: "absolute", top: "-20px", right: "-20px",
-                  width: "100px", height: "100px", borderRadius: "50%",
-                  background: `${cat.color}12`,
+                  position: "absolute",
+                  inset: 0,
+                  overflow: "hidden",
+                  borderRadius: isExpanded ? "18px 18px 0 0" : "18px",
                   pointerEvents: "none"
-                }} />
+                }}>
+                  <div style={{
+                    position: "absolute", top: "-20px", right: "-20px",
+                    width: "100px", height: "100px", borderRadius: "50%",
+                    background: `${cat.color}12`,
+                  }} />
+                </div>
 
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", position: "relative" }}>
                   {/* Icon */}
@@ -158,28 +165,56 @@ export function CategoryNav({ courses = [] }: { courses?: any[] }) {
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                       {catCourses.length > 0 ? (
                         catCourses.map(c => (
-                          <Link href={`/learn/${cat.slug}/${c.slug || c.id}`} key={c.id} style={{
-                            background: "var(--bg-primary)",
-                            border: `1px solid ${cat.color}20`,
-                            padding: "6px 12px",
-                            borderRadius: "8px",
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            color: "var(--text-primary)",
-                            textDecoration: "none",
-                            transition: "all 0.2s"
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLAnchorElement).style.background = cat.color;
-                            (e.currentTarget as HTMLAnchorElement).style.color = "white";
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-primary)";
-                            (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-primary)";
-                          }}
-                          >
-                            {c.title}
-                          </Link>
+                          <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <Link href={`/learn/${cat.slug}/${c.slug || c.id}`} style={{
+                              background: "var(--bg-primary)",
+                              border: `1px solid ${cat.color}20`,
+                              padding: "6px 12px",
+                              borderRadius: "8px",
+                              fontSize: "12px",
+                              fontWeight: 700,
+                              color: "var(--text-primary)",
+                              textDecoration: "none",
+                              transition: "all 0.2s"
+                            }}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLAnchorElement).style.background = cat.color;
+                              (e.currentTarget as HTMLAnchorElement).style.color = "white";
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-primary)";
+                              (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-primary)";
+                            }}
+                            >
+                              {c.title}
+                            </Link>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const url = `${window.location.origin}/learn/${cat.slug}/${c.slug || c.id}`;
+                                if (navigator.share) {
+                                  navigator.share({ title: c.title, url });
+                                } else {
+                                  navigator.clipboard.writeText(url);
+                                  alert("Link copied!");
+                                }
+                              }}
+                              style={{
+                                background: "var(--bg-primary)", border: `1px solid ${cat.color}20`, borderRadius: "8px", padding: "6px", cursor: "pointer", color: "var(--text-secondary)", display: "flex", alignItems: "center", justifyContent: "center"
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.color = cat.color;
+                                e.currentTarget.style.borderColor = cat.color;
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.color = "var(--text-secondary)";
+                                e.currentTarget.style.borderColor = `${cat.color}20`;
+                              }}
+                              title="Share Course"
+                            >
+                              <Share2 size={14} />
+                            </button>
+                          </div>
                         ))
                       ) : (
                         <span style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>
