@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/public";
 import { CourseContent } from "@/components/tutorials/CourseContent";
 import { CourseSchema } from "@/components/seo/CourseSchema";
 import { BreadcrumbSchema } from "@/components/seo/BreadcrumbSchema";
@@ -10,7 +10,7 @@ export const revalidate = 3600; // Revalidate every hour
 
 export async function generateMetadata({ params }: { params: Promise<{ category: string, courseSlug: string }> }): Promise<Metadata> {
   const { category, courseSlug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   
   const { data: course } = await supabase
     .from("courses")
@@ -39,8 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
 export default async function LearnCoursePage({ params }: { params: Promise<{ category: string, courseSlug: string }> }) {
   const { category, courseSlug } = await params;
   
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabase = createPublicClient();
 
   // Fetch course from Supabase
   let { data: course, error: courseError } = await supabase
@@ -79,19 +78,7 @@ export default async function LearnCoursePage({ params }: { params: Promise<{ ca
         .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
     );
 
-  // Check Enrollment
-  let isEnrolled = false;
-  if (user) {
-    const { data: enrollment } = await supabase
-      .from("enrollments")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("course_id", course.id)
-      .eq("status", "active")
-      .single();
-    
-    isEnrolled = !!enrollment;
-  }
+  // Caching revalidation is set to 3600s, so we don't query user-dependent enrollment data server-side.
 
   // Authorization Logic: redirect when lessons exist
   if (allLessons.length > 0) {
@@ -122,7 +109,6 @@ export default async function LearnCoursePage({ params }: { params: Promise<{ ca
         modules={modules || []}
         lessons={allLessons} 
         gradient={gradient}
-        currentUserId={user?.id}
         baseUrl={`/learn/${category}/${course.slug}`}
       />
     </div>

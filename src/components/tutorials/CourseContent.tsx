@@ -335,10 +335,10 @@ export function CourseContent({ course, modules, lessons, gradient, currentUserI
       </div>
 
       {/* ─── LMS Components (authenticated users only) ─── */}
-      {currentUserId && (
+      {user?.id && (
         <div style={{ maxWidth: "900px", margin: "0 auto", padding: "0 var(--container-padding) 80px" }}>
-          <CourseReview courseId={course.id} currentUserId={currentUserId} />
-          <Discussion lessonId={lessons[0]?.id || course.id} currentUserId={currentUserId} />
+          <CourseReview courseId={course.id} currentUserId={user.id} />
+          <Discussion lessonId={lessons[0]?.id || course.id} currentUserId={user.id} />
         </div>
       )}
 

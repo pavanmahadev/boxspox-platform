@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/public";
 import { LessonContent } from "@/components/tutorials/LessonContent";
 import { ArticleSchema } from "@/components/seo/ArticleSchema";
 import { BreadcrumbSchema } from "@/components/seo/BreadcrumbSchema";
@@ -9,7 +9,7 @@ export const revalidate = 3600; // Revalidate every hour
 
 export async function generateMetadata({ params }: { params: Promise<{ category: string, courseSlug: string; lessonSlug: string }> }): Promise<Metadata> {
   const { category, courseSlug, lessonSlug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   
   // Fetch lesson joining with module and course to ensure we get the right one for this course
   const { data: lesson } = await supabase
@@ -54,8 +54,7 @@ export default async function LearnLessonPage({
   params: Promise<{ category: string, courseSlug: string; lessonSlug: string }>;
 }) {
   const { category, courseSlug, lessonSlug } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabase = createPublicClient();
 
   // Fetch course
   const { data: course, error: courseError } = await supabase
@@ -148,7 +147,6 @@ export default async function LearnLessonPage({
         ad={ad} 
         allLessons={allLessons || []} 
         gradient={gradient}
-        currentUserId={user?.id}
         baseUrl={`/learn/${category}/${course.slug}`}
       />
     </>

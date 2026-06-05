@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/public";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -6,7 +6,7 @@ import { BookOpen, Clock, Users, Star, ChevronRight, Filter } from "lucide-react
 import { DOMAIN_GROUPS } from "@/utils/domains";
 import { ShareCourseButton } from "@/components/ui/ShareCourseButton";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache for 5 minutes (ISR)
 
 type Props = { params: Promise<{ category: string }> };
 
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function LearnCategoryPage({ params }: Props) {
   const { category } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Try to find it in categories table first
   const { data: catRow } = await supabase
@@ -79,12 +79,18 @@ export default async function LearnCategoryPage({ params }: Props) {
   const icon = catRow?.icon || (domainEntry ? domainEntry[0].split(" ")[0] : "📚");
   const color = catRow?.color || "linear-gradient(135deg, #0F6E56 0%, #15B8A6 100%)";
 
-  // Fetch enrollment counts for display
-  const { data: enrollData } = await supabase
-    .from("enrollments")
-    .select("course_id");
+  // Fetch enrollment counts for display only for the courses listed
+  const courseIds = courses?.map((c: any) => c.id) || [];
+  let enrollData: any[] = [];
+  if (courseIds.length > 0) {
+    const { data } = await supabase
+      .from("enrollments")
+      .select("course_id")
+      .in("course_id", courseIds);
+    enrollData = data || [];
+  }
   const enrollMap: Record<string, number> = {};
-  (enrollData || []).forEach((e: any) => {
+  enrollData.forEach((e: any) => {
     enrollMap[e.course_id] = (enrollMap[e.course_id] || 0) + 1;
   });
 

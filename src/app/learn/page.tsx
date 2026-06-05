@@ -1,10 +1,10 @@
-import { createClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/public";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { DOMAIN_GROUPS } from "@/utils/domains";
 import { BookOpen, ChevronRight } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache for 5 minutes (ISR)
 
 export const metadata: Metadata = {
   title: "All Learning Domains — Boxspox",
@@ -20,7 +20,7 @@ const slugify = (s: string) =>
     .replace(/(^-|-$)/g, "");
 
 export default async function LearnIndexPage() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Fetch categories from DB (for custom order/colors)
   const { data: dbCategories } = await supabase

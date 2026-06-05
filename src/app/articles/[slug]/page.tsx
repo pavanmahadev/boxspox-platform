@@ -1,7 +1,8 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/public";
+import { ViewIncrementer } from "@/components/articles/ViewIncrementer";
 import { ArrowLeft, Clock, Calendar, Eye, Share2, BookOpen } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -31,7 +32,7 @@ const LinkedinIcon = (props: any) => (
 );
 
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache for 5 minutes (ISR)
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -39,7 +40,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: article } = await supabase
     .from("articles")
@@ -60,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Fetch article
   const { data: article } = await supabase
@@ -73,13 +74,7 @@ export default async function ArticlePage({ params }: Props) {
     notFound();
   }
 
-  // Increment view count atomically
-  try {
-    await supabase.rpc("increment_article_views", { article_id: article.id });
-  } catch (e) {
-    // Fallback: regular update
-    await supabase.from("articles").update({ view_count: (article.view_count || 0) + 1 }).eq("id", article.id);
-  }
+  // Offload view increment to client-side ViewIncrementer component below to keep page static and cacheable.
 
   // Fetch 3 related articles
   const { data: related } = await supabase
@@ -100,6 +95,7 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <div style={{ background: "var(--bg-primary)", minHeight: "100vh", padding: "40px 24px 100px" }}>
+      <ViewIncrementer articleId={article.id} />
       <ArticleSchema
         headline={article.title}
         description={article.excerpt || ""}
