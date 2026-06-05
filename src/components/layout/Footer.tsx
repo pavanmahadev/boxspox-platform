@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Code2, Globe, Mail } from "lucide-react";
+import { Code2, Globe, Mail, Heart } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
 // Custom SVG Icons for Brands (since Lucide removed them)
@@ -190,15 +190,15 @@ export function Footer() {
             }
           `}</style>
           <div style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500 }}>
-            Â© {currentYear} {settings?.platform_name || "BOXSPOX"}. All rights reserved.
+            &copy; {currentYear} {settings?.platform_name || "BOXSPOX"}. All rights reserved.
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }} className="footer-bottom-links">
             <Link href={`mailto:${settings?.admin_email || "hello@boxspox.in"}`} style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-tertiary)", textDecoration: "none", fontSize: "14px", fontWeight: 500 }}>
               <Mail size={16} /> {settings?.admin_email || "hello@boxspox.in"}
             </Link>
             <div style={{ width: "1px", height: "14px", background: "#E5E7EB" }} className="footer-divider" />
-            <div style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500 }}>
-              Made with â¤ï¸ by GreenNetspark
+            <div style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
+              Made with <Heart size={14} fill="#ef4444" color="#ef4444" /> by GreenNetspark
             </div>
           </div>
         </div>

@@ -5,6 +5,9 @@ import { FeaturedCourses } from "@/components/home/FeaturedCourses";
 import { createClient } from "@/utils/supabase/server";
 import { CategoryNavServer } from "@/components/home/CategoryNavServer";
 import dynamic from "next/dynamic";
+import { LeadGeneration } from "@/components/home/LeadGeneration";
+import { ExitPopup } from "@/components/home/ExitPopup";
+import { EnrollmentToast } from "@/components/home/EnrollmentToast";
 
 const Testimonials = dynamic(() => import("@/components/home/Testimonials").then(mod => mod.Testimonials), { ssr: true });
 const Pricing = dynamic(() => import("@/components/home/Pricing").then(mod => mod.Pricing), { ssr: true });
@@ -12,6 +15,8 @@ const EditorPreview = dynamic(() => import("@/components/home/EditorPreview").th
 const LearningPaths = dynamic(() => import("@/components/home/LearningPaths").then(mod => mod.LearningPaths), { ssr: true });
 const ProjectsPreview = dynamic(() => import("@/components/home/ProjectsPreview").then(mod => mod.ProjectsPreview), { ssr: true });
 const AIFeature = dynamic(() => import("@/components/home/AIFeature").then(mod => mod.AIFeature), { ssr: true });
+const BundlePackages = dynamic(() => import("@/components/home/BundlePackages").then(mod => mod.BundlePackages), { ssr: true });
+const TrustBuilding = dynamic(() => import("@/components/home/TrustBuilding").then(mod => mod.TrustBuilding), { ssr: true });
 
 import { Suspense } from 'react';
 import { FeaturedCoursesServer } from "@/components/home/FeaturedCoursesServer";
@@ -37,7 +42,12 @@ export default async function HomePage() {
       <ProjectsPreview />
       <AIFeature />
       <Testimonials />
+      <BundlePackages />
+      <LeadGeneration />
       <Pricing />
+      <TrustBuilding />
+      <ExitPopup />
+      <EnrollmentToast />
     </>
   );
 }

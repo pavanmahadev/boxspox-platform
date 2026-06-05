@@ -719,6 +719,11 @@ export function LessonContent({ course, lesson, allLessons, ad, baseUrl }: Lesso
                videoUrl={lesson.video_url} 
                pdfUrl={lesson.pdf_url}
                codeTemplate={lesson.code_template}
+               onVideoProgress={(progressPercent: number) => {
+                 if (progressPercent >= 90 && !isCompleted(lesson.id)) {
+                   handleToggleComplete();
+                 }
+               }}
              />
           </div>
 
@@ -1182,14 +1187,14 @@ function CodeBlock({ children }: any) {
   );
 }
 
-function LessonRenderer({ content, lessonType, videoUrl, pdfUrl, codeTemplate }: any) {
+function LessonRenderer({ content, lessonType, videoUrl, pdfUrl, codeTemplate, onVideoProgress }: any) {
   // Unescape literal \n strings if they exist
   const formattedContent = content ? content.replace(/\\n/g, "\n") : "";
 
   if (lessonType === 'video' && videoUrl) {
     return (
       <div style={{ marginBottom: "48px" }}>
-        <VideoPlayer url={videoUrl} />
+        <VideoPlayer url={videoUrl} onProgress={onVideoProgress} />
       </div>
     );
   }

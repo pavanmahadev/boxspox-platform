@@ -4,9 +4,11 @@ import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { UserPlus, Mail, Lock, Loader2, Code2, ArrowRight, User } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { notifyNewUserRegistration } from "@/app/actions/discord";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -16,6 +18,8 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const referralId = searchParams.get('ref');
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +51,7 @@ export default function RegisterPage() {
       successMsg.style.cssText = "position: fixed; top: 20px; right: 20px; background: #10B981; color: white; padding: 12px 24px; borderRadius: 8px; zIndex: 9999; fontWeight: 700; animation: slideIn 0.3s ease";
       document.body.appendChild(successMsg);
 
-      // Manual profile creation fallback (in case trigger is missing)
+      // Manual profile creation fallback
       if (data.user) {
         await supabase.from("profiles").upsert([
           {
@@ -57,6 +61,22 @@ export default function RegisterPage() {
             full_name: fullName,
           }
         ], { onConflict: 'id' });
+        
+        // Record referral if exists
+        if (referralId) {
+          try {
+            await supabase.from('referrals').insert({
+              referrer_id: referralId,
+              referred_email: email,
+              status: 'PENDING'
+            });
+          } catch (e) {
+            console.error("Referral recording failed:", e);
+          }
+        }
+        
+        // Notify Discord
+        await notifyNewUserRegistration(data.user.id, email, fullName);
       }
     }
   };
@@ -419,5 +439,13 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "80px", textAlign: "center" }}>Loading...</div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }

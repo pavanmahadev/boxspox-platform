@@ -58,7 +58,8 @@ export function EditorPreview() {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               viewport={{ once: true }}
               style={{
-                position: "relative"
+                position: "relative",
+                minWidth: 0 /* crucial for CSS grid so child doesn't blow out width */
               }}
             >
               {/* Decorative Glow */}
@@ -74,46 +75,18 @@ export function EditorPreview() {
               }} />
 
               <div style={{
-                background: "#1E293B",
                 borderRadius: "var(--radius-xl)",
                 overflow: "hidden",
                 boxShadow: "0 30px 60px -12px rgba(0,0,0,0.25), 0 18px 36px -18px rgba(0,0,0,0.3)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 position: "relative",
-                zIndex: 1
+                zIndex: 1,
+                minWidth: 0
               }}>
-                {/* Window Header */}
-                <div style={{
-                  height: "40px",
-                  background: "#111827",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "0 16px",
-                  gap: "8px",
-                  borderBottom: "1px solid rgba(255,255,255,0.05)"
-                }}>
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    <div style={{ width: "10px", height: "10px", background: "#FF5F56", borderRadius: "50%" }} />
-                    <div style={{ width: "10px", height: "10px", background: "#FFBD2E", borderRadius: "50%" }} />
-                    <div style={{ width: "10px", height: "10px", background: "#27C93F", borderRadius: "50%" }} />
-                  </div>
-                  <div style={{ 
-                    flex: 1, 
-                    textAlign: "center", 
-                    fontSize: "12px", 
-                    color: "rgba(255,255,255,0.4)", 
-                    fontWeight: 600, 
-                    fontFamily: "var(--font-sans)",
-                    letterSpacing: "0.5px"
-                  }}>
-                    boxspox_editor — index.html
-                  </div>
-                </div>
-
-                <div style={{ padding: "12px" }}>
-                  <SandpackEditor
-                    template="vanilla"
-                    files={{
+                <SandpackEditor
+                  template="vanilla"
+                  height={380}
+                  files={{
                       "/index.html": `<!DOCTYPE html>
 <html>
   <head>
@@ -132,7 +105,6 @@ export function EditorPreview() {
                       "/index.js": ""
                     }}
                   />
-                </div>
               </div>
             </motion.div>
           </div>

@@ -394,6 +394,22 @@ export default function JobsPage() {
           </div>
         </div>
 
+        {/* AI Resume Reviewer Banner */}
+        <div style={{ background: "linear-gradient(135deg, var(--bg-card), rgba(16, 185, 129, 0.05))", border: "1px solid var(--border-primary)", borderRadius: "20px", padding: "32px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "24px", marginBottom: "40px", boxShadow: "0 10px 30px -10px rgba(0,0,0,0.05)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            <div style={{ width: "64px", height: "64px", background: "linear-gradient(135deg, var(--brand-primary), #059669)", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", flexShrink: 0, boxShadow: "0 10px 20px -5px rgba(15,110,86,0.3)" }}>
+              <Sparkles size={32} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "4px" }}>AI Resume Reviewer & Job Matcher</h3>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>Paste your resume to get instant ATS scoring, actionable feedback, and handpicked job matches.</p>
+            </div>
+          </div>
+          <Link href="/jobs/resume" className="btn-primary" style={{ padding: "16px 32px", fontSize: "0.95rem", fontWeight: 700, borderRadius: "12px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+            <Sparkles size={18} /> Analyze Resume Free
+          </Link>
+        </div>
+
         {/* 2. Filter Bar & Actions Controls */}
         <div style={{
           display: "flex",

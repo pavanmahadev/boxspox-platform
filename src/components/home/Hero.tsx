@@ -223,6 +223,13 @@ export function Hero() {
               </AnimatePresence>
             </div>
 
+            {/* Hidden preloader to fix image reloading flashes */}
+            <div style={{ position: "absolute", width: 0, height: 0, overflow: "hidden", opacity: 0, pointerEvents: "none" }}>
+              {DOMAINS.map((domain) => (
+                <img key={domain.id} src={domain.image} alt="preload" />
+              ))}
+            </div>
+
             {/* Notch */}
             <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
               <Notch
