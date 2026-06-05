@@ -458,7 +458,7 @@ export default function DashboardClient({
               </div>
               <div style={{ padding: "16px", background: "var(--bg-secondary)", borderRadius: "12px", border: "1px solid var(--border-primary)", textAlign: "center" }}>
                 <div style={{ fontSize: "0.8rem", color: "var(--text-tertiary)", marginBottom: "4px" }}>YOUR CURRENT RANK</div>
-                <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "var(--text-primary)" }}>#{Math.floor(Math.random() * 100) + 1}</div>
+                <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "var(--text-primary)" }}>#{Math.max(1, 150 - Math.floor((profile?.xp || 0) / 100))}</div>
                 <div style={{ fontSize: "0.75rem", color: "var(--brand-primary)", fontWeight: 700, marginTop: "8px" }}>
                   {profile?.xp || 0} XP earned so far
                 </div>
