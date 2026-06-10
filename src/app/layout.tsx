@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://boxspox.in'),
@@ -98,6 +99,7 @@ export default function RootLayout({
             </LayoutWrapper>
           </ThemeProvider>
         </ToastProvider>
+        <SpeedInsights />
       </body>
     </html>
   );

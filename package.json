@@ -21,6 +21,7 @@
     "@react-pdf/renderer": "^4.5.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
+    "@vercel/speed-insights": "^2.0.0",
     "axios": "^1.16.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
