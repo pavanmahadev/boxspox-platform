@@ -13,6 +13,10 @@ export const DOMAIN_GROUPS: Record<string, string[]> = {
     "Data Analytics", "Excel", "Google Sheets", "R", "TensorFlow", "PyTorch",
     "Computer Vision", "NLP", "LLMs", "Prompt Engineering"
   ],
+  "🛡️ Cybersecurity": [
+    "Cybersecurity", "Ethical Hacking", "Network Security", "Cloud Security",
+    "Penetration Testing", "Cryptography", "Information Security", "SOC Analyst"
+  ],
   "📊 MBA & Business": [
     "Business Strategy", "Marketing", "Finance", "Accounting", "Operations Management",
     "Organizational Behaviour", "Human Resources", "Economics", "Entrepreneurship",

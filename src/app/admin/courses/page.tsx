@@ -8,7 +8,7 @@ import { CourseSearch } from "@/components/admin/CourseSearch";
 export default async function AdminCoursesPage({ searchParams }: { searchParams: Promise<{ q?: string, category?: string, page?: string }> }) {
   const { q: search, category, page: pageStr } = await searchParams;
   const page = parseInt(pageStr || "1");
-  const pageSize = 10;
+  const pageSize = 1000;
   const start = (page - 1) * pageSize;
   const end = start + pageSize - 1;
 
@@ -17,6 +17,7 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
   let query = supabase
     .from("courses")
     .select("*, modules(id)", { count: "exact" })
+    .order("category", { ascending: true })
     .order("created_at", { ascending: false });
 
   if (search) {
@@ -29,6 +30,13 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
 
   const { data: courses, count } = await query.range(start, end);
   const totalPages = Math.ceil((count || 0) / pageSize);
+
+  const groupedCourses: Record<string, any[]> = (courses || []).reduce((acc: any, course: any) => {
+    const cat = course.category || "Uncategorized";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(course);
+    return acc;
+  }, {});
 
   return (
     <div className="admin-page-content">
@@ -95,8 +103,18 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
             </tr>
           </thead>
           <tbody>
-            {courses?.map((course) => (
-              <tr key={course.id} style={{ borderBottom: "1px solid var(--border-primary)", transition: "background 0.1s" }}>
+            {Object.entries(groupedCourses).map(([cat, catCourses]) => (
+              <React.Fragment key={cat}>
+                <tr>
+                  <td colSpan={7} style={{ padding: "12px 24px", background: "var(--bg-secondary)", fontWeight: 800, color: "var(--text-primary)", fontSize: "13px", borderBottom: "1px solid var(--border-primary)", borderTop: "1px solid var(--border-primary)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <Layers size={16} color="var(--brand-primary)" />
+                      <span style={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>{cat.replace(/-/g, ' ')}</span>
+                    </div>
+                  </td>
+                </tr>
+                {catCourses?.map((course) => (
+                  <tr key={course.id} style={{ borderBottom: "1px solid var(--border-primary)", transition: "background 0.1s" }}>
                 <td style={{ padding: "16px 24px", whiteSpace: "nowrap" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <div style={{ 
@@ -171,6 +189,8 @@ export default async function AdminCoursesPage({ searchParams }: { searchParams:
                   </div>
                 </td>
               </tr>
+                ))}
+              </React.Fragment>
             ))}
           </tbody>
         </table>

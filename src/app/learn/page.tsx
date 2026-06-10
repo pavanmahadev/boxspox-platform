@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { DOMAIN_GROUPS } from "@/utils/domains";
 import { BookOpen, ChevronRight } from "lucide-react";
 
-export const revalidate = 300; // Cache for 5 minutes (ISR)
+
 
 export const metadata: Metadata = {
   title: "All Learning Domains — Boxspox",

@@ -20,7 +20,10 @@ import {
   Cpu,
   Briefcase,
   FolderOpen,
-  Activity
+  Activity,
+  DollarSign,
+  Tag,
+  Ticket
 } from "lucide-react";
 
 const menuSections = [
@@ -35,24 +38,27 @@ const menuSections = [
     ],
   },
   {
-    label: "Community",
+    label: "Sales & Finance",
     items: [
-      { name: "Submissions", icon: <FileText size={20} />, href: "/admin/submissions" },
-      { name: "Course Reviews", icon: <MessageSquare size={20} />, href: "/admin/reviews" },
-      { name: "User Management", icon: <Users size={20} />, href: "/admin/users" },
-      { name: "Live Activity", icon: <Activity size={20} />, href: "/admin/activity" },
+      { name: "Financial Dashboard", icon: <DollarSign size={20} />, href: "/admin/finance" },
+      { name: "Coupons & Promo", icon: <Ticket size={20} />, href: "/admin/coupons" },
+      { name: "Global Sales", icon: <Tag size={20} />, href: "/admin/sales" },
     ],
   },
   {
-    label: "Monetization",
+    label: "Community",
     items: [
-      { name: "Manage Ads", icon: <Megaphone size={20} />, href: "/admin/ads" },
-      { name: "Manage Jobs", icon: <Briefcase size={20} />, href: "/admin/jobs" },
+      { name: "User Management", icon: <Users size={20} />, href: "/admin/users" },
+      { name: "Submissions", icon: <FileText size={20} />, href: "/admin/submissions" },
+      { name: "Course Reviews", icon: <MessageSquare size={20} />, href: "/admin/reviews" },
+      { name: "Live Activity", icon: <Activity size={20} />, href: "/admin/activity" },
     ],
   },
   {
     label: "System",
     items: [
+      { name: "Manage Ads", icon: <Megaphone size={20} />, href: "/admin/ads" },
+      { name: "Manage Jobs", icon: <Briefcase size={20} />, href: "/admin/jobs" },
       { name: "AI Usage", icon: <Cpu size={20} />, href: "/admin/ai-usage" },
       { name: "Settings", icon: <Settings size={20} />, href: "/admin/settings" },
     ],

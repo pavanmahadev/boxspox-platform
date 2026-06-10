@@ -6,7 +6,7 @@ import { BookOpen, Clock, Users, Star, ChevronRight, Filter } from "lucide-react
 import { DOMAIN_GROUPS } from "@/utils/domains";
 import { ShareCourseButton } from "@/components/ui/ShareCourseButton";
 
-export const revalidate = 300; // Cache for 5 minutes (ISR)
+
 
 type Props = { params: Promise<{ category: string }> };
 

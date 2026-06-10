@@ -19,7 +19,7 @@ const paths = [
     title: "Frontend Developer",
     desc: "Master the art of building beautiful, responsive, and high-performance user interfaces.",
     skills: ["HTML5", "CSS3", "JavaScript", "React", "Next.js"],
-    icon: <Monitor size={32} />,
+    icon: <Monitor size={24} />,
     color: "#04AA6D",
     bg: "#ebf7f1",
     slug: "frontend"
@@ -28,7 +28,7 @@ const paths = [
     title: "Backend Architect",
     desc: "Build scalable APIs, manage databases, and master server-side logic.",
     skills: ["Node.js", "Python", "SQL", "PostgreSQL", "Redis"],
-    icon: <Server size={32} />,
+    icon: <Server size={24} />,
     color: "#6366f1",
     bg: "#eff0fe",
     slug: "backend"
@@ -37,7 +37,7 @@ const paths = [
     title: "AI & Data Science",
     desc: "Dive into machine learning, data analysis, and the future of artificial intelligence.",
     skills: ["Python", "NumPy", "Pandas", "Scikit-Learn", "OpenAI"],
-    icon: <Cpu size={32} />,
+    icon: <Cpu size={24} />,
     color: "#f43f5e",
     bg: "#fef1f2",
     slug: "ai-data"
@@ -46,7 +46,7 @@ const paths = [
     title: "Cybersecurity Pro",
     desc: "Learn to protect systems, networks, and data from digital attacks.",
     skills: ["Networking", "Linux", "Ethical Hacking", "Cryptography"],
-    icon: <Shield size={32} />,
+    icon: <Shield size={24} />,
     color: "#f59e0b",
     bg: "#fef8ee",
     slug: "cybersecurity"
@@ -79,7 +79,7 @@ export function LearningPaths() {
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
           gap: "var(--container-padding)"
         }}>
           {paths.map((path, i) => (
@@ -93,7 +93,7 @@ export function LearningPaths() {
               style={{
                 background: "var(--bg-card)",
                 borderRadius: "var(--radius-xl)",
-                padding: "48px 40px",
+                padding: "24px 20px",
                 border: "1px solid var(--border-primary)",
                 display: "flex",
                 flexDirection: "column",
@@ -127,24 +127,24 @@ export function LearningPaths() {
               }} />
 
               <div style={{
-                width: "72px",
-                height: "72px",
-                borderRadius: "22px",
+                width: "48px",
+                height: "48px",
+                borderRadius: "16px",
                 background: `${path.color}10`,
                 color: path.color,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                marginBottom: "32px",
+                marginBottom: "16px",
                 border: `1px solid ${path.color}20`
               }}>
                 {path.icon}
               </div>
 
               <h3 style={{ 
-                fontSize: "24px", 
+                fontSize: "20px", 
                 fontWeight: 900, 
-                marginBottom: "20px", 
+                marginBottom: "8px", 
                 color: "var(--text-primary)",
                 fontFamily: "var(--font-heading)",
                 letterSpacing: "-0.5px"
@@ -154,22 +154,22 @@ export function LearningPaths() {
 
               <p style={{ 
                 color: "var(--text-secondary)", 
-                marginBottom: "40px", 
-                fontSize: "15px", 
-                lineHeight: 1.7,
+                marginBottom: "20px", 
+                fontSize: "14px", 
+                lineHeight: 1.6,
                 fontWeight: 500
               }}>
                 {path.desc}
               </p>
 
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "48px" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "32px" }}>
                 {path.skills.map(skill => (
                   <span key={skill} style={{
-                    padding: "8px 16px",
+                    padding: "6px 12px",
                     background: "var(--bg-secondary)",
                     border: "1px solid var(--border-primary)",
-                    borderRadius: "12px",
-                    fontSize: "13px",
+                    borderRadius: "10px",
+                    fontSize: "12px",
                     fontWeight: 700,
                     color: "var(--text-secondary)",
                     transition: "all 0.2s ease"
@@ -194,7 +194,7 @@ export function LearningPaths() {
                   letterSpacing: "1px"
                 }}
               >
-                Explore Roadmap <ArrowRight size={20} />
+                Explore Roadmap <ArrowRight size={16} />
               </Link>
             </motion.div>
           ))}
@@ -203,7 +203,7 @@ export function LearningPaths() {
       <style>{`
         @media (max-width: 640px) {
           .path-card {
-            padding: 32px 24px !important;
+            padding: 20px 16px !important;
           }
         }
       `}</style>

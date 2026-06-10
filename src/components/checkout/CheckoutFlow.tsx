@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Check, ShieldCheck, Lock, CreditCard, Sparkles, MoveRight, Loader2, Award, Zap, CheckCircle2 } from "lucide-react";
-import { simulatePurchase } from "@/app/checkout/[id]/actions";
+import { simulatePurchase, createRazorpayOrder, verifyRazorpayPayment } from "@/app/checkout/[id]/actions";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 
@@ -24,10 +24,7 @@ interface CheckoutFlowProps {
 export default function CheckoutFlow({ course, user }: CheckoutFlowProps) {
   const [step, setStep] = useState<"billing" | "processing" | "success">("billing");
   const [loading, setLoading] = useState(false);
-  const [cardHolder, setCardHolder] = useState(user.name || "LEARNER NAME");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvv, setCardCvv] = useState("");
+  const [cardHolder, setCardHolder] = useState(user.name || "LEARNER");
   const [processingText, setProcessingText] = useState("Establishing secure payment tunnel...");
   const router = useRouter();
 
@@ -45,56 +42,98 @@ export default function CheckoutFlow({ course, user }: CheckoutFlowProps) {
     return () => timers.forEach(clearTimeout);
   }, [step]);
 
-  // Clean formatting for Mock Card input
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "").substring(0, 16);
-    const formatted = value.match(/.{1,4}/g)?.join(" ") || value;
-    setCardNumber(formatted);
-  };
-
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "").substring(0, 4);
-    if (value.length >= 2) {
-      setCardExpiry(`${value.slice(0, 2)}/${value.slice(2)}`);
-    } else {
-      setCardExpiry(value);
-    }
-  };
-
-  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCardCvv(e.target.value.replace(/\D/g, "").substring(0, 3));
-  };
+  // Removed mock card format handlers
 
   const triggerPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setStep("processing");
 
     try {
-      // Simulate purchase using the Server Action
-      const result = await simulatePurchase(course.id);
+      const res = await createRazorpayOrder(course.id);
       
-      // Delay slightly to allow the beautiful high-fidelity vault authorization visual sequence to play
-      setTimeout(() => {
-        if (result.success) {
-          setStep("success");
-        } else {
-          alert("Simulation failed");
-          setStep("billing");
-        }
+      if (!res.success) {
+        alert(res.error || "Failed to create order");
         setLoading(false);
-      }, 5500);
+        return;
+      }
+
+      if (res.mock) {
+        // Fallback to simulation if keys are missing
+        setStep("processing");
+        const simResult = await simulatePurchase(course.id);
+        setTimeout(() => {
+          if (simResult.success) {
+            setStep("success");
+          } else {
+            alert("Simulation failed");
+            setStep("billing");
+          }
+          setLoading(false);
+        }, 3000);
+        return;
+      }
+
+      // Real Razorpay Flow
+      const options = {
+        key: res.keyId,
+        amount: res.order.amount,
+        currency: res.order.currency,
+        name: "Boxspox",
+        description: res.course?.description || "Certification Exam",
+        order_id: res.order.id,
+        handler: async function (response: any) {
+          setStep("processing");
+          try {
+            const verify = await verifyRazorpayPayment(
+              response.razorpay_payment_id,
+              response.razorpay_order_id,
+              response.razorpay_signature,
+              course.id
+            );
+            if (verify.success) {
+              setStep("success");
+            } else {
+              alert(verify.error || "Payment verification failed");
+              setStep("billing");
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Verification error.");
+            setStep("billing");
+          }
+          setLoading(false);
+        },
+        prefill: {
+          name: res.user?.name || user.name,
+          email: res.user?.email || user.email,
+        },
+        theme: {
+          color: "#0F6E56"
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        alert("Payment failed: " + response.error.description);
+        setLoading(false);
+      });
+      rzp.open();
 
     } catch (err) {
       console.error(err);
       alert("An unexpected error occurred.");
-      setStep("billing");
       setLoading(false);
     }
   };
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-secondary)", paddingTop: "120px", paddingBottom: "80px", color: "var(--text-primary)" }}>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       
       {/* Visual Step Banner */}
       <div style={{ display: "flex", justifyContent: "center", gap: "24px", marginBottom: "40px" }}>
@@ -168,7 +207,7 @@ export default function CheckoutFlow({ course, user }: CheckoutFlowProps) {
 
               {/* Card Number */}
               <div style={{ fontSize: "22px", fontFamily: "monospace", letterSpacing: "3px", color: "#fff", wordSpacing: "4px", textShadow: "0 2px 4px rgba(0,0,0,0.4)", zIndex: 2 }}>
-                {cardNumber || "•••• •••• •••• ••••"}
+                •••• •••• •••• ••••
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", zIndex: 2 }}>
@@ -179,11 +218,11 @@ export default function CheckoutFlow({ course, user }: CheckoutFlowProps) {
                 <div style={{ display: "flex", gap: "20px" }}>
                   <div>
                     <div style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: "1.5px", color: "rgba(255,255,255,0.4)" }}>Expires</div>
-                    <div style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>{cardExpiry || "MM/YY"}</div>
+                    <div style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>MM/YY</div>
                   </div>
                   <div>
                     <div style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: "1.5px", color: "rgba(255,255,255,0.4)" }}>CVV</div>
-                    <div style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>{cardCvv || "•••"}</div>
+                    <div style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>•••</div>
                   </div>
                 </div>
               </div>
@@ -226,63 +265,13 @@ export default function CheckoutFlow({ course, user }: CheckoutFlowProps) {
                   <Award size={18} color="var(--brand-primary)" /> Billing & Invoice Summary
                 </h2>
 
-                <div style={{ background: "rgba(16, 185, 129, 0.05)", border: "1px solid rgba(16, 185, 129, 0.15)", borderRadius: "14px", padding: "16px", marginBottom: "24px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#10b981", fontSize: "13px", fontWeight: 800 }}>
-                    <Zap size={14} /> SIMULATION VAULT TUNNEL ACTIVE
+                <div style={{ background: "rgba(15, 110, 86, 0.05)", border: "1px solid rgba(15, 110, 86, 0.15)", borderRadius: "14px", padding: "16px", marginBottom: "24px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--brand-primary)", fontSize: "13px", fontWeight: 800 }}>
+                    <ShieldCheck size={14} /> 256-BIT SECURE ENCRYPTION
                   </div>
                   <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px", lineHeight: 1.4 }}>
-                    No actual charge will be made. Enter any mock card numbers below to trigger simulation credentials.
+                    Your payment information is securely processed by Razorpay. Boxspox does not store your card details.
                   </p>
-                </div>
-
-                {/* Form Fields */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--text-tertiary)", marginBottom: "6px", textTransform: "uppercase" }}>Cardholder Name</label>
-                    <input 
-                      type="text" 
-                      required
-                      placeholder="Jane Doe" 
-                      value={cardHolder} 
-                      onChange={(e) => setCardHolder(e.target.value)}
-                      style={{ width: "100%", padding: "12px 16px", borderRadius: "12px", border: "1px solid var(--border-primary)", background: "var(--bg-secondary)", color: "var(--text-primary)", fontSize: "14px", fontWeight: 600, outline: "none" }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--text-tertiary)", marginBottom: "6px", textTransform: "uppercase" }}>Card Number</label>
-                    <input 
-                      type="text" 
-                      required
-                      placeholder="4111 2222 3333 4444" 
-                      value={cardNumber} 
-                      onChange={handleCardNumberChange}
-                      style={{ width: "100%", padding: "12px 16px", borderRadius: "12px", border: "1px solid var(--border-primary)", background: "var(--bg-secondary)", color: "var(--text-primary)", fontSize: "14px", fontWeight: 600, outline: "none", fontFamily: "monospace", letterSpacing: "1px" }}
-                    />
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                    <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--text-tertiary)", marginBottom: "6px", textTransform: "uppercase" }}>Expiry Date</label>
-                      <input 
-                        type="text" 
-                        required
-                        placeholder="MM/YY" 
-                        value={cardExpiry} 
-                        onChange={handleExpiryChange}
-                        style={{ width: "100%", padding: "12px 16px", borderRadius: "12px", border: "1px solid var(--border-primary)", background: "var(--bg-secondary)", color: "var(--text-primary)", fontSize: "14px", fontWeight: 600, outline: "none" }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--text-tertiary)", marginBottom: "6px", textTransform: "uppercase" }}>CVV</label>
-                      <input 
-                        type="password" 
-                        required
-                        placeholder="•••" 
-                        value={cardCvv} 
-                        onChange={handleCvvChange}
-                        style={{ width: "100%", padding: "12px 16px", borderRadius: "12px", border: "1px solid var(--border-primary)", background: "var(--bg-secondary)", color: "var(--text-primary)", fontSize: "14px", fontWeight: 600, outline: "none" }}
-                      />
-                    </div>
-                  </div>
                 </div>
 
                 {/* Price Receipt Box */}

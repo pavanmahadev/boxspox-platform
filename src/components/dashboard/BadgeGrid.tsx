@@ -8,16 +8,31 @@ interface BadgeGridProps {
     pythonPathfinder: boolean;
     sqlSage: boolean;
     gitGuardian: boolean;
+    reactMaster: boolean;
+    nodeNinja: boolean;
+    dataPro: boolean;
+  };
+  badgeProgress: {
+    htmlHero: number;
+    cssChampion: number;
+    jsJedi: number;
+    pythonPathfinder: number;
+    sqlSage: number;
+    gitGuardian: number;
+    reactMaster: number;
+    nodeNinja: number;
+    dataPro: number;
   };
 }
 
-export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
+export function BadgeGrid({ unlockedBadges, badgeProgress }: BadgeGridProps) {
   const badges = [
     { 
       id: "html", 
       label: "HTML Hero", 
-      desc: "Complete any HTML lesson", 
+      desc: "Complete 80% of HTML path", 
       active: unlockedBadges.htmlHero, 
+      progress: badgeProgress.htmlHero,
       renderBadge: () => (
         <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
           <defs>
@@ -36,8 +51,9 @@ export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
     { 
       id: "css", 
       label: "CSS Champion", 
-      desc: "Complete any CSS lesson", 
+      desc: "Complete 80% of CSS path", 
       active: unlockedBadges.cssChampion, 
+      progress: badgeProgress.cssChampion,
       renderBadge: () => (
         <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
           <defs>
@@ -59,8 +75,9 @@ export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
     { 
       id: "js", 
       label: "JS Jedi", 
-      desc: "Complete any JavaScript lesson", 
+      desc: "Complete 80% of JS path", 
       active: unlockedBadges.jsJedi, 
+      progress: badgeProgress.jsJedi,
       renderBadge: () => (
         <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
           <defs>
@@ -78,8 +95,9 @@ export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
     { 
       id: "python", 
       label: "Python Pathfinder", 
-      desc: "Complete any Python lesson", 
+      desc: "Complete 80% of Python path", 
       active: unlockedBadges.pythonPathfinder, 
+      progress: badgeProgress.pythonPathfinder,
       renderBadge: () => (
         <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
           <defs>
@@ -98,8 +116,9 @@ export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
     { 
       id: "sql", 
       label: "SQL Sage", 
-      desc: "Complete any SQL lesson", 
+      desc: "Complete 80% of SQL path", 
       active: unlockedBadges.sqlSage, 
+      progress: badgeProgress.sqlSage,
       renderBadge: () => (
         <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
           <defs>
@@ -119,8 +138,9 @@ export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
     { 
       id: "git", 
       label: "Git Guardian", 
-      desc: "Complete Git beginner guide", 
+      desc: "Complete 80% of Git path", 
       active: unlockedBadges.gitGuardian, 
+      progress: badgeProgress.gitGuardian,
       renderBadge: () => (
         <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
           <defs>
@@ -136,6 +156,77 @@ export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
           <circle cx="35" cy="35" r="7" fill="#fff" />
           <circle cx="35" cy="65" r="7" fill="#fff" />
           <circle cx="65" cy="35" r="7" fill="#fff" />
+        </svg>
+      )
+    },
+    { 
+      id: "react", 
+      label: "React Master", 
+      desc: "Complete 80% of React path", 
+      active: unlockedBadges.reactMaster, 
+      progress: badgeProgress.reactMaster,
+      renderBadge: () => (
+        <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
+          <defs>
+            <linearGradient id="gReact" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#0ea5e9" />
+              <stop offset="100%" stopColor="#0284c7" />
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="45" fill="url(#gReact)" />
+          <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+          <g stroke="#fff" strokeWidth="2.5" fill="none">
+            <ellipse cx="50" cy="50" rx="12" ry="28" transform="rotate(0 50 50)" />
+            <ellipse cx="50" cy="50" rx="12" ry="28" transform="rotate(60 50 50)" />
+            <ellipse cx="50" cy="50" rx="12" ry="28" transform="rotate(120 50 50)" />
+          </g>
+          <circle cx="50" cy="50" r="4" fill="#fff" />
+        </svg>
+      )
+    },
+    { 
+      id: "node", 
+      label: "Node Ninja", 
+      desc: "Complete 80% of Node.js path", 
+      active: unlockedBadges.nodeNinja, 
+      progress: badgeProgress.nodeNinja,
+      renderBadge: () => (
+        <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
+          <defs>
+            <linearGradient id="gNode" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#22c55e" />
+              <stop offset="100%" stopColor="#16a34a" />
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="45" fill="url(#gNode)" />
+          <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+          <path d="M50 25 L75 35 L75 65 L50 75 L25 65 L25 35 Z" fill="none" stroke="#fff" strokeWidth="2.5" />
+          <path d="M50 25 L50 50 M25 35 L50 50 M75 35 L50 50 M25 65 L50 50 M75 65 L50 50" stroke="#fff" strokeWidth="1" strokeOpacity="0.5" />
+          <text x="50" y="55" fill="#fff" fontSize="14" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">JS</text>
+        </svg>
+      )
+    },
+    { 
+      id: "data", 
+      label: "Data Pro", 
+      desc: "Complete 80% of Data path", 
+      active: unlockedBadges.dataPro, 
+      progress: badgeProgress.dataPro,
+      renderBadge: () => (
+        <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%" }}>
+          <defs>
+            <linearGradient id="gData" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ec4899" />
+              <stop offset="100%" stopColor="#be185d" />
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="45" fill="url(#gData)" />
+          <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="3" />
+          <path d="M30 65 L30 45 L45 30 L60 45 L70 35 L70 65 Z" fill="rgba(255,255,255,0.2)" stroke="#fff" strokeWidth="2.5" strokeLinejoin="round" />
+          <circle cx="30" cy="45" r="3" fill="#fff" />
+          <circle cx="45" cy="30" r="3" fill="#fff" />
+          <circle cx="60" cy="45" r="3" fill="#fff" />
+          <circle cx="70" cy="35" r="3" fill="#fff" />
         </svg>
       )
     },
@@ -165,7 +256,7 @@ export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
               position: "relative",
               cursor: "help"
             }}
-            title={`${ach.label}\n${ach.desc}\n(${ach.active ? "UNLOCKED! 🎉" : "LOCKED 🔒"})`}
+            title={ach.active ? `${ach.label}\n${ach.desc}\n(UNLOCKED! 🎉)` : `${ach.label}\n${ach.desc}\n(Progress: ${ach.progress}% / 80%)`}
           >
             <div style={{ 
               width: "60px", 
@@ -177,6 +268,12 @@ export function BadgeGrid({ unlockedBadges }: BadgeGridProps) {
             }} className={ach.active ? "badge-hover" : ""}>
               {ach.renderBadge()}
             </div>
+            {/* Progress Bar for Locked Badges */}
+            {!ach.active && (
+              <div style={{ width: "40px", height: "4px", background: "var(--bg-primary)", margin: "0 auto 4px", borderRadius: "2px", overflow: "hidden", border: "1px solid var(--border-primary)" }}>
+                <div style={{ width: `${Math.min(100, (ach.progress / 80) * 100)}%`, height: "100%", background: "var(--brand-primary)" }} />
+              </div>
+            )}
             <div style={{ 
               fontSize: "0.65rem", 
               color: ach.active ? "var(--text-primary)" : "var(--text-tertiary)", 

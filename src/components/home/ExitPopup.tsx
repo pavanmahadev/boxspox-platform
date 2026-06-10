@@ -56,8 +56,8 @@ export function ExitPopup() {
           style={{
             background: "var(--bg-card)",
             width: "100%",
-            maxWidth: "480px",
-            borderRadius: "24px",
+            maxWidth: "420px",
+            borderRadius: "20px",
             overflow: "hidden",
             position: "relative",
             boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)"
@@ -85,32 +85,32 @@ export function ExitPopup() {
             <X size={18} />
           </button>
 
-          <div style={{ background: "linear-gradient(135deg, #111827 0%, #1F2937 100%)", padding: "40px 32px", textAlign: "center", color: "white" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-              <div style={{ background: "rgba(16, 185, 129, 0.2)", padding: "16px", borderRadius: "50%" }}>
-                <Gift size={40} color="#10B981" />
+          <div style={{ background: "linear-gradient(135deg, #111827 0%, #1F2937 100%)", padding: "32px 24px", textAlign: "center", color: "white" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+              <div style={{ background: "rgba(16, 185, 129, 0.2)", padding: "12px", borderRadius: "50%" }}>
+                <Gift size={32} color="#10B981" />
               </div>
             </div>
-            <h2 style={{ fontSize: "28px", fontWeight: 900, marginBottom: "12px", lineHeight: 1.2 }}>Wait! Before You Go...</h2>
-            <p style={{ color: "#D1D5DB", fontSize: "15px", lineHeight: 1.5, margin: 0 }}>
+            <h2 style={{ fontSize: "24px", fontWeight: 900, marginBottom: "8px", lineHeight: 1.2 }}>Wait! Before You Go...</h2>
+            <p style={{ color: "#D1D5DB", fontSize: "14px", lineHeight: 1.5, margin: 0 }}>
               Don't leave empty-handed. Take an extra <strong>50% OFF</strong> any course or bundle right now!
             </p>
           </div>
 
-          <div style={{ padding: "32px", textAlign: "center" }}>
+          <div style={{ padding: "24px", textAlign: "center" }}>
             <div style={{ color: "var(--text-secondary)", fontSize: "14px", fontWeight: 600, marginBottom: "12px", textTransform: "uppercase", letterSpacing: "1px" }}>
               Use Promo Code
             </div>
             <div style={{ 
               background: "rgba(15, 110, 86, 0.1)", 
               border: "2px dashed var(--brand-primary)", 
-              padding: "16px", 
-              borderRadius: "12px", 
-              fontSize: "32px", 
+              padding: "12px", 
+              borderRadius: "10px", 
+              fontSize: "28px", 
               fontWeight: 900, 
               color: "var(--brand-primary)", 
               letterSpacing: "2px",
-              marginBottom: "24px"
+              marginBottom: "20px"
             }}>
               WELCOME50
             </div>
@@ -122,12 +122,12 @@ export function ExitPopup() {
                 display: "block",
                 background: "var(--text-primary)",
                 color: "var(--bg-primary)",
-                padding: "16px",
-                borderRadius: "12px",
+                padding: "14px",
+                borderRadius: "10px",
                 textDecoration: "none",
                 fontWeight: 800,
-                fontSize: "16px",
-                marginBottom: "16px",
+                fontSize: "15px",
+                marginBottom: "12px",
                 transition: "transform 0.1s"
               }}
             >

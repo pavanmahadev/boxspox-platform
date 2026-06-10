@@ -1,9 +1,11 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { ChevronRight, CheckCircle2, Lock, BookOpen, Play } from "lucide-react";
+import { ChevronRight, CheckCircle2, Lock, BookOpen, Play, Monitor, Server, Cpu, Shield } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+
+export const revalidate = 0;
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -28,7 +30,7 @@ export default async function PathDetailPage({ params }: Props) {
 
   const { data: path, error } = await supabase
     .from("learning_paths")
-    .select("*, path_courses(order_index, courses(id, title, slug, description, difficulty, status, icon))")
+    .select("*, path_courses(order_index, courses(id, title, slug, category_name, description, difficulty, status, icon))")
     .eq("slug", slug)
     .eq("status", "published")
     .single();
@@ -39,6 +41,20 @@ export default async function PathDetailPage({ params }: Props) {
   const courses = [...(path.path_courses ?? [])].sort(
     (a: any, b: any) => a.order_index - b.order_index
   );
+
+  const getDomainSlug = (categoryName?: string) => {
+    if (!categoryName) return "general";
+    const name = categoryName.replace(/^[^\s]+ /, "");
+    return name
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
+  // Map string icons to Lucide components
+  const IconMap: any = { Monitor, Server, Cpu, Shield };
+  const PathIcon = path.icon && IconMap[path.icon] ? IconMap[path.icon] : null;
 
   return (
     <div style={{ paddingTop: "128px", background: "var(--bg-secondary)", minHeight: "100vh" }}>
@@ -53,15 +69,14 @@ export default async function PathDetailPage({ params }: Props) {
           </Link>
 
           <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
-            {path.icon && (
+            {PathIcon && (
               <div style={{
                 width: "56px", height: "56px", borderRadius: "16px",
                 background: path.bg_color || "#E1F5EE",
                 color: path.color || "var(--brand-primary)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "28px"
               }}>
-                {path.icon}
+                <PathIcon size={28} />
               </div>
             )}
             <div>
@@ -158,7 +173,7 @@ export default async function PathDetailPage({ params }: Props) {
                     {/* CTA */}
                     {isPublished && course.slug ? (
                       <Link
-                        href={`/courses/${course.slug}`}
+                        href={`/learn/${getDomainSlug(course.category_name)}/${course.slug}`}
                         style={{
                           background: path.color || "var(--brand-primary)",
                           color: "white",

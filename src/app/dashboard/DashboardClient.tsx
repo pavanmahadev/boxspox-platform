@@ -62,13 +62,34 @@ export default function DashboardClient({
       const completedLessons = progress.filter((p: any) => p.lesson?.course?.id === course.id).length || 0;
       const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
+      let nextLessonSlug = null;
+      let nextLessonTitle = null;
+      
+      if (course.modules && course.modules.length > 0) {
+        // Flatten all lessons into a single array
+        const allLessons = course.modules.flatMap((m: any) => m.lessons || []);
+        
+        // Find the first uncompleted lesson
+        for (const lesson of allLessons) {
+          const isCompleted = progress.some((p: any) => p.lesson_id === lesson.id);
+          if (!isCompleted) {
+            nextLessonSlug = lesson.slug;
+            nextLessonTitle = lesson.title;
+            break;
+          }
+        }
+      }
+
       return {
         id: course.id,
         title: course.title,
         slug: course.slug,
+        category: course.category || "development",
         progress: progressPercent,
         total: totalLessons,
         completed: completedLessons,
+        next_lesson_slug: nextLessonSlug,
+        next_lesson_title: nextLessonTitle,
         color: course.gradient?.match(/#[a-fA-F0-9]{6}/)?.[0] || "#6366f1",
         icon: course.icon || "📚",
         exam_unlocked: enrollment.exam_unlocked,
@@ -139,14 +160,37 @@ export default function DashboardClient({
 
 
 
-  // Badges completion checks
+  // Badges completion checks (now requiring a higher completion rate, calculated via activeCourses if available, otherwise just checking if they started it and using it as a fallback)
+  const getCourseProgress = (slugMatch: string) => {
+    const course = activeCourses.find(c => c.slug.toLowerCase().includes(slugMatch.toLowerCase()));
+    if (course) return course.progress;
+    // Fallback: if not in activeCourses, check if there's any progress
+    return progress.some(p => p.lesson?.course?.slug?.includes(slugMatch)) ? 10 : 0;
+  };
+
   const unlockedBadges = {
-    htmlHero: progress.some(p => p.lesson?.course?.slug === 'html'),
-    cssChampion: progress.some(p => p.lesson?.course?.slug === 'css'),
-    jsJedi: progress.some(p => p.lesson?.course?.slug === 'javascript'),
-    pythonPathfinder: progress.some(p => p.lesson?.course?.slug === 'python'),
-    sqlSage: progress.some(p => p.lesson?.course?.slug === 'sql'),
-    gitGuardian: progress.some(p => p.lesson?.course?.slug?.includes('git'))
+    htmlHero: getCourseProgress('html') >= 80,
+    cssChampion: getCourseProgress('css') >= 80,
+    jsJedi: getCourseProgress('javascript') >= 80,
+    pythonPathfinder: getCourseProgress('python') >= 80,
+    sqlSage: getCourseProgress('sql') >= 80,
+    gitGuardian: getCourseProgress('git') >= 80,
+    reactMaster: getCourseProgress('react') >= 80,
+    nodeNinja: getCourseProgress('node') >= 80,
+    dataPro: getCourseProgress('data') >= 80,
+  };
+  
+  // Also pass detailed progress for tooltip info
+  const badgeProgress = {
+    htmlHero: getCourseProgress('html'),
+    cssChampion: getCourseProgress('css'),
+    jsJedi: getCourseProgress('javascript'),
+    pythonPathfinder: getCourseProgress('python'),
+    sqlSage: getCourseProgress('sql'),
+    gitGuardian: getCourseProgress('git'),
+    reactMaster: getCourseProgress('react'),
+    nodeNinja: getCourseProgress('node'),
+    dataPro: getCourseProgress('data'),
   };
 
   // Daily Goal Logic
@@ -466,7 +510,7 @@ export default function DashboardClient({
             </div>
 
             {/* Achievements - Custom SVG Badges */}
-            <BadgeGrid unlockedBadges={unlockedBadges} />
+            <BadgeGrid unlockedBadges={unlockedBadges} badgeProgress={badgeProgress} />
 
             {/* Wishlist */}
             <div style={{ background: "var(--bg-card)", padding: "24px", borderRadius: "var(--radius-xl)", border: "1px solid var(--border-primary)" }}>

@@ -62,7 +62,11 @@ function CheckoutContent() {
       const res = await fetch('/api/checkout/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: finalPrice, productId, productType: productId === 'SINGLE' ? 'SINGLE' : productId === 'LIFETIME' ? 'LIFETIME' : 'BUNDLE' })
+        body: JSON.stringify({ 
+          couponCode: couponCode || null, 
+          productId, 
+          productType: productId === 'SINGLE' ? 'SINGLE' : productId === 'LIFETIME' ? 'LIFETIME' : 'BUNDLE' 
+        })
       });
 
       const data = await res.json();
@@ -90,7 +94,8 @@ function CheckoutContent() {
               razorpay_signature: response.razorpay_signature,
               productId,
               productType: productId === 'SINGLE' ? 'SINGLE' : productId === 'LIFETIME' ? 'LIFETIME' : 'BUNDLE',
-              amount: finalPrice
+              amount: finalPrice,
+              couponCode: couponCode || null
             })
           });
 

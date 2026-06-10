@@ -70,48 +70,48 @@ export function EnrollmentToast() {
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
           style={{
             position: "fixed",
-            bottom: "32px",
-            left: "32px",
+            bottom: "24px",
+            left: "24px",
             zIndex: 9999,
             background: "var(--bg-card)",
             border: "1px solid var(--border-primary)",
-            borderRadius: "16px",
-            padding: "16px",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+            borderRadius: "12px",
+            padding: "12px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
             display: "flex",
             alignItems: "center",
-            gap: "16px",
-            maxWidth: "380px"
+            gap: "12px",
+            maxWidth: "320px"
           }}
         >
           <button 
             onClick={() => setNotification(null)}
-            style={{ position: "absolute", top: "8px", right: "8px", background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer", display: "flex" }}
+            style={{ position: "absolute", top: "6px", right: "6px", background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer", display: "flex" }}
           >
-            <X size={14} />
+            <X size={12} />
           </button>
           
           <div style={{ position: "relative" }}>
-            <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--bg-secondary)", border: "2px solid var(--border-primary)", overflow: "hidden" }}>
+            <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "var(--bg-secondary)", border: "1px solid var(--border-primary)", overflow: "hidden" }}>
               <img 
                 src={`https://api.dicebear.com/7.x/notionists/svg?seed=${notification.name}`} 
                 alt={notification.name} 
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
             </div>
-            <div style={{ position: "absolute", bottom: "-4px", right: "-4px", background: "white", borderRadius: "50%", padding: "2px" }}>
-              <CheckCircle2 size={16} color="#10B981" fill="#10B981" style={{ color: "white" }} />
+            <div style={{ position: "absolute", bottom: "-2px", right: "-2px", background: "white", borderRadius: "50%", padding: "1px" }}>
+              <CheckCircle2 size={12} color="#10B981" fill="#10B981" style={{ color: "white" }} />
             </div>
           </div>
           
           <div>
-            <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>
+            <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "2px" }}>
               {notification.name} from {notification.location}
             </div>
-            <div style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.4 }}>
+            <div style={{ fontSize: "11px", color: "var(--text-secondary)", lineHeight: 1.3 }}>
               Just enrolled in <span style={{ fontWeight: 600, color: "var(--brand-primary)" }}>{notification.course}</span>
             </div>
-            <div style={{ fontSize: "11px", color: "var(--text-tertiary)", marginTop: "4px", fontWeight: 600 }}>
+            <div style={{ fontSize: "10px", color: "var(--text-tertiary)", marginTop: "2px", fontWeight: 600 }}>
               {notification.timeAgo} minutes ago
             </div>
           </div>

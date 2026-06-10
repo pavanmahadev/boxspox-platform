@@ -137,7 +137,7 @@ export function Pricing() {
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
           gap: "24px",
           alignItems: "stretch"
         }}>
@@ -154,7 +154,7 @@ export function Pricing() {
                 transition={{ delay: i * 0.1 }}
                 style={{
                   background: "var(--bg-card)",
-                  padding: "32px 24px",
+                  padding: "24px 20px",
                   borderRadius: "20px",
                   border: plan.popular ? "2px solid var(--brand-primary)" : "1px solid #E5E7EB",
                   boxShadow: plan.popular ? "0 20px 25px -5px rgba(15,110,86,0.1)" : "0 4px 6px -1px rgba(0,0,0,0.05)",
@@ -184,15 +184,15 @@ export function Pricing() {
                   </div>
                 )}
 
-                <div style={{ color: plan.color, marginBottom: "20px", marginTop: plan.popular ? "16px" : "0" }}>
+                <div style={{ color: plan.color, marginBottom: "16px", marginTop: plan.popular ? "16px" : "0" }}>
                   {plan.icon}
                 </div>
 
-                <h3 style={{ fontSize: "24px", fontWeight: 900, color: "var(--text-primary)", marginBottom: "8px" }}>{plan.name}</h3>
-                <p style={{ color: "var(--text-tertiary)", fontSize: "14px", marginBottom: "24px", minHeight: "40px" }}>{plan.description}</p>
+                <h3 style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-primary)", marginBottom: "6px" }}>{plan.name}</h3>
+                <p style={{ color: "var(--text-tertiary)", fontSize: "13px", marginBottom: "16px", minHeight: "36px" }}>{plan.description}</p>
 
                 {/* Pricing Section */}
-                <div style={{ marginBottom: "32px", padding: "16px", background: "rgba(15, 110, 86, 0.04)", borderRadius: "16px", border: "1px dashed rgba(15, 110, 86, 0.2)" }}>
+                <div style={{ marginBottom: "24px", padding: "12px", background: "rgba(15, 110, 86, 0.04)", borderRadius: "16px", border: "1px dashed rgba(15, 110, 86, 0.2)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                     <span style={{ color: "#EF4444", fontWeight: 800, fontSize: "14px", background: "rgba(239, 68, 68, 0.1)", padding: "2px 8px", borderRadius: "6px" }}>
                       Save {savingsPercent}%
@@ -203,19 +203,19 @@ export function Pricing() {
                   </div>
                   
                   <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
-                    <span style={{ fontSize: "42px", fontWeight: 900, color: "var(--text-primary)", letterSpacing: "-1px" }}>
+                    <span style={{ fontSize: "32px", fontWeight: 900, color: "var(--text-primary)", letterSpacing: "-1px" }}>
                       ₹{salePrice.toLocaleString('en-IN')}
                     </span>
                     {plan.id !== 'LIFETIME' && <span style={{ color: "var(--text-tertiary)", fontWeight: 600 }}>/once</span>}
                   </div>
                 </div>
 
-                <div style={{ flex: 1, marginBottom: "40px" }}>
-                  <div style={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: "16px", fontSize: "14px" }}>What's included:</div>
-                  <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "12px", padding: 0 }}>
+                <div style={{ flex: 1, marginBottom: "24px" }}>
+                  <div style={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: "12px", fontSize: "13px" }}>What's included:</div>
+                  <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "8px", padding: 0 }}>
                     {plan.features.map(f => (
-                      <li key={f} style={{ display: "flex", gap: "12px", fontSize: "14px", color: "var(--text-secondary)", fontWeight: 500, lineHeight: 1.4 }}>
-                        <Check size={18} color="var(--brand-primary)" style={{ flexShrink: 0, marginTop: "2px" }} />
+                      <li key={f} style={{ display: "flex", gap: "10px", fontSize: "13px", color: "var(--text-secondary)", fontWeight: 500, lineHeight: 1.4 }}>
+                        <Check size={16} color="var(--brand-primary)" style={{ flexShrink: 0, marginTop: "2px" }} />
                         {f}
                       </li>
                     ))}
@@ -223,14 +223,14 @@ export function Pricing() {
                 </div>
 
                 <Link href={`/checkout?product=${plan.id}&price=${salePrice}&title=${encodeURIComponent(plan.name)}`} style={{
-                  padding: "16px",
+                  padding: "12px",
                   textAlign: "center",
-                  borderRadius: "14px",
+                  borderRadius: "12px",
                   background: plan.popular ? "var(--brand-primary)" : "#111827",
                   color: "white",
                   textDecoration: "none",
                   fontWeight: 800,
-                  fontSize: "15px",
+                  fontSize: "14px",
                   transition: "transform 0.2s, box-shadow 0.2s",
                   boxShadow: plan.popular ? "0 10px 20px -10px var(--brand-primary)" : "none",
                   display: "flex",

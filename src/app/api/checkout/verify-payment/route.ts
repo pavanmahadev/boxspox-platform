@@ -10,7 +10,8 @@ export async function POST(request: Request) {
       razorpay_signature,
       productId,
       productType,
-      amount
+      amount,
+      couponCode
     } = await request.json();
 
     const secret = process.env.RAZORPAY_KEY_SECRET as string;
@@ -49,6 +50,38 @@ export async function POST(request: Request) {
     if (dbError) {
       console.error("Database error saving purchase:", dbError);
       return NextResponse.json({ error: "Payment verified but failed to grant access." }, { status: 500 });
+    }
+
+    // Process Coupon if provided
+    if (couponCode) {
+      try {
+        const { data: coupon } = await supabase.from('coupons').select('id, used_count').ilike('code', couponCode).single();
+        if (coupon) {
+          await supabase.from('coupons').update({ used_count: (coupon.used_count || 0) + 1 }).eq('id', coupon.id);
+        }
+      } catch (err) {
+        console.error("Failed to increment coupon:", err);
+      }
+    }
+
+    // Process Referral
+    try {
+      const { data: pendingReferrals } = await supabase
+        .from('referrals')
+        .select('*')
+        .eq('referred_email', user.email)
+        .eq('status', 'PENDING');
+      
+      if (pendingReferrals && pendingReferrals.length > 0) {
+        // Mark as completed
+        await supabase
+          .from('referrals')
+          .update({ status: 'COMPLETED' })
+          .eq('referred_email', user.email)
+          .eq('status', 'PENDING');
+      }
+    } catch (err) {
+      console.error("Failed to process referral:", err);
     }
 
     // Fire Discord Webhook

@@ -22,13 +22,18 @@ export function ActiveCourses({ activeCourses }: ActiveCoursesProps) {
                 {course.icon}
               </div>
               <div style={{ flex: 1, minWidth: 0, width: "100%" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", gap: "10px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", gap: "10px" }}>
                   <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{course.title}</h3>
                   <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 600, flexShrink: 0 }}>{course.completed}/{course.total}</span>
                 </div>
-                <div style={{ height: "8px", background: "var(--bg-secondary)", borderRadius: "4px", overflow: "hidden" }}>
+                <div style={{ height: "8px", background: "var(--bg-secondary)", borderRadius: "4px", overflow: "hidden", marginBottom: "8px" }}>
                   <div style={{ width: `${course.progress}%`, height: "100%", background: `linear-gradient(90deg, ${course.color}, ${course.color}dd)`, borderRadius: "4px", transition: "width 0.5s ease" }} />
                 </div>
+                {course.next_lesson_title && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--text-tertiary)", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    Up Next: <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{course.next_lesson_title}</span>
+                  </div>
+                )}
               </div>
               <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                 {!course.is_free && !course.exam_unlocked && (
@@ -41,7 +46,7 @@ export function ActiveCourses({ activeCourses }: ActiveCoursesProps) {
                   </Link>
                 )}
                 <Link 
-                  href={`/tutorials/${course.slug}`} 
+                  href={course.next_lesson_slug ? `/tutorials/${course.slug}/${course.next_lesson_slug}` : `/tutorials/${course.slug}`} 
                   className="btn-primary" 
                   style={{ padding: "10px 20px", fontSize: "0.9rem", whiteSpace: "nowrap", background: "var(--bg-secondary)", color: "var(--text-primary)", border: "1px solid var(--border-primary)" }}
                 >
