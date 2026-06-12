@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone', // Required by @opennextjs/cloudflare to produce .next/standalone/
   compress: true, // Enables gzip compression
   images: {
     formats: ['image/avif', 'image/webp'],
