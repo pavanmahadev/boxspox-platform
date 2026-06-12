@@ -1,18 +1,46 @@
 import { createClient } from '@supabase/supabase-js';
 
 function createDummyClient() {
-  const dummy: any = new Proxy(() => {}, {
-    get(target, prop) {
-      if (prop === 'then') {
-        return (resolve: any) => resolve({ data: null, error: null });
-      }
-      return dummy;
-    },
-    apply(target, thisArg, argumentsList) {
-      return dummy;
+  const chainable: any = new Proxy({
+    data: [] as any,
+    error: null as any,
+    count: 0 as any
+  }, {
+    get(target: any, prop: any) {
+      if (prop === 'then') return undefined;
+      if (prop in target) return target[prop];
+      return () => chainable;
     }
   });
-  return dummy;
+
+  return {
+    from: () => chainable,
+    rpc: () => chainable,
+    auth: new Proxy({
+      getUser: async () => ({ data: { user: null }, error: null }),
+      getSession: async () => ({ data: { session: null }, error: null }),
+      onAuthStateChange: () => ({
+        data: { subscription: { unsubscribe: () => {} } }
+      }),
+      signOut: async () => ({ error: null }),
+      admin: new Proxy({}, {
+        get() {
+          return async () => ({ data: {}, error: null });
+        }
+      }) as any
+    }, {
+      get(target: any, prop: any) {
+        if (prop in target) return target[prop];
+        return async () => ({ data: {}, error: null });
+      }
+    }) as any,
+    channel: () => ({
+      send: async () => ({}),
+      subscribe: () => ({}),
+      on: () => ({})
+    }),
+    removeChannel: async () => ({})
+  };
 }
 
 export function createPublicClient() {
