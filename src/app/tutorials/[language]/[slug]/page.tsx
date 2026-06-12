@@ -11,23 +11,32 @@ export const revalidate = 3600; // Revalidate every hour
 export async function generateStaticParams() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-  const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
-  // Fetch common course/lesson combinations to pre-render
-  // This is a subset of the sitemap
-  const { data } = await supabase
-    .from("lessons")
-    .select(`
-      slug,
-      module:modules!inner(
-        course:courses!inner(slug)
-      )
-    `)
-    .limit(100);
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn("Supabase environment variables missing at build time. Skipping generateStaticParams for /tutorials/[language]/[slug]");
+    return [];
+  }
+  try {
+    const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+    // Fetch common course/lesson combinations to pre-render
+    // This is a subset of the sitemap
+    const { data } = await supabase
+      .from("lessons")
+      .select(`
+        slug,
+        module:modules!inner(
+          course:courses!inner(slug)
+        )
+      `)
+      .limit(100);
 
-  return (data || []).map((l: any) => ({
-    language: l.module.course.slug,
-    slug: l.slug,
-  }));
+    return (data || []).map((l: any) => ({
+      language: l.module.course.slug,
+      slug: l.slug,
+    }));
+  } catch (error) {
+    console.error("Error in generateStaticParams for /tutorials/[language]/[slug]:", error);
+    return [];
+  }
 }
 
 

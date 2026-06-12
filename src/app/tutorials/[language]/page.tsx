@@ -9,11 +9,20 @@ export const revalidate = 3600; // Revalidate every hour
 export async function generateStaticParams() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-  const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
-  const { data } = await supabase.from("courses").select("slug").eq("status", "published");
-  return (data || []).map((c: any) => ({
-    language: c.slug,
-  }));
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn("Supabase environment variables missing at build time. Skipping generateStaticParams for /tutorials/[language]");
+    return [];
+  }
+  try {
+    const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+    const { data } = await supabase.from("courses").select("slug").eq("status", "published");
+    return (data || []).map((c: any) => ({
+      language: c.slug,
+    }));
+  } catch (error) {
+    console.error("Error in generateStaticParams for /tutorials/[language]:", error);
+    return [];
+  }
 }
 
 import Link from "next/link";
