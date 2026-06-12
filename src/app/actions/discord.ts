@@ -8,7 +8,7 @@ export async function notifyNewUserRegistration(userId: string, email: string, f
 
     await sendDiscordNotification(`👋 **New User Alert!**`, {
       title: "Student Registration",
-      description: `Welcome aboard, **${name}**! They just joined the Boxspox platform.`,
+      description: `Welcome aboard, **${name}**! They just joined the Pandaschool platform.`,
       color: 0x3B82F6, // Blue
       fields: [
         { name: "User ID", value: userId.substring(0, 8) + "...", inline: true },

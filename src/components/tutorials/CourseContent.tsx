@@ -74,6 +74,16 @@ export function CourseContent({ course, modules, lessons, gradient, currentUserI
     if (!error) {
       setIsEnrolled(true);
       showToast("Successfully enrolled in " + course.title, "success");
+      
+      // Create enrollment notification
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        type: "success",
+        title: "Enrolled in Course!",
+        body: `You have successfully enrolled in ${course.title}. Start learning today!`,
+        link: "/tutorials/" + course.slug,
+        is_read: false
+      });
     }
     setEnrollLoading(false);
   };
@@ -105,7 +115,7 @@ export function CourseContent({ course, modules, lessons, gradient, currentUserI
     const url = typeof window !== "undefined" ? window.location.href : "";
     const shareData = {
       title: course.title,
-      text: `Check out ${course.title} on Boxspox!`,
+      text: `Check out ${course.title} on Pandaschool!`,
       url: url,
     };
 

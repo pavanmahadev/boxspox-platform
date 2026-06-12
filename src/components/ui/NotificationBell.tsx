@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Bell, Check, CheckCheck, X } from "lucide-react";
+import Link from "next/link";
 
 export default function NotificationBell({ userId }: { userId: string }) {
   const supabase = createClient();
@@ -125,7 +126,36 @@ export default function NotificationBell({ userId }: { userId: string }) {
           boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
           zIndex: 1000,
           overflow: "hidden",
+          animation: "notification-panel-slide 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+          transformOrigin: "top right",
         }}>
+          <style>{`
+            @keyframes notification-panel-slide {
+              from {
+                opacity: 0;
+                transform: translateY(-8px) scale(0.96);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+              }
+            }
+            .notification-item {
+              transition: background 0.2s;
+            }
+            .notification-item:hover {
+              background: rgba(15, 110, 86, 0.04) !important;
+            }
+            .notification-action-btn {
+              opacity: 0.6;
+              transition: opacity 0.2s, transform 0.2s;
+            }
+            .notification-action-btn:hover {
+              opacity: 1;
+              transform: scale(1.15);
+            }
+          `}</style>
+
           {/* Header */}
           <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-primary)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h3 style={{ fontWeight: 800, fontSize: "1rem", color: "var(--text-primary)", margin: 0 }}>
@@ -149,14 +179,14 @@ export default function NotificationBell({ userId }: { userId: string }) {
               notifications.map((n) => (
                 <div
                   key={n.id}
+                  className="notification-item"
                   style={{
                     padding: "14px 20px",
                     borderBottom: "1px solid var(--border-primary)",
-                    background: n.is_read ? "transparent" : "rgba(15, 110, 86, 0.03)",
+                    background: n.is_read ? "transparent" : "rgba(15, 110, 86, 0.02)",
                     display: "flex",
                     gap: "12px",
                     alignItems: "flex-start",
-                    transition: "background 0.2s"
                   }}
                 >
                   <div style={{
@@ -168,22 +198,40 @@ export default function NotificationBell({ userId }: { userId: string }) {
                     flexShrink: 0,
                     opacity: n.is_read ? 0.3 : 1
                   }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: "0.9rem", fontWeight: n.is_read ? 500 : 700, color: "var(--text-primary)", marginBottom: "2px" }}>
-                      {n.title}
+                  
+                  {n.link ? (
+                    <Link 
+                      href={n.link} 
+                      onClick={() => { setOpen(false); if (!n.is_read) markRead(n.id); }} 
+                      style={{ flex: 1, minWidth: 0, textDecoration: "none" }}
+                    >
+                      <div style={{ fontSize: "0.9rem", fontWeight: n.is_read ? 500 : 700, color: "var(--text-primary)", marginBottom: "2px" }}>
+                        {n.title}
+                      </div>
+                      {n.body && <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>{n.body}</div>}
+                      <div style={{ fontSize: "0.7rem", color: "var(--text-tertiary)", marginTop: "6px" }}>
+                        {new Date(n.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                    </Link>
+                  ) : (
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: "0.9rem", fontWeight: n.is_read ? 500 : 700, color: "var(--text-primary)", marginBottom: "2px" }}>
+                        {n.title}
+                      </div>
+                      {n.body && <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>{n.body}</div>}
+                      <div style={{ fontSize: "0.7rem", color: "var(--text-tertiary)", marginTop: "6px" }}>
+                        {new Date(n.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </div>
                     </div>
-                    {n.body && <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>{n.body}</div>}
-                    <div style={{ fontSize: "0.7rem", color: "var(--text-tertiary)", marginTop: "6px" }}>
-                      {new Date(n.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                    </div>
-                  </div>
+                  )}
+
                   <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
                     {!n.is_read && (
-                      <button onClick={() => markRead(n.id)} title="Mark read" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand-primary)", padding: "2px" }}>
+                      <button onClick={() => markRead(n.id)} title="Mark read" className="notification-action-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand-primary)", padding: "2px" }}>
                         <Check size={14} />
                       </button>
                     )}
-                    <button onClick={() => dismiss(n.id)} title="Dismiss" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-tertiary)", padding: "2px" }}>
+                    <button onClick={() => dismiss(n.id)} title="Dismiss" className="notification-action-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-tertiary)", padding: "2px" }}>
                       <X size={14} />
                     </button>
                   </div>

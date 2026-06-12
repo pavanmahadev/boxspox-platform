@@ -25,7 +25,7 @@ export function createClient() {
         flowType: 'pkce'
       },
       global: {
-        headers: { 'x-application-name': 'boxspox' },
+        headers: { 'x-application-name': 'pandaschool' },
       },
     }
   );

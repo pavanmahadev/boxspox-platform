@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single();
 
   return {
-    title: data ? `${data.title} – Boxspox` : "Learning Path – Boxspox",
+    title: data ? `${data.title} – Pandaschool` : "Learning Path – Pandaschool",
     description: data?.description ?? "Explore this structured learning path.",
   };
 }

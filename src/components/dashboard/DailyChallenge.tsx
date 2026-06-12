@@ -31,7 +31,7 @@ const DAILY_CHALLENGES = [
     starterCode: `function reverseString(str) {\n  // Write your code here\n  \n}`,
     testCases: [
       { input: ["hello"], expected: "olleh", label: "reverseString('hello')" },
-      { input: ["Boxspox"], expected: "xopxsoB", label: "reverseString('Boxspox')" },
+      { input: ["Pandaschool"], expected: "xopxsoB", label: "reverseString('Pandaschool')" },
       { input: ["a"], expected: "a", label: "reverseString('a')" }
     ],
     functionName: "reverseString"
@@ -95,10 +95,10 @@ export default function DailyChallenge({ profile, user, onRewardClaimed }: Daily
 
   // Initialize starter code or solved state from localStorage
   useEffect(() => {
-    const isCompletedToday = localStorage.getItem(`boxspox_challenge_solved_${challenge.id}_${todayStr}`) === "true";
+    const isCompletedToday = localStorage.getItem(`pandaschool_challenge_solved_${challenge.id}_${todayStr}`) === "true";
     setIsSolved(isCompletedToday);
 
-    const savedCode = localStorage.getItem(`boxspox_challenge_code_${challenge.id}`);
+    const savedCode = localStorage.getItem(`pandaschool_challenge_code_${challenge.id}`);
     if (savedCode) {
       setCode(savedCode);
     } else {
@@ -109,14 +109,14 @@ export default function DailyChallenge({ profile, user, onRewardClaimed }: Daily
   // Handle Code Saving
   const handleCodeChange = (val: string) => {
     setCode(val);
-    localStorage.setItem(`boxspox_challenge_code_${challenge.id}`, val);
+    localStorage.setItem(`pandaschool_challenge_code_${challenge.id}`, val);
   };
 
   // Reset to starter template
   const handleReset = () => {
     if (window.confirm("Are you sure you want to reset the editor to the starter template?")) {
       setCode(challenge.starterCode);
-      localStorage.setItem(`boxspox_challenge_code_${challenge.id}`, challenge.starterCode);
+      localStorage.setItem(`pandaschool_challenge_code_${challenge.id}`, challenge.starterCode);
       setConsoleLogs(["Editor reset successfully."]);
       setTestResults([]);
     }
@@ -252,7 +252,7 @@ export default function DailyChallenge({ profile, user, onRewardClaimed }: Daily
       });
 
       // 3. Update Local Storage & state
-      localStorage.setItem(`boxspox_challenge_solved_${challenge.id}_${todayStr}`, "true");
+      localStorage.setItem(`pandaschool_challenge_solved_${challenge.id}_${todayStr}`, "true");
       setIsSolved(true);
       
       // Trigger particles celebration

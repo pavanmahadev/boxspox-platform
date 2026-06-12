@@ -5,10 +5,10 @@ import { ToastProvider } from "@/components/ui/ToastProvider";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://boxspox.in'),
+  metadataBase: new URL('https://pandaschool.in'),
   title: {
-    default: "Boxspox \u2014 Learn to Code, The Smart Way",
-    template: "%s | Boxspox"
+    default: "Pandaschool \u2014 Learn to Code, The Smart Way",
+    template: "%s | Pandaschool"
   },
   description: "A modern, interactive educational platform for learning web development. Master HTML, CSS, JavaScript, Python, React, and more with hands-on tutorials and a live code editor.",
   keywords: [
@@ -16,9 +16,9 @@ export const metadata: Metadata = {
     "JavaScript tutorial", "Python tutorial", "React tutorial", "interactive code editor",
     "learn programming", "coding platform", "free coding courses", "programming examples"
   ],
-  authors: [{ name: "Boxspox" }],
-  creator: "Boxspox",
-  publisher: "Boxspox",
+  authors: [{ name: "Pandaschool" }],
+  creator: "Pandaschool",
+  publisher: "Pandaschool",
   formatDetection: {
     email: false,
     address: false,
@@ -28,10 +28,10 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "Boxspox \u2014 Learn to Code, The Smart Way",
+    title: "Pandaschool \u2014 Learn to Code, The Smart Way",
     description: "Master web development with interactive tutorials and a live code editor. Free tutorials for HTML, CSS, JavaScript, Python, and more.",
-    url: "https://boxspox.in",
-    siteName: "Boxspox",
+    url: "https://pandaschool.in",
+    siteName: "Pandaschool",
     locale: "en_US",
     type: "website",
     images: [
@@ -39,15 +39,15 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Boxspox Platform Preview',
+        alt: 'Pandaschool Platform Preview',
       }
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Boxspox \u2014 Learn to Code, The Smart Way",
+    title: "Pandaschool \u2014 Learn to Code, The Smart Way",
     description: "A modern, interactive educational platform for learning web development.",
-    creator: "@boxspox",
+    creator: "@pandaschool",
     images: ['/og-image.png'],
   },
   robots: {

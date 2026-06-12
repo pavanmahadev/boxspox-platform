@@ -94,7 +94,7 @@ export function AdminSidebar({ onNavItemClick }: { onNavItemClick?: () => void }
       <div style={{ padding: "24px", borderBottom: "1px solid #F3F4F6" }}>
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px" }}>
           <div style={{ width: "28px", height: "28px", background: "#111827", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 900, fontSize: "14px" }}>B</div>
-          <span style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>BOXSPOX <span style={{ color: "var(--text-tertiary)", fontSize: "10px", fontWeight: 700 }}>ADMIN</span></span>
+          <span style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>PANDASCHOOL <span style={{ color: "var(--text-tertiary)", fontSize: "10px", fontWeight: 700 }}>ADMIN</span></span>
         </Link>
       </div>
 

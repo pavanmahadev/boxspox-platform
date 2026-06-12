@@ -48,13 +48,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq("slug", slug)
     .single();
 
-  if (!article) return { title: "Article Not Found | Boxspox" };
+  if (!article) return { title: "Article Not Found | Pandaschool" };
 
   return {
-    title: `${article.title} | Boxspox Blog & Guides`,
-    description: article.excerpt || `Read ${article.title} on Boxspox. Master technology, business, engineering, and more.`,
+    title: `${article.title} | Pandaschool Blog & Guides`,
+    description: article.excerpt || `Read ${article.title} on Pandaschool. Master technology, business, engineering, and more.`,
     alternates: {
-      canonical: `https://boxspox.in/articles/${article.slug}`,
+      canonical: `https://pandaschool.in/articles/${article.slug}`,
     }
   };
 }
@@ -85,11 +85,11 @@ export default async function ArticlePage({ params }: Props) {
     .neq("id", article.id)
     .limit(3);
 
-  const cleanUrl = `https://boxspox.in/articles/${article.slug}`;
+  const cleanUrl = `https://pandaschool.in/articles/${article.slug}`;
 
   const breadcrumbItems = [
-    { name: "Home", url: "https://boxspox.in/" },
-    { name: "Articles", url: "https://boxspox.in/articles" },
+    { name: "Home", url: "https://pandaschool.in/" },
+    { name: "Articles", url: "https://pandaschool.in/articles" },
     { name: article.title, url: cleanUrl }
   ];
 

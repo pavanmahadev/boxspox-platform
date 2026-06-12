@@ -99,7 +99,7 @@ export function EditorPreview() {
   <body>
     <h1>Build Something 🚀</h1>
     <p>Type code on the left, see it alive on the right!</p>
-    <button class="btn" onclick="alert('Boxspox is Ready!')">Launch App</button>
+    <button class="btn" onclick="alert('Pandaschool is Ready!')">Launch App</button>
   </body>
 </html>`,
                       "/index.js": ""

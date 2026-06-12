@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 
 /**
- * Boxspox API Utility
+ * Pandaschool API Utility
  * - Centralized configuration
  * - Request/Response interceptors
  * - Error handling & retries

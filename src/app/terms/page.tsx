@@ -33,19 +33,19 @@ export default function TermsPage() {
               <AlertCircle color="var(--brand-primary)" size={24} style={{ marginTop: "4px", flexShrink: 0 }} />
               <div>
                 <h3 style={{ fontWeight: 800, marginBottom: "8px" }}>Please read carefully</h3>
-                <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: 1.6 }}>By using Boxspox, you agree to these terms. If you do not agree to all these terms, do not use our services.</p>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: 1.6 }}>By using Pandaschool, you agree to these terms. If you do not agree to all these terms, do not use our services.</p>
               </div>
             </div>
 
             <div>
               <h2 style={{ fontSize: "1.8rem", fontWeight: 800, marginBottom: "24px", color: "var(--text-primary)" }}>1. Account Eligibility</h2>
-              <p style={{ color: "var(--text-secondary)", lineHeight: 1.8 }}>You must be at least 13 years old to use Boxspox. If you are under 18, you must have the consent of a parent or legal guardian to create an account.</p>
+              <p style={{ color: "var(--text-secondary)", lineHeight: 1.8 }}>You must be at least 13 years old to use Pandaschool. If you are under 18, you must have the consent of a parent or legal guardian to create an account.</p>
             </div>
 
             <div>
               <h2 style={{ fontSize: "1.8rem", fontWeight: 800, marginBottom: "24px", color: "var(--text-primary)" }}>2. Acceptable Use</h2>
               <div style={{ color: "var(--text-secondary)", lineHeight: 1.8 }}>
-                <p style={{ marginBottom: "16px" }}>You agree not to use Boxspox for any unlawful purpose or to:</p>
+                <p style={{ marginBottom: "16px" }}>You agree not to use Pandaschool for any unlawful purpose or to:</p>
                 <ul style={{ paddingLeft: "0", display: "flex", flexDirection: "column", gap: "12px", listStyle: "none" }}>
                   {[
                     "Attempt to gain unauthorized access to our systems or other users' accounts.",
@@ -68,14 +68,14 @@ export default function TermsPage() {
 
             <div>
               <h2 style={{ fontSize: "1.8rem", fontWeight: 800, marginBottom: "24px", color: "var(--text-primary)" }}>4. Intellectual Property</h2>
-              <p style={{ color: "var(--text-secondary)", lineHeight: 1.8 }}>The content provided by Boxspox, including lessons, videos, and code examples, is owned by Boxspox and protected by copyright law. You are granted a limited license to use this content for personal learning only.</p>
+              <p style={{ color: "var(--text-secondary)", lineHeight: 1.8 }}>The content provided by Pandaschool, including lessons, videos, and code examples, is owned by Pandaschool and protected by copyright law. You are granted a limited license to use this content for personal learning only.</p>
             </div>
 
             <div style={{ padding: "40px", borderRadius: "24px", background: "var(--bg-card)", border: "1px solid var(--border-primary)", textAlign: "center" }}>
               <Scale size={40} color="var(--text-tertiary)" style={{ marginBottom: "20px" }} />
               <h3 style={{ fontWeight: 800, marginBottom: "12px" }}>Legal Notice</h3>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>Boxspox provides its services &quot;as is&quot; and disclaims all warranties to the fullest extent permitted by law.</p>
-              <Link href="mailto:legal@boxspox.in" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>legal@boxspox.in</Link>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>Pandaschool provides its services &quot;as is&quot; and disclaims all warranties to the fullest extent permitted by law.</p>
+              <Link href="mailto:legal@pandaschool.in" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>legal@pandaschool.in</Link>
             </div>
 
           </div>

@@ -70,7 +70,7 @@ export default function PrivacyPage() {
                   <Trash2 color="#ef4444" size={24} style={{ marginTop: "4px" }} />
                   <div>
                     <p style={{ fontWeight: 700, color: "#ef4444", marginBottom: "4px" }}>Right to be Forgotten</p>
-                    <p style={{ fontSize: "0.9rem" }}>If you wish to delete your data, please visit your account settings or contact us at privacy@boxspox.in.</p>
+                    <p style={{ fontSize: "0.9rem" }}>If you wish to delete your data, please visit your account settings or contact us at privacy@pandaschool.in.</p>
                   </div>
                 </div>
               </div>
@@ -79,14 +79,14 @@ export default function PrivacyPage() {
             <div>
               <h2 style={{ fontSize: "1.8rem", fontWeight: 800, marginBottom: "24px", color: "var(--text-primary)" }}>4. Cookies</h2>
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", color: "var(--text-secondary)", lineHeight: 1.8 }}>
-                <p>We use cookies to keep you logged in and remember your preferences. You can disable cookies in your browser settings, but some features of Boxspox may not function correctly.</p>
+                <p>We use cookies to keep you logged in and remember your preferences. You can disable cookies in your browser settings, but some features of Pandaschool may not function correctly.</p>
               </div>
             </div>
 
             <div style={{ padding: "40px", borderRadius: "24px", background: "var(--bg-card)", border: "1px solid var(--border-primary)", textAlign: "center" }}>
               <h3 style={{ fontWeight: 800, marginBottom: "12px" }}>Questions about our privacy policy?</h3>
               <p style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>We&apos;re here to help you understand how your data is handled.</p>
-              <Link href="mailto:privacy@boxspox.in" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>privacy@boxspox.in</Link>
+              <Link href="mailto:privacy@pandaschool.in" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>privacy@pandaschool.in</Link>
             </div>
 
           </div>

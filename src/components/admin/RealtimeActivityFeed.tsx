@@ -7,7 +7,7 @@ import { subscribeToChannel } from "@/utils/realtime";
 import { createClient } from "@/utils/supabase/client";
 
 /**
- * Boxspox: Realtime Admin Activity Feed
+ * Pandaschool: Realtime Admin Activity Feed
  * Listens for new audit logs and updates the UI instantly
  */
 

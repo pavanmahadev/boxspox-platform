@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       
       await sendDiscordNotification(`🎉 **Ka-ching! New Sale!**`, {
         title: "New Course Enrollment",
-        description: `${buyerName} just purchased a new Boxspox product!`,
+        description: `${buyerName} just purchased a new Pandaschool product!`,
         color: 0x10B981, // Success Green
         fields: [
           { name: "Product Type", value: productType || "Course", inline: true },

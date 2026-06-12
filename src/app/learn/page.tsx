@@ -7,9 +7,9 @@ import { BookOpen, ChevronRight } from "lucide-react";
 
 
 export const metadata: Metadata = {
-  title: "All Learning Domains — Boxspox",
+  title: "All Learning Domains — Pandaschool",
   description:
-    "Explore all learning domains on Boxspox — from Technology and AI to MBA, Law, Agriculture, Healthcare, and more.",
+    "Explore all learning domains on Pandaschool — from Technology and AI to MBA, Law, Agriculture, Healthcare, and more.",
 };
 
 const slugify = (s: string) =>

@@ -8,7 +8,7 @@ const testimonials = [
   {
     name: "Alex Johnson",
     role: "Frontend Developer at Google",
-    content: "Boxspox helped me master React in weeks. The project-based approach is exactly what I needed to land my dream job.",
+    content: "Pandaschool helped me master React in weeks. The project-based approach is exactly what I needed to land my dream job.",
     avatar: "https://i.pravatar.cc/150?u=alex"
   },
   {

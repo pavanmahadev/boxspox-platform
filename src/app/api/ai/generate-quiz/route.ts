@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = `You are an expert programming instructor for the Boxspox platform.
+    const prompt = `You are an expert programming instructor for the Pandaschool platform.
 The student is currently taking a lesson titled: "${lessonTitle}".
 Here is the content of the lesson for your context:
 ${lessonContent?.substring(0, 4000) || "No content provided."}

@@ -25,6 +25,27 @@ export function SubmissionAction({ submission }: { submission: any }) {
       .eq("id", submission.id);
 
     if (!error) {
+      // Fetch course details for context
+      const { data: course } = await supabase
+        .from("courses")
+        .select("title, slug")
+        .eq("id", submission.course_id)
+        .single();
+
+      // Create notification for the student
+      await supabase.from("notifications").insert({
+        user_id: submission.user_id,
+        type: status === "approved" ? "success" : status === "rejected" ? "error" : "info",
+        title: status === "approved" ? "Project Approved!" : status === "rejected" ? "Project Needs Changes" : "Project Under Review",
+        body: status === "approved" 
+          ? `Congratulations! Your project "${submission.title}" for ${course?.title || 'Course'} has been approved.${feedback ? ` Feedback: "${feedback}"` : ""}`
+          : status === "rejected"
+            ? `Your project "${submission.title}" for ${course?.title || 'Course'} needs revision.${feedback ? ` Feedback: "${feedback}"` : ""}`
+            : `Your project "${submission.title}" for ${course?.title || 'Course'} is now under review.`,
+        link: course ? `/tutorials/${course.slug}` : "/dashboard",
+        is_read: false
+      });
+
       showToast(`Submission ${status}`, status === "approved" ? "success" : "info");
       router.refresh();
     } else {

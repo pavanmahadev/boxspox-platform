@@ -6,7 +6,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { fetchCoursesAction } from "@/app/tutorials/actions";
 
 /**
- * Boxspox: Infinite Tutorial List
+ * Pandaschool: Infinite Tutorial List
  * Implements intersection observer for high-performance lazy loading
  */
 

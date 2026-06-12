@@ -889,11 +889,11 @@ export function LessonContent({ course, lesson, allLessons, ad, baseUrl }: Lesso
                 },
                 {
                   question: `Is this ${course.title} tutorial for beginners?`,
-                  answer: `Yes, this Boxspox tutorial is designed to take you from a complete beginner to an advanced developer. We recommend going through the modules sequentially.`
+                  answer: `Yes, this Pandaschool tutorial is designed to take you from a complete beginner to an advanced developer. We recommend going through the modules sequentially.`
                 },
                 {
                   question: `How do I get a certificate for ${course.title}?`,
-                  answer: `Once you complete all lessons in this track, you will unlock the Final Certification Exam. Pass the exam to earn a verified Boxspox certificate that you can share on your resume and LinkedIn.`
+                  answer: `Once you complete all lessons in this track, you will unlock the Final Certification Exam. Pass the exam to earn a verified Pandaschool certificate that you can share on your resume and LinkedIn.`
                 }
               ]}
             />
@@ -1005,7 +1005,7 @@ export function LessonContent({ course, lesson, allLessons, ad, baseUrl }: Lesso
             marginBottom: "40px",
             boxShadow: "0 12px 24px rgba(0,0,0,0.1)"
           }}>
-            <h4 style={{ fontSize: "16px", fontWeight: 900, marginBottom: "8px" }}>Boxspox Pro</h4>
+            <h4 style={{ fontSize: "16px", fontWeight: 900, marginBottom: "8px" }}>Pandaschool Pro</h4>
             <p style={{ fontSize: "12px", opacity: 0.8, marginBottom: "20px", lineHeight: 1.5 }}>Unlock certificates, offline mode, and 1-on-1 mentor support.</p>
             <Link href="/checkout" style={{ display: "block", textAlign: "center", background: "var(--brand-primary)", color: "white", padding: "10px", borderRadius: "12px", textDecoration: "none", fontWeight: 800, fontSize: "13px" }}>Upgrade</Link>
           </div>
@@ -1254,7 +1254,7 @@ function AIModal({ isOpen, onClose, history, onSubmit, question, setQuestion, lo
         <div style={{ padding: "24px", borderBottom: "1px solid var(--border-primary)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{ background: "#111827", padding: "8px", borderRadius: "12px" }}><Zap size={18} color="#10B981" /></div>
-            <h3 style={{ fontWeight: 800 }}>Boxspox AI Tutor</h3>
+            <h3 style={{ fontWeight: 800 }}>Pandaschool AI Tutor</h3>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-tertiary)" }}><X size={24} /></button>
         </div>

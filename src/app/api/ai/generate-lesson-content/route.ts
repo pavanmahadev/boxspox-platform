@@ -43,7 +43,7 @@ export async function POST(req: Request) {
       baseURL: "https://api.groq.com/openai/v1",
     });
 
-    const prompt = `You are an expert technical writer and instructor for the Boxspox platform.
+    const prompt = `You are an expert technical writer and instructor for the Pandaschool platform.
 Generate a comprehensive, engaging, and easy-to-understand lesson content for a tutorial.
 
 Course: "${courseTitle || "Unknown Course"}"

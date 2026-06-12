@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import CategoriesManager from "./CategoriesManager";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Categories — Admin | Boxspox" };
+export const metadata = { title: "Categories — Admin | Pandaschool" };
 
 export default async function AdminCategoriesPage() {
   const supabase = await createClient();

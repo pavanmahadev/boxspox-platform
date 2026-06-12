@@ -39,7 +39,7 @@ export function CTA() {
               lineHeight: 1.7,
             }}
           >
-            Boxspox is a leading Ed Tech company striving to provide the best learning material on technical and non-technical subjects.
+            Pandaschool is a leading Ed Tech company striving to provide the best learning material on technical and non-technical subjects.
             <br />
             It&apos;s free, interactive, and designed for you.
           </p>

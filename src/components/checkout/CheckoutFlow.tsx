@@ -78,7 +78,7 @@ export default function CheckoutFlow({ course, user }: CheckoutFlowProps) {
         key: res.keyId,
         amount: res.order.amount,
         currency: res.order.currency,
-        name: "Boxspox",
+        name: "Pandaschool",
         description: res.course?.description || "Certification Exam",
         order_id: res.order.id,
         handler: async function (response: any) {
@@ -196,7 +196,7 @@ export default function CheckoutFlow({ course, user }: CheckoutFlowProps) {
               
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", zIndex: 2 }}>
                 <div>
-                  <div style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "2px", color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>Boxspox Certified Learner</div>
+                  <div style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "2px", color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>Pandaschool Certified Learner</div>
                   <div style={{ fontSize: "18px", fontWeight: 900, color: "#fff", marginTop: "4px" }}>PLATINUM ACCESS</div>
                 </div>
                 {/* Chip Icon */}
@@ -270,7 +270,7 @@ export default function CheckoutFlow({ course, user }: CheckoutFlowProps) {
                     <ShieldCheck size={14} /> 256-BIT SECURE ENCRYPTION
                   </div>
                   <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px", lineHeight: 1.4 }}>
-                    Your payment information is securely processed by Razorpay. Boxspox does not store your card details.
+                    Your payment information is securely processed by Razorpay. Pandaschool does not store your card details.
                   </p>
                 </div>
 

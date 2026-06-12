@@ -27,7 +27,7 @@ export default function ReferralsPage() {
     setLoading(false);
   };
 
-  const referralLink = user ? `https://boxspox.in/register?ref=${user.id.substring(0, 8)}` : '';
+  const referralLink = user ? `https://pandaschool.in/register?ref=${user.id.substring(0, 8)}` : '';
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);

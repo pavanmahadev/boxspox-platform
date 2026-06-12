@@ -125,7 +125,7 @@ export async function verifyRazorpayPayment(
 
   const { data: course } = await supabase
     .from("courses")
-    .select("slug, category")
+    .select("title, slug, category")
     .eq("id", courseId)
     .single();
 
@@ -172,6 +172,19 @@ export async function verifyRazorpayPayment(
       .replace(/(^-|-$)/g, "");
 
   const cat = slugify(course.category || "development");
+  const isTutorial = !course.category || course.category.toLowerCase() === "tutorials" || course.category.toLowerCase() === "tutorial";
+  const linkPath = isTutorial ? `/tutorials/${course.slug}/exam` : `/learn/${cat}/${course.slug}/exam`;
+
+  // Insert Exam Unlocked notification
+  await supabase.from("notifications").insert({
+    user_id: user.id,
+    type: "success",
+    title: "Exam Unlocked!",
+    body: `Payment verified. You have successfully unlocked the certification exam for ${course.title || 'Course'}!`,
+    link: linkPath,
+    is_read: false
+  });
+
   revalidatePath(`/learn/${cat}/${course.slug}`);
   revalidatePath(`/learn/${cat}/${course.slug}/exam`);
   revalidatePath(`/tutorials/${course.slug}`);
@@ -190,7 +203,7 @@ export async function simulatePurchase(courseId: string) {
 
   const { data: course } = await supabase
     .from("courses")
-    .select("slug, category")
+    .select("title, slug, category")
     .eq("id", courseId)
     .single();
 
@@ -238,6 +251,19 @@ export async function simulatePurchase(courseId: string) {
       .replace(/(^-|-$)/g, "");
 
   const cat = slugify(course.category || "development");
+  const isTutorial = !course.category || course.category.toLowerCase() === "tutorials" || course.category.toLowerCase() === "tutorial";
+  const linkPath = isTutorial ? `/tutorials/${course.slug}/exam` : `/learn/${cat}/${course.slug}/exam`;
+
+  // Insert Exam Unlocked notification
+  await supabase.from("notifications").insert({
+    user_id: user.id,
+    type: "success",
+    title: "Exam Unlocked!",
+    body: `Purchase simulated. You have successfully unlocked the certification exam for ${course.title || 'Course'}!`,
+    link: linkPath,
+    is_read: false
+  });
+
   revalidatePath(`/learn/${cat}/${course.slug}`);
   revalidatePath(`/learn/${cat}/${course.slug}/exam`);
   revalidatePath(`/tutorials/${course.slug}`);

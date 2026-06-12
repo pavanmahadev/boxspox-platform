@@ -1,7 +1,7 @@
 import React from "react";
 
 /**
- * Boxspox UI: Skeleton Loader
+ * Pandaschool UI: Skeleton Loader
  * Premium animated placeholders for async loading states
  */
 

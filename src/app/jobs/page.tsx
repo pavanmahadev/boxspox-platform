@@ -192,6 +192,16 @@ export default function JobsPage() {
               verified_certs: certificates.map(c => c.course?.title)
             }
           });
+
+          // Create notification for the job application
+          await supabase.from("notifications").insert({
+            user_id: user.id,
+            type: "info",
+            title: "Applied for Job 💼",
+            body: `You successfully applied for ${selectedJob.title} at ${selectedJob.company}!`,
+            link: "/jobs",
+            is_read: false
+          });
         }
 
         setApplySuccess(true);
@@ -371,14 +381,14 @@ export default function JobsPage() {
             gap: "6px",
             marginBottom: "16px"
           }}>
-            <Sparkles size={14} /> Boxspox Careers Portal
+            <Sparkles size={14} /> Pandaschool Careers Portal
           </span>
           
           <h1 style={{ fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 900, color: "var(--text-primary)", letterSpacing: "-0.5px", lineHeight: 1.1 }}>
             Get Hired with <span style={{ color: "var(--brand-primary)" }}>Verified Credentials</span>
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", maxWidth: "600px", margin: "16px auto 0", lineHeight: 1.6 }}>
-            Bypass standard HR resume filters. Showcase your verified Boxspox course completions, XP, and badges to top tech companies instantly.
+            Bypass standard HR resume filters. Showcase your verified Pandaschool course completions, XP, and badges to top tech companies instantly.
           </p>
 
           {/* Glass Search Bar */}
@@ -673,7 +683,7 @@ export default function JobsPage() {
                     Application Sent! 🚀
                   </h3>
                   <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: 1.5 }}>
-                    Your certified Boxspox achievements and certificates have been successfully compiled and sent to <strong>{selectedJob.company}</strong>!
+                    Your certified Pandaschool achievements and certificates have been successfully compiled and sent to <strong>{selectedJob.company}</strong>!
                   </p>
                 </div>
               ) : (
@@ -693,7 +703,7 @@ export default function JobsPage() {
                     Certified 1-Click Apply
                   </h3>
                   <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", marginBottom: "20px", lineHeight: 1.4 }}>
-                    By clicking submit, your certified learning credentials on Boxspox will be securely attached as your verified technical resume.
+                    By clicking submit, your certified learning credentials on Pandaschool will be securely attached as your verified technical resume.
                   </p>
 
                   {/* Certified resume showcase panel */}
@@ -767,7 +777,7 @@ export default function JobsPage() {
                       fontSize: "0.85rem",
                       marginBottom: "28px"
                     }}>
-                      You must be logged in to apply with your Boxspox credentials.
+                      You must be logged in to apply with your Pandaschool credentials.
                     </div>
                   )}
 
@@ -852,7 +862,7 @@ export default function JobsPage() {
                     Job Published! 🚀
                   </h3>
                   <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                    The position has been successfully published to the live Boxspox Careers Hub!
+                    The position has been successfully published to the live Pandaschool Careers Hub!
                   </p>
                 </div>
               ) : (

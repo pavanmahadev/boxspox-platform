@@ -20,14 +20,14 @@ export async function sendDiscordNotification(message: string, embed?: DiscordEm
   try {
     const payload: any = {
       content: message,
-      username: "Boxspox Alerts",
+      username: "Pandaschool Alerts",
       avatar_url: "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?auto=format&fit=crop&w=256&h=256&q=80",
     };
 
     if (embed) {
       payload.embeds = [{
         ...embed,
-        color: embed.color || 0x0F6E56, // Default Boxspox Brand Color
+        color: embed.color || 0x0F6E56, // Default Pandaschool Brand Color
         timestamp: new Date().toISOString()
       }];
     }

@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Learning Paths – Boxspox",
+  title: "Learning Paths – Pandaschool",
   description: "Structured roadmaps designed to take you from absolute beginner to industry-ready professional.",
 };
 

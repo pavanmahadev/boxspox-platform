@@ -42,8 +42,8 @@ export default function AdminSettingsPage() {
   const supabase = createClient();
   const [settings, setSettings] = useState({ 
     id: "", 
-    platform_name: "Boxspox", 
-    admin_email: "admin@boxspox.in",
+    platform_name: "Pandaschool", 
+    admin_email: "admin@pandaschool.in",
     logo_url: "",
     primary_color: "#0F6E56",
     maintenance_mode: false,

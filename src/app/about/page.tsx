@@ -43,7 +43,7 @@ export default function AboutPage() {
               <span style={{ color: "var(--brand-primary)" }}>digital creators.</span>
             </h1>
             <p style={{ fontSize: "1.2rem", color: "var(--text-secondary)", lineHeight: 1.6, maxWidth: "600px", margin: "0 auto" }}>
-              Boxspox is a global community of learners, creators, and innovators. We believe that everyone should have access to world-class coding education.
+              Pandaschool is a global community of learners, creators, and innovators. We believe that everyone should have access to world-class coding education.
             </p>
           </motion.div>
         </div>
@@ -86,9 +86,9 @@ export default function AboutPage() {
         <div className="section-container">
           <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
             <div>
-              <h2 style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "24px" }}>The Boxspox Story</h2>
+              <h2 style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "24px" }}>The Pandaschool Story</h2>
               <div style={{ display: "flex", flexDirection: "column", gap: "20px", color: "var(--text-secondary)", lineHeight: 1.8 }}>
-                <p>Founded in 2024, Boxspox started with a simple idea: coding shouldn't be boring or prohibitively expensive. We wanted to create a platform that feels like a studio—creative, inspiring, and professional.</p>
+                <p>Founded in 2024, Pandaschool started with a simple idea: coding shouldn't be boring or prohibitively expensive. We wanted to create a platform that feels like a studio—creative, inspiring, and professional.</p>
                 <p>What began as a small collection of web development tutorials has grown into a comprehensive ecosystem of learning paths, interactive playgrounds, and professional certifications.</p>
                 <p>Our team is composed of developers, designers, and educators who are passionate about open-source and the future of the web.</p>
               </div>

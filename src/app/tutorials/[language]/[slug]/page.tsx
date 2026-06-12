@@ -52,19 +52,19 @@ export async function generateMetadata({ params }: { params: Promise<{ language:
     .eq("module.course.slug", language)
     .maybeSingle();
 
-  if (!lesson) return { title: "Lesson Not Found | Boxspox" };
+  if (!lesson) return { title: "Lesson Not Found | Pandaschool" };
 
   const courseTitle = (lesson.module as any)?.course?.title;
-  const canonicalUrl = `https://boxspox.in/tutorials/${language}/${slug}`;
+  const canonicalUrl = `https://pandaschool.in/tutorials/${language}/${slug}`;
 
   return {
-    title: `${lesson.title} - ${courseTitle || 'Course'} | Boxspox Academy`,
-    description: lesson.description || `Master ${lesson.title} with interactive examples and AI-powered tutoring on Boxspox.`,
+    title: `${lesson.title} - ${courseTitle || 'Course'} | Pandaschool Academy`,
+    description: lesson.description || `Master ${lesson.title} with interactive examples and AI-powered tutoring on Pandaschool.`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${lesson.title} - ${courseTitle || 'Course'} | Boxspox Academy`,
+      title: `${lesson.title} - ${courseTitle || 'Course'} | Pandaschool Academy`,
       description: lesson.description || `Master ${lesson.title} with interactive examples.`,
       url: canonicalUrl,
       type: "article",
@@ -150,10 +150,10 @@ export default async function LessonPage({
   const gradient = course.gradient || "linear-gradient(135deg, #6366f1, #a855f7)";
 
   const breadcrumbItems = [
-    { name: "Home", url: "https://boxspox.in/" },
-    { name: "Tutorials", url: "https://boxspox.in/tutorials" },
-    { name: course.title, url: `https://boxspox.in/tutorials/${course.slug}` },
-    { name: lesson.title, url: `https://boxspox.in/tutorials/${course.slug}/${lesson.slug}` }
+    { name: "Home", url: "https://pandaschool.in/" },
+    { name: "Tutorials", url: "https://pandaschool.in/tutorials" },
+    { name: course.title, url: `https://pandaschool.in/tutorials/${course.slug}` },
+    { name: lesson.title, url: `https://pandaschool.in/tutorials/${course.slug}/${lesson.slug}` }
   ];
 
   return (
@@ -161,7 +161,7 @@ export default async function LessonPage({
       <ArticleSchema 
         headline={lesson.title}
         description={(lesson as any).description || `Learn ${lesson.title}`}
-        url={`https://boxspox.in/tutorials/${course.slug}/${lesson.slug}`}
+        url={`https://pandaschool.in/tutorials/${course.slug}/${lesson.slug}`}
       />
       <BreadcrumbSchema items={breadcrumbItems} />
       

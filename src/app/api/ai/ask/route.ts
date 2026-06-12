@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       ? history.map((h: any) => `${h.role === 'user' ? 'Student' : 'Tutor'}: ${h.content}`).join('\n')
       : "";
 
-    const prompt = `You are an expert programming tutor for the Boxspox platform.
+    const prompt = `You are an expert programming tutor for the Pandaschool platform.
 The student is currently taking a lesson titled: "${lessonTitle}".
 Here is the content of the lesson for your context:
 ${lessonContent?.substring(0, 3000) || "No content provided."}

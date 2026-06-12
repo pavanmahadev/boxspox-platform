@@ -204,7 +204,7 @@ function RegisterForm() {
             Create Account
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-            Join Boxspox and start your coding journey today
+            Join Pandaschool and start your coding journey today
           </p>
         </div>
 

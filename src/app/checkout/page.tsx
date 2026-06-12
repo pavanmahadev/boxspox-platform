@@ -23,7 +23,7 @@ function CheckoutContent() {
 
   const productId = searchParams.get('product') || 'BUNDLE';
   const price = Number(searchParams.get('price') || 2999);
-  const title = searchParams.get('title') || 'Boxspox Premium Bundle';
+  const title = searchParams.get('title') || 'Pandaschool Premium Bundle';
   const finalPrice = Math.max(0, price - discountAmount);
 
   const handleApplyCoupon = async () => {
@@ -80,7 +80,7 @@ function CheckoutContent() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SxzOxqka39bdQT", // Public key fallback
         amount: data.order.amount,
         currency: "INR",
-        name: "Boxspox",
+        name: "Pandaschool",
         description: title,
         order_id: data.order.id,
         handler: async function (response: any) {

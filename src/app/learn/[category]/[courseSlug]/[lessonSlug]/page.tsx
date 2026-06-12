@@ -28,19 +28,19 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     .eq("module.course.slug", courseSlug)
     .maybeSingle();
 
-  if (!lesson) return { title: "Lesson Not Found | Boxspox" };
+  if (!lesson) return { title: "Lesson Not Found | Pandaschool" };
 
   const courseTitle = (lesson.module as any)?.course?.title;
-  const canonicalUrl = `https://boxspox.in/learn/${category}/${courseSlug}/${lessonSlug}`;
+  const canonicalUrl = `https://pandaschool.in/learn/${category}/${courseSlug}/${lessonSlug}`;
 
   return {
-    title: `${lesson.title} - ${courseTitle || 'Course'} | Boxspox Academy`,
-    description: lesson.description || `Master ${lesson.title} with interactive examples and AI-powered tutoring on Boxspox.`,
+    title: `${lesson.title} - ${courseTitle || 'Course'} | Pandaschool Academy`,
+    description: lesson.description || `Master ${lesson.title} with interactive examples and AI-powered tutoring on Pandaschool.`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${lesson.title} - ${courseTitle || 'Course'} | Boxspox Academy`,
+      title: `${lesson.title} - ${courseTitle || 'Course'} | Pandaschool Academy`,
       description: lesson.description || `Master ${lesson.title} with interactive examples.`,
       url: canonicalUrl,
       type: "article",
@@ -125,11 +125,11 @@ export default async function LearnLessonPage({
   const gradient = course.gradient || "linear-gradient(135deg, #6366f1, #a855f7)";
 
   const breadcrumbItems = [
-    { name: "Home", url: "https://boxspox.in/" },
-    { name: "Learn", url: "https://boxspox.in/learn" },
-    { name: category, url: `https://boxspox.in/learn/${category}` },
-    { name: course.title, url: `https://boxspox.in/learn/${category}/${course.slug}` },
-    { name: lesson.title, url: `https://boxspox.in/learn/${category}/${course.slug}/${lesson.slug}` }
+    { name: "Home", url: "https://pandaschool.in/" },
+    { name: "Learn", url: "https://pandaschool.in/learn" },
+    { name: category, url: `https://pandaschool.in/learn/${category}` },
+    { name: course.title, url: `https://pandaschool.in/learn/${category}/${course.slug}` },
+    { name: lesson.title, url: `https://pandaschool.in/learn/${category}/${course.slug}/${lesson.slug}` }
   ];
 
   return (
@@ -137,7 +137,7 @@ export default async function LearnLessonPage({
       <ArticleSchema 
         headline={lesson.title}
         description={(lesson as any).description || `Learn ${lesson.title}`}
-        url={`https://boxspox.in/learn/${category}/${course.slug}/${lesson.slug}`}
+        url={`https://pandaschool.in/learn/${category}/${course.slug}/${lesson.slug}`}
       />
       <BreadcrumbSchema items={breadcrumbItems} />
       

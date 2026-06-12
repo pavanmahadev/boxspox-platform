@@ -63,6 +63,20 @@ export default function Discussion({ lessonId, currentUserId }: DiscussionProps)
     if (!content.trim()) return;
     setSubmitting(true);
     
+    let parentCommentUserId = null;
+    let parentCommentContent = "";
+    if (parentId) {
+      const { data: parentData } = await supabase
+        .from("discussion_comments")
+        .select("user_id, content")
+        .eq("id", parentId)
+        .single();
+      if (parentData) {
+        parentCommentUserId = parentData.user_id;
+        parentCommentContent = parentData.content;
+      }
+    }
+
     // We don't need to manually call fetchComments() anymore because the realtime sub will trigger it
     const { error } = await supabase.from("discussion_comments").insert({
       lesson_id: lessonId,
@@ -77,6 +91,22 @@ export default function Discussion({ lessonId, currentUserId }: DiscussionProps)
       setNewComment("");
       setReplyText("");
       setReplyTo(null);
+
+      // Create reply notification if parentId exists and parent user is different
+      if (parentId && parentCommentUserId && parentCommentUserId !== currentUserId) {
+        const truncatedParent = parentCommentContent.length > 50 
+          ? parentCommentContent.substring(0, 50) + "..." 
+          : parentCommentContent;
+
+        await supabase.from("notifications").insert({
+          user_id: parentCommentUserId,
+          type: "info",
+          title: "New reply on your comment",
+          body: `Someone replied: "${content.trim().substring(0, 50)}${content.trim().length > 50 ? '...' : ''}" to your comment "${truncatedParent}"`,
+          link: window.location.pathname,
+          is_read: false
+        });
+      }
     }
     setSubmitting(false);
   }

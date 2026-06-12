@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
-  const baseUrl = 'https://boxspox.in'
+  const baseUrl = 'https://pandaschool.in'
 
   // 1. Fetch all courses
   const { data: courses } = await supabase

@@ -105,7 +105,7 @@ export default async function AdminDashboard() {
           <h1 style={{ fontSize: "24px", fontWeight: 800, color: "var(--text-primary)", marginBottom: "4px" }}>
             System Overview
           </h1>
-          <p style={{ color: "var(--text-tertiary)", fontSize: "14px", fontWeight: 500 }}>Real-time metrics for the Boxspox ecosystem.</p>
+          <p style={{ color: "var(--text-tertiary)", fontSize: "14px", fontWeight: 500 }}>Real-time metrics for the Pandaschool ecosystem.</p>
         </div>
         <div style={{ display: "flex", gap: "12px" }}>
           <button className="hide-mobile" style={{ 

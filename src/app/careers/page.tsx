@@ -46,7 +46,7 @@ export default function CareersPage() {
       {/* Perks */}
       <section style={{ padding: "100px var(--container-padding)", background: "var(--bg-card)", borderTop: "1px solid var(--border-primary)" }}>
         <div className="section-container">
-          <h2 style={{ fontSize: "2.5rem", fontWeight: 800, textAlign: "center", marginBottom: "60px" }}>Why Work at Boxspox?</h2>
+          <h2 style={{ fontSize: "2.5rem", fontWeight: 800, textAlign: "center", marginBottom: "60px" }}>Why Work at Pandaschool?</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "32px" }}>
             {[
               { title: "Remote First", text: "Work from anywhere in the world. We value outcomes over hours.", icon: <Star size={24} /> },
@@ -121,7 +121,7 @@ export default function CareersPage() {
           <div style={{ marginTop: "60px", textAlign: "center", padding: "40px", background: "var(--bg-secondary)", borderRadius: "24px" }}>
             <h3 style={{ fontWeight: 800, marginBottom: "8px" }}>Don&apos;t see a fit?</h3>
             <p style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>We&apos;re always looking for talented people. Send us an open application.</p>
-            <Link href="mailto:careers@boxspox.in" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>careers@boxspox.in</Link>
+            <Link href="mailto:careers@pandaschool.in" style={{ color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" }}>careers@pandaschool.in</Link>
           </div>
         </div>
       </section>

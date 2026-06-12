@@ -44,7 +44,7 @@ const TEMPLATES = {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Boxspox Studio</title>
+  <title>Pandaschool Studio</title>
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -98,7 +98,7 @@ const TEMPLATES = {
 </body>
 </html>`,
       "/index.js": `document.getElementById('btn').addEventListener('click', () => {
-  alert('Welcome to the Boxspox Interactive Playground! 🎉');
+  alert('Welcome to the Pandaschool Interactive Playground! 🎉');
 });`
     }
   },
@@ -230,7 +230,7 @@ export function PlaygroundStudio() {
   // Load custom drafts from localStorage with automatic self-healing sanitization
   useEffect(() => {
     setInitialFiles(null); // Triggers smooth pulse visual transition
-    const saved = localStorage.getItem(`boxspox_playground_${activeTemplate}`);
+    const saved = localStorage.getItem(`pandaschool_playground_${activeTemplate}`);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -324,7 +324,7 @@ export function PlaygroundStudio() {
 
   const handleResetWorkspace = () => {
     if (window.confirm("Are you sure you want to reset the current workspace? All your local unsaved modifications for this template will be cleared.")) {
-      localStorage.removeItem(`boxspox_playground_${activeTemplate}`);
+      localStorage.removeItem(`pandaschool_playground_${activeTemplate}`);
       setResetCounter(c => c + 1);
       showToast("Workspace successfully reset to template defaults!", "success");
     }
@@ -448,7 +448,7 @@ export function PlaygroundStudio() {
               <div className="p-4 border-b border-border-primary bg-bg-secondary flex items-center justify-between">
                 <div className="flex items-center gap-2 font-bold text-brand-primary">
                   <Sparkles size={18} />
-                  Boxspox AI
+                  Pandaschool AI
                 </div>
               </div>
               

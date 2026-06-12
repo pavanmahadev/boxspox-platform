@@ -154,7 +154,7 @@ export default function DashboardClient({
   const stats = [
     { label: "Total XP", value: (profile?.xp || 0).toLocaleString(), icon: <TrendingUp size={20} />, color: "#6366f1" },
     { label: "Daily Streak", value: `${profile?.streak || 0} Days`, icon: <Flame size={20} />, color: "#ff4d4d" },
-    { label: "Boxspox Coins", value: (profile?.coins || 0).toLocaleString(), icon: <Target size={20} />, color: "#f59e0b" },
+    { label: "Pandaschool Coins", value: (profile?.coins || 0).toLocaleString(), icon: <Target size={20} />, color: "#f59e0b" },
     { label: "Lessons Done", value: progress.length.toString(), icon: <CheckCircle2 size={20} />, color: "#10b981" },
   ];
 

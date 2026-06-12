@@ -1,4 +1,4 @@
--- Boxspox EdTech Platform Expansion Migration
+-- Pandaschool EdTech Platform Expansion Migration
 -- Adds scalable category architecture, quizzes, assignments, and certificates
 
 -- 1. Create Categories Table

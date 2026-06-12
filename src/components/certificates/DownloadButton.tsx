@@ -68,7 +68,7 @@ export default function DownloadButton({
       const blobUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = blobUrl;
-      anchor.download = `Boxspox-Certificate-${courseName.replace(/[^a-zA-Z0-9]/g, "-")}.pdf`;
+      anchor.download = `Pandaschool-Certificate-${courseName.replace(/[^a-zA-Z0-9]/g, "-")}.pdf`;
       anchor.style.display = "none";
       document.body.appendChild(anchor);
       anchor.click();

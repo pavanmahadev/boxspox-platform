@@ -30,18 +30,18 @@ export async function generateMetadata({ params }: { params: Promise<{ language:
     .eq("slug", language)
     .single();
 
-  if (!course) return { title: "Course Not Found | Boxspox" };
+  if (!course) return { title: "Course Not Found | Pandaschool" };
 
-  const canonicalUrl = `https://boxspox.in/tutorials/${course.slug}`;
+  const canonicalUrl = `https://pandaschool.in/tutorials/${course.slug}`;
 
   return {
-    title: `Master ${course.title} - Full Interactive Course | Boxspox`,
+    title: `Master ${course.title} - Full Interactive Course | Pandaschool`,
     description: course.description || `Learn ${course.title} from scratch with our project-based curriculum, interactive editor, and AI tutors.`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `Master ${course.title} | Boxspox`,
+      title: `Master ${course.title} | Pandaschool`,
       description: course.description || `Learn ${course.title} with interactive tutorials.`,
       url: canonicalUrl,
     }
@@ -138,9 +138,9 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
   const gradient = course.gradient || "linear-gradient(135deg, #6366f1, #a855f7)";
   
   const breadcrumbItems = [
-    { name: "Home", url: "https://boxspox.in/" },
-    { name: "Tutorials", url: "https://boxspox.in/tutorials" },
-    { name: course.title, url: `https://boxspox.in/tutorials/${course.slug}` }
+    { name: "Home", url: "https://pandaschool.in/" },
+    { name: "Tutorials", url: "https://pandaschool.in/tutorials" },
+    { name: course.title, url: `https://pandaschool.in/tutorials/${course.slug}` }
   ];
 
   return (
@@ -148,7 +148,7 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
       <CourseSchema 
         name={course.title}
         description={course.description || `Learn ${course.title}`}
-        url={`https://boxspox.in/tutorials/${course.slug}`}
+        url={`https://pandaschool.in/tutorials/${course.slug}`}
       />
       <BreadcrumbSchema items={breadcrumbItems} />
       

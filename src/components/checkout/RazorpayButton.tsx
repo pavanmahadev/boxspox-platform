@@ -50,7 +50,7 @@ export default function RazorpayButton({ courseId }: RazorpayButtonProps) {
         key: keyId,
         amount: order.amount,
         currency: order.currency,
-        name: "Boxspox",
+        name: "Pandaschool",
         description: course?.description || "Course Payment",
         order_id: order.id,
         prefill: {

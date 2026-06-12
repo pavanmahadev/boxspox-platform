@@ -5,7 +5,7 @@ import { subscribeToChannel } from "@/utils/realtime";
 import { createClient } from "@/utils/supabase/client";
 
 /**
- * Boxspox Realtime Notification System
+ * Pandaschool Realtime Notification System
  * - Listens for new database notifications
  * - Manages toast alerts for async actions
  * - Realtime broadcast channel

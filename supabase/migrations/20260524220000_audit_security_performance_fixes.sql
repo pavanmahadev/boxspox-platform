@@ -1,5 +1,5 @@
 -- =====================================================
--- Boxspox Platform Audit Fixes Migration
+-- Pandaschool Platform Audit Fixes Migration
 -- Date: 2026-05-24
 -- =====================================================
 

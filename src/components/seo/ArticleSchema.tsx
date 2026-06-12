@@ -16,11 +16,11 @@ interface ArticleSchemaProps {
 export function ArticleSchema({
   headline,
   description,
-  authorName = "Boxspox Expert",
-  publisherName = "Boxspox",
-  publisherLogo = "https://boxspox.in/logo.png",
+  authorName = "Pandaschool Expert",
+  publisherName = "Pandaschool",
+  publisherLogo = "https://pandaschool.in/logo.png",
   url,
-  imageUrl = "https://boxspox.in/og-image.png",
+  imageUrl = "https://pandaschool.in/og-image.png",
   datePublished,
   dateModified,
   schemaType = "Article"

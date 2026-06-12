@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
   return {
-    title: `${name} Courses — Learn ${name} Online | Boxspox`,
-    description: `Browse all ${name} courses on Boxspox. Expert-curated content for beginners to advanced learners.`,
+    title: `${name} Courses — Learn ${name} Online | Pandaschool`,
+    description: `Browse all ${name} courses on Pandaschool. Expert-curated content for beginners to advanced learners.`,
   };
 }
 

@@ -209,7 +209,7 @@ export async function generateExamWithAIAction(courseId: string, courseTitle: st
   try {
     const groq = new Groq({ apiKey: GROQ_API_KEY });
 
-    const prompt = `You are an expert exam creator for the Boxspox platform. 
+    const prompt = `You are an expert exam creator for the Pandaschool platform. 
 Generate exactly ${numQuestions} high-quality, challenging questions for a final certification exam strictly on the topic of: "${courseTitle}".
 
 CRITICAL INSTRUCTION: ALL questions MUST be exclusively related to "${courseTitle}". Do not include general, unrelated programming questions. Every question must test the user's knowledge on this specific course subject.

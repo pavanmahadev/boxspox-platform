@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Articles & Tutorials | Boxspox",
+  title: "Articles & Tutorials | Pandaschool",
   description: "Explore our latest in-depth articles, tutorials, and career insights. Free tech guides, business guides, and more curated by experts.",
 };
 
@@ -51,8 +51,8 @@ export default async function ArticlesPage({ searchParams }: Props) {
   const activeCategory = category || "All";
 
   const breadcrumbItems = [
-    { name: "Home", url: "https://boxspox.in/" },
-    { name: "Articles", url: "https://boxspox.in/articles" }
+    { name: "Home", url: "https://pandaschool.in/" },
+    { name: "Articles", url: "https://pandaschool.in/articles" }
   ];
 
   return (

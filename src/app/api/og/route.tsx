@@ -6,7 +6,7 @@ export const runtime = 'edge';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const title = searchParams.get('title') || 'EduPlatform by Boxspox';
+    const title = searchParams.get('title') || 'EduPlatform by Pandaschool';
     const desc = searchParams.get('desc') || 'Master Web Development and Coding Interactive Courses.';
     const category = searchParams.get('category') || 'Course';
 
@@ -121,7 +121,7 @@ export async function GET(req: NextRequest) {
               </svg>
             </div>
             <span style={{ fontSize: 40, fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>
-              Boxspox
+              Pandaschool
             </span>
           </div>
         </div>

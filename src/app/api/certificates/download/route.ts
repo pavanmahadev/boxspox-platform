@@ -18,7 +18,7 @@ import {
 const RATE_LIMIT_WINDOW_MINUTES = 60; // 1 hour
 const MAX_REQUESTS_PER_WINDOW = 10; // 10 PDFs per hour per user
 
-// Premium PDF Styles — Boxspox Branding
+// Premium PDF Styles — Pandaschool Branding
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  // Boxspox "B" logo box
+  // Pandaschool "B" logo box
   logoBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -229,7 +229,7 @@ function CertificateDocument({
 }) {
   return React.createElement(
     Document,
-    { title: `Boxspox Academy — ${courseName} Certificate` },
+    { title: `Pandaschool Academy — ${courseName} Certificate` },
     React.createElement(
       Page,
       { size: "A4", orientation: "landscape", style: styles.page },
@@ -249,7 +249,7 @@ function CertificateDocument({
             View,
             { style: styles.headerSection },
 
-            // Boxspox Logo Badge
+            // Pandaschool Logo Badge
             React.createElement(
               View,
               { style: styles.logoBadge },
@@ -258,7 +258,7 @@ function CertificateDocument({
                 { style: styles.logoBox },
                 React.createElement(Text, { style: styles.logoBoxText }, "B")
               ),
-              React.createElement(Text, { style: styles.logoText }, "BOXSPOX ACADEMY")
+              React.createElement(Text, { style: styles.logoText }, "PANDASCHOOL ACADEMY")
             ),
 
             // Gold/Teal SVG Seal
@@ -280,7 +280,7 @@ function CertificateDocument({
             React.createElement(View, { style: styles.accentBar }),
 
             // Org name
-            React.createElement(Text, { style: styles.orgName }, "Boxspox Academy"),
+            React.createElement(Text, { style: styles.orgName }, "Pandaschool Academy"),
 
             // Title
             React.createElement(Text, { style: styles.certTitle }, "Certificate of Completion"),
@@ -324,7 +324,7 @@ function CertificateDocument({
               { style: { ...styles.footerCol, alignItems: "center" } },
               React.createElement(Text, { style: { ...styles.footerLabel, marginBottom: 10 } }, "Authorized By"),
               React.createElement(View, { style: styles.signatureLine }),
-              React.createElement(Text, { style: styles.footerValue }, "Boxspox Academy")
+              React.createElement(Text, { style: styles.footerValue }, "Pandaschool Academy")
             ),
 
             // Certificate ID column

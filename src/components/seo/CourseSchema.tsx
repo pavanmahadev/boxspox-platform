@@ -12,10 +12,10 @@ interface CourseSchemaProps {
 export function CourseSchema({
   name,
   description,
-  providerName = "Boxspox",
-  providerUrl = "https://boxspox.in",
+  providerName = "Pandaschool",
+  providerUrl = "https://pandaschool.in",
   url,
-  imageUrl = "https://boxspox.in/og-image.png"
+  imageUrl = "https://pandaschool.in/og-image.png"
 }: CourseSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',

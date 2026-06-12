@@ -113,7 +113,7 @@ export default function PremiumCertificateView({
       const currentUrl = window.location.origin + "/certificates/" + cert?.id;
       const linkedinAddUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME` +
         `&name=${encodeURIComponent((course?.title || 'Professional') + ' Certification of Competence')}` +
-        `&organizationName=${encodeURIComponent('Boxspox Academy')}` +
+        `&organizationName=${encodeURIComponent('Pandaschool Academy')}` +
         `&issueYear=${issueYear}` +
         `&issueMonth=${issueMonth}` +
         `&certUrl=${encodeURIComponent(currentUrl)}` +
@@ -407,7 +407,7 @@ export default function PremiumCertificateView({
                   boxShadow: "0 4px 6px rgba(0,0,0,0.05)"
                 }}>B</div>
                 <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "var(--text-primary, #0f172a)", letterSpacing: "-0.5px" }}>
-                  BOXSPOX <span style={{ color: "#64748b", fontSize: "9px", fontWeight: 800, letterSpacing: "1px" }}>ACADEMY</span>
+                  PANDASCHOOL <span style={{ color: "#64748b", fontSize: "9px", fontWeight: 800, letterSpacing: "1px" }}>ACADEMY</span>
                 </span>
               </div>
 
@@ -435,7 +435,7 @@ export default function PremiumCertificateView({
                 Verified Skill Mastery
               </h2>
               <p style={{ fontSize: "0.82rem", color: "var(--text-secondary, #6b7280)", marginTop: "2px" }}>
-                Technical competencies validated by Boxspox Academy examinations.
+                Technical competencies validated by Pandaschool Academy examinations.
               </p>
             </div>
           </div>
@@ -595,7 +595,7 @@ export default function PremiumCertificateView({
               <ShieldCheck size={26} color="#10b981" style={{ filter: "drop-shadow(0 0 8px rgba(16,185,129,0.4))" }} />
               <div>
                 <div style={{ fontSize: "13px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", color: "#10b981" }}>Secure Ledger Verified</div>
-                <div style={{ fontSize: "10px", color: "#64748b", marginTop: "1px" }}>Boxspox Verification Authority</div>
+                <div style={{ fontSize: "10px", color: "#64748b", marginTop: "1px" }}>Pandaschool Verification Authority</div>
               </div>
             </div>
 

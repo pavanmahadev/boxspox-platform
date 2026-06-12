@@ -1,7 +1,7 @@
 import { api } from "@/utils/api";
 
 /**
- * Boxspox Course Service
+ * Pandaschool Course Service
  * Centralized AJAX calls for course-related data
  */
 

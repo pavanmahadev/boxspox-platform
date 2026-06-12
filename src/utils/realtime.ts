@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/client";
 
 /**
- * Boxspox Realtime Manager
+ * Pandaschool Realtime Manager
  * Centralized subscription handling for Supabase Channels
  */
 

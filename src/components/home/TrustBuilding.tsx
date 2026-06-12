@@ -23,7 +23,7 @@ const testimonials = [
     name: "Amit Kumar",
     role: "Freelance Digital Marketer",
     image: "https://i.pravatar.cc/150?u=amit",
-    text: "The SEO and Marketing modules are top-notch. I applied the strategies to my own consulting business and saw a 40% increase in organic traffic in just a few weeks. Highly recommend Boxspox!",
+    text: "The SEO and Marketing modules are top-notch. I applied the strategies to my own consulting business and saw a 40% increase in organic traffic in just a few weeks. Highly recommend Pandaschool!",
     rating: 5
   }
 ];

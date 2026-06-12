@@ -18,19 +18,19 @@ export function AIFeature() {
     {
       title: "Error Detected",
       icon: <AlertCircle size={20} color="#EF4444" />,
-      content: "ReferenceError: boxspox is not defined",
+      content: "ReferenceError: pandaschool is not defined",
       ai: "Looks like you have a typo in your variable name."
     },
     {
       title: "AI Analyzing",
       icon: <Bot size={20} color="var(--brand-primary)" />,
       content: "Scanning your code for similar patterns...",
-      ai: "I found the issue! You meant 'Boxspox' with a capital B."
+      ai: "I found the issue! You meant 'Pandaschool' with a capital B."
     },
     {
       title: "Fixed!",
       icon: <CheckCircle2 size={20} color="#10B981" />,
-      content: "const Boxspox = () => { ... }",
+      content: "const Pandaschool = () => { ... }",
       ai: "Your code is now working perfectly. Great job!"
     }
   ];

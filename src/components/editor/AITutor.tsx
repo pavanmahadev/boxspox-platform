@@ -8,7 +8,7 @@ export function AITutor() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hello! I'm your Boxspox AI Tutor. Stuck on a coding problem? Ask me anything!" }
+    { role: "assistant", content: "Hello! I'm your Pandaschool AI Tutor. Stuck on a coding problem? Ask me anything!" }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);

@@ -106,12 +106,18 @@ export function Footer() {
               }
             `}</style>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none", color: "var(--text-primary)", marginBottom: "24px" }}>
-              <div style={{ width: 36, height: 36, borderRadius: "8px", background: "var(--brand-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Code2 size={22} color="white" aria-hidden="true" />
-              </div>
-              <span style={{ fontSize: "1.8rem", fontWeight: 900, letterSpacing: "-1px", fontFamily: "var(--font-heading)" }}>
-                {settings?.platform_name || "BOXSPOX"}
-              </span>
+              {settings?.logo_url ? (
+                <img src={settings.logo_url} alt={settings.platform_name} style={{ height: "40px", width: "auto", display: "block" }} />
+              ) : (
+                <>
+                  <div style={{ width: 36, height: 36, borderRadius: "8px", background: "var(--brand-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Code2 size={22} color="white" aria-hidden="true" />
+                  </div>
+                  <span style={{ fontSize: "1.8rem", fontWeight: 900, letterSpacing: "-1px", fontFamily: "var(--font-heading)" }}>
+                    {settings?.platform_name || "PANDASCHOOL"}
+                  </span>
+                </>
+              )}
             </Link>
             <p style={{ color: "var(--text-tertiary)", lineHeight: 1.6, maxWidth: "320px", marginBottom: "32px", fontSize: "14px" }}>
               Empowering developers worldwide with project-based learning and AI-powered mentorship.
@@ -190,11 +196,11 @@ export function Footer() {
             }
           `}</style>
           <div style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500 }}>
-            &copy; {currentYear} {settings?.platform_name || "BOXSPOX"}. All rights reserved.
+            &copy; {currentYear} {settings?.platform_name || "PANDASCHOOL"}. All rights reserved.
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "24px" }} className="footer-bottom-links">
-            <Link href={`mailto:${settings?.admin_email || "hello@boxspox.in"}`} style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-tertiary)", textDecoration: "none", fontSize: "14px", fontWeight: 500 }}>
-              <Mail size={16} /> {settings?.admin_email || "hello@boxspox.in"}
+            <Link href={`mailto:${settings?.admin_email || "hello@pandaschool.in"}`} style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-tertiary)", textDecoration: "none", fontSize: "14px", fontWeight: 500 }}>
+              <Mail size={16} /> {settings?.admin_email || "hello@pandaschool.in"}
             </Link>
             <div style={{ width: "1px", height: "14px", background: "#E5E7EB" }} className="footer-divider" />
             <div style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>

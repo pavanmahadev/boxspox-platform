@@ -18,18 +18,18 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     .eq("slug", courseSlug)
     .single();
 
-  if (!course) return { title: "Course Not Found | Boxspox" };
+  if (!course) return { title: "Course Not Found | Pandaschool" };
 
-  const canonicalUrl = `https://boxspox.in/learn/${category}/${course.slug}`;
+  const canonicalUrl = `https://pandaschool.in/learn/${category}/${course.slug}`;
 
   return {
-    title: `Master ${course.title} - Full Interactive Course | Boxspox`,
+    title: `Master ${course.title} - Full Interactive Course | Pandaschool`,
     description: course.description || `Learn ${course.title} from scratch with our expert curriculum.`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `Master ${course.title} | Boxspox`,
+      title: `Master ${course.title} | Pandaschool`,
       description: course.description || `Learn ${course.title} with interactive tutorials.`,
       url: canonicalUrl,
     }
@@ -89,10 +89,10 @@ export default async function LearnCoursePage({ params }: { params: Promise<{ ca
   const gradient = course.gradient || "linear-gradient(135deg, #6366f1, #a855f7)";
   
   const breadcrumbItems = [
-    { name: "Home", url: "https://boxspox.in/" },
-    { name: "Learn", url: "https://boxspox.in/learn" },
-    { name: category, url: `https://boxspox.in/learn/${category}` },
-    { name: course.title, url: `https://boxspox.in/learn/${category}/${course.slug}` }
+    { name: "Home", url: "https://pandaschool.in/" },
+    { name: "Learn", url: "https://pandaschool.in/learn" },
+    { name: category, url: `https://pandaschool.in/learn/${category}` },
+    { name: course.title, url: `https://pandaschool.in/learn/${category}/${course.slug}` }
   ];
 
   return (
@@ -100,7 +100,7 @@ export default async function LearnCoursePage({ params }: { params: Promise<{ ca
       <CourseSchema 
         name={course.title}
         description={course.description || `Learn ${course.title}`}
-        url={`https://boxspox.in/learn/${category}/${course.slug}`}
+        url={`https://pandaschool.in/learn/${category}/${course.slug}`}
       />
       <BreadcrumbSchema items={breadcrumbItems} />
       

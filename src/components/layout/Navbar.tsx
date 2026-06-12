@@ -220,21 +220,23 @@ export function Navbar() {
         <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 2vw, 24px)" }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
             {settings?.logo_url ? (
-                <img src={settings.logo_url} alt={settings.platform_name} style={{ height: "28px", width: "auto", borderRadius: "4px" }} />
+                <img src={settings.logo_url} alt={settings.platform_name} style={{ height: "36px", width: "auto", display: "block" }} />
             ) : (
+              <>
                 <Code2 size={24} color="var(--brand-primary)" />
+                <span style={{
+                  fontSize: "clamp(1rem, 3vw, 1.3rem)",
+                  fontWeight: 800,
+                  color: "var(--text-primary)",
+                  letterSpacing: "-0.5px",
+                  fontFamily: "var(--font-heading)",
+                  textTransform: "uppercase",
+                  display: "block"
+                }} className="logo-text">
+                  {settings?.platform_name || "PANDASCHOOL"}
+                </span>
+              </>
             )}
-            <span style={{
-              fontSize: "clamp(1rem, 3vw, 1.3rem)",
-              fontWeight: 800,
-              color: "var(--text-primary)",
-              letterSpacing: "-0.5px",
-              fontFamily: "var(--font-heading)",
-              textTransform: "uppercase",
-              display: "block"
-            }} className="logo-text">
-              {settings?.platform_name || "BOXSPOX"}
-            </span>
           </Link>
 
           <Link
@@ -519,7 +521,7 @@ export function Navbar() {
           {!user ? (
             /* Logged Out State */
             <div style={{ background: "white", padding: "20px", borderRadius: "16px", border: "1px solid #E2E8F0", textAlign: "center" }}>
-              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#0F172A", marginBottom: "8px" }}>Welcome to Boxspox</h3>
+              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#0F172A", marginBottom: "8px" }}>Welcome to Pandaschool</h3>
               <p style={{ fontSize: "14px", color: "#64748B", marginBottom: "20px" }}>Log in to track your progress and earn XP!</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-primary" style={{ justifyContent: "center" }}>Login</Link>

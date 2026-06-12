@@ -43,7 +43,7 @@ function AutoSaver({ template }: { template: string }) {
     if (template === "react" && !isReactFiles) return; // Skip saving if React files aren't loaded yet
     if (template === "vanilla" && isReactFiles) return; // Skip saving if Vanilla still contains React files
 
-    localStorage.setItem(`boxspox_playground_${template}`, JSON.stringify(files));
+    localStorage.setItem(`pandaschool_playground_${template}`, JSON.stringify(files));
   }, [files, template]);
 
   return null;

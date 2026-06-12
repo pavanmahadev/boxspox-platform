@@ -381,11 +381,31 @@ export default async function LearnExamPage({
           .eq("user_id", user.id)
           .eq("course_id", course.id);
 
+        // Create notification for passing final exam and earning certificate
+        await supabase.from("notifications").insert({
+          user_id: user.id,
+          type: "success",
+          title: "Exam Passed & Certified! 🎓",
+          body: `Congratulations! You scored ${examScore}% on the final exam for ${course.title} and earned your official certificate.`,
+          link: `/certificates/${cert.id}`,
+          is_read: false
+        });
+
         redirect(`/certificates/${cert.id}?just_passed=true&score=${examScore}`);
       } else {
         throw new Error("Failed to issue or retrieve certificate. Please contact support.");
       }
     } else {
+      // Create notification for failing the exam
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        type: "error",
+        title: "Exam Attempt Finished",
+        body: `You scored ${examScore}% on the final exam for ${course.title}. A score of 80% or higher is required. Review the material and try again!`,
+        link: `/learn/${category}/${courseSlug}/exam`,
+        is_read: false
+      });
+
       redirect(`/learn/${category}/${courseSlug}/exam?failed=true&score=${examScore}`);
     }
   }

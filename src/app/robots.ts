@@ -13,6 +13,6 @@ export default function robots(): MetadataRoute.Robots {
         '/api/',
       ],
     },
-    sitemap: 'https://boxspox.in/sitemap.xml',
+    sitemap: 'https://pandaschool.in/sitemap.xml',
   }
 }

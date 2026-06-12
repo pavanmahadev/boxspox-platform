@@ -2,10 +2,10 @@ import { Metadata } from "next";
 import { PlaygroundStudio } from "@/components/playground/PlaygroundStudio";
 
 export const metadata: Metadata = {
-  title: "Online Code Playground & Editor | Boxspox",
+  title: "Online Code Playground & Editor | Pandaschool",
   description: "Experiment with HTML, CSS, JavaScript, and React right in your browser with our fast, interactive code playground.",
   alternates: {
-    canonical: 'https://boxspox.in/playground',
+    canonical: 'https://pandaschool.in/playground',
   }
 };
 

@@ -118,7 +118,7 @@ export default function LeaderboardPage() {
             Global Leaderboard
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", maxWidth: "560px", margin: "0 auto 36px", fontWeight: 500, lineHeight: 1.6 }}>
-            The absolute best developers of the Boxspox community. Complete lessons to climb the heights of glory.
+            The absolute best developers of the Pandaschool community. Complete lessons to climb the heights of glory.
           </p>
 
           {/* Stats Summaries Row */}
