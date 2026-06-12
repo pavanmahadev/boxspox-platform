@@ -143,7 +143,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                 </td>
               </tr>
             ) : (
-              profiles?.map((profile) => (
+              profiles?.map((profile: any) => (
                 <tr key={profile.id} style={{ borderBottom: "1px solid var(--border-primary)", transition: "background 0.2s" }}>
                   <td style={{ padding: "18px 24px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>

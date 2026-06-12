@@ -14,7 +14,7 @@ export default async function InstructorDashboardPage() {
     .select("id, title, status, enrollments(id), modules(lessons(id))")
     .eq("instructor_id", user?.id);
 
-  const totalStudents = courses?.reduce((acc, course) => acc + (course.enrollments?.length || 0), 0) || 0;
+  const totalStudents = courses?.reduce((acc: number, course: any) => acc + (course.enrollments?.length || 0), 0) || 0;
 
   return (
     <div style={{ animation: "fadeIn 0.5s ease-out" }}>

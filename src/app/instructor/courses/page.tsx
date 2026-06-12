@@ -48,7 +48,7 @@ export default async function InstructorCoursesPage({ searchParams }: { searchPa
             </tr>
           </thead>
           <tbody>
-            {courses?.map((course) => (
+            {courses?.map((course: any) => (
               <tr key={course.id} style={{ borderBottom: "1px solid #F3F4F6", transition: "background 0.1s" }}>
                 <td style={{ padding: "16px 24px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>

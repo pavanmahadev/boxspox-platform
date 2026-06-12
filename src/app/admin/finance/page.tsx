@@ -17,7 +17,7 @@ export default async function AdminFinancePage() {
   }
 
   // Fetch profiles separately since FK points to auth.users
-  const userIds = Array.from(new Set(rawPurchases?.map(p => p.user_id) || []));
+  const userIds = Array.from(new Set(rawPurchases?.map((p: any) => p.user_id) || []));
   let profilesData: any[] = [];
   
   if (userIds.length > 0) {
@@ -28,19 +28,19 @@ export default async function AdminFinancePage() {
     if (profs) profilesData = profs;
   }
 
-  const purchases = rawPurchases?.map(p => ({
+  const purchases = rawPurchases?.map((p: any) => ({
     ...p,
-    profiles: profilesData.find(prof => prof.id === p.user_id) || null
+    profiles: profilesData.find((prof: any) => prof.id === p.user_id) || null
   })) || [];
 
   // Calculate Metrics
-  const totalRevenue = purchases?.reduce((acc, p) => acc + (p.amount_paid || 0), 0) || 0;
+  const totalRevenue = purchases?.reduce((acc: number, p: any) => acc + (p.amount_paid || 0), 0) || 0;
   
   // Calculate this month's revenue
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const thisMonthPurchases = purchases?.filter(p => new Date(p.purchased_at) >= startOfMonth) || [];
-  const mrr = thisMonthPurchases.reduce((acc, p) => acc + (p.amount_paid || 0), 0);
+  const thisMonthPurchases = purchases?.filter((p: any) => new Date(p.purchased_at) >= startOfMonth) || [];
+  const mrr = thisMonthPurchases.reduce((acc: number, p: any) => acc + (p.amount_paid || 0), 0);
   
   const totalOrders = purchases?.length || 0;
   const averageOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
@@ -107,7 +107,7 @@ export default async function AdminFinancePage() {
             </thead>
             <tbody>
               {purchases && purchases.length > 0 ? (
-                purchases.map((purchase) => (
+                purchases.map((purchase: any) => (
                   <tr key={purchase.id} style={{ borderBottom: "1px solid var(--border-primary)" }}>
                     <td style={{ padding: "16px 24px" }}>
                       <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", fontFamily: "monospace" }}>

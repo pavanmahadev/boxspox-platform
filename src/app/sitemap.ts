@@ -28,14 +28,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       )
     `)
 
-  const courseUrls = (courses || []).map((course) => ({
+  const courseUrls = (courses || []).map((course: any) => ({
     url: `${baseUrl}/tutorials/${course.slug}`,
     lastModified: new Date(course.created_at || Date.now()),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))
 
-  const pathUrls = (paths || []).map((path) => ({
+  const pathUrls = (paths || []).map((path: any) => ({
     url: `${baseUrl}/paths/${path.slug}`,
     lastModified: new Date(path.created_at || Date.now()),
     changeFrequency: 'monthly' as const,

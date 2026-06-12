@@ -116,8 +116,8 @@ export default async function CoursePage({ params }: { params: Promise<{ languag
   // Sort lessons across modules: first sort by module order_index, then lesson order_index
   const allLessons = (modules || [])
     .slice()
-    .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
-    .flatMap(m =>
+    .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+    .flatMap((m: any) =>
       (m.lessons || [])
         .slice()
         .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))

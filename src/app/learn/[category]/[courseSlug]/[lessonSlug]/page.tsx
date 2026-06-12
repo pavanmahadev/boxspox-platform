@@ -92,13 +92,13 @@ export default async function LearnLessonPage({
   }
 
   // Flatten lessons and ensure correct order
-  const allLessons = modulesData?.flatMap(mod => {
+  const allLessons = modulesData?.flatMap((mod: any) => {
     // Sort lessons within the module
     const sortedLessons = mod.lessons.sort((a: any, b: any) => a.order_index - b.order_index);
     return sortedLessons;
   }) || [];
 
-  const lesson = allLessons?.find(l => l.slug === lessonSlug);
+  const lesson = allLessons?.find((l: any) => l.slug === lessonSlug);
 
   if (!lesson) {
     return (

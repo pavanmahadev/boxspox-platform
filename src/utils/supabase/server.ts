@@ -1,12 +1,35 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+function createDummyClient() {
+  const dummy: any = new Proxy(() => {}, {
+    get(target, prop) {
+      if (prop === 'then') {
+        return (resolve: any) => resolve({ data: null, error: null });
+      }
+      return dummy;
+    },
+    apply(target, thisArg, argumentsList) {
+      return dummy;
+    }
+  });
+  return dummy;
+}
+
 export async function createClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    console.error("Supabase environment variables are MISSING on server! Returning dummy client.");
+    return createDummyClient();
+  }
+
   const cookieStore = await cookies()
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    url,
+    key,
     {
       cookies: {
         getAll() {

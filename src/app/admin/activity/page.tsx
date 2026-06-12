@@ -62,7 +62,7 @@ export default async function ActivityPage() {
             </thead>
             <tbody>
               {activityLogs && activityLogs.length > 0 ? (
-                activityLogs.map((log) => (
+                activityLogs.map((log: any) => (
                   <tr key={log.id} style={{ borderBottom: "1px solid #F3F4F6", transition: "background 0.2s" }} className="hover-bg-gray">
                     <td style={{ padding: "16px 24px", fontSize: "13px", color: "var(--text-tertiary)" }}>
                       {new Date(log.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}

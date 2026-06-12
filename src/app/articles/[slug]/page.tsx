@@ -273,7 +273,7 @@ export default async function ArticlePage({ params }: Props) {
               gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
               gap: "24px"
             }}>
-              {related.map((post) => (
+              {related.map((post: any) => (
                 <Link
                   key={post.id}
                   href={`/articles/${post.slug}`}

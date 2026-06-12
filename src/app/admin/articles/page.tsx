@@ -133,7 +133,7 @@ export default async function AdminArticlesPage({ searchParams }: { searchParams
                 </td>
               </tr>
             ) : (
-              articles.map((article) => (
+              articles.map((article: any) => (
                 <tr key={article.id} style={{ borderBottom: "1px solid var(--border-primary)" }}>
                   <td style={{ padding: "16px 24px", whiteSpace: "nowrap" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>

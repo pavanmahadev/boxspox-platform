@@ -240,7 +240,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
             gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
             gap: "32px"
           }}>
-            {articles.map((article) => (
+            {articles.map((article: any) => (
               <article
                 key={article.id}
                 style={{

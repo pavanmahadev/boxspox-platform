@@ -154,7 +154,7 @@ export async function POST() {
 
   // Find the MBA & Business category
   const { data: categories } = await supabase.from("categories").select("*");
-  const mbaCategory = categories?.find(c => c.name.includes("MBA") || c.name.includes("Business"));
+  const mbaCategory = categories?.find((c: any) => c.name.includes("MBA") || c.name.includes("Business"));
 
   if (!mbaCategory) {
     return NextResponse.json({ error: "MBA & Business category not found. Please create it first." }, { status: 404 });

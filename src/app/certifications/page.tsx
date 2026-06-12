@@ -53,7 +53,7 @@ export default async function CertificationsPage() {
           
           {earnedCertificates.length > 0 ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
-              {earnedCertificates.map((cert) => (
+              {earnedCertificates.map((cert: any) => (
                 <Link key={cert.id} href={`/certificates/${cert.id}`} style={{ textDecoration: "none" }}>
                   <div className="hover-lift" style={{ background: "var(--bg-card)", padding: "32px", borderRadius: "24px", border: "1px solid var(--border-primary)", position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: "var(--brand-primary)" }} />
@@ -81,7 +81,7 @@ export default async function CertificationsPage() {
         <div>
           <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: "24px" }}>Available Certifications</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
-            {allCourses.filter(c => !earnedCertificates.some(ec => ec.course_id === c.id)).map((course) => (
+            {allCourses.filter((c: any) => !earnedCertificates.some((ec: any) => ec.course_id === c.id)).map((course: any) => (
               <Link key={course.id} href={`/tutorials/${course.slug}`} style={{ textDecoration: "none" }}>
                 <div style={{ background: "var(--bg-primary)", padding: "24px", borderRadius: "20px", border: "1px solid var(--border-primary)", opacity: 0.8, transition: "opacity 0.2s" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "20px" }}>

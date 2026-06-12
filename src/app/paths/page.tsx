@@ -65,7 +65,7 @@ export default async function PathsPage() {
             gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
             gap: "32px"
           }}>
-            {paths.map((path) => (
+            {paths.map((path: any) => (
               <div
                 key={path.id}
                 style={{

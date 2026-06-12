@@ -84,7 +84,7 @@ export default async function AdminAdsPage() {
           <h2 style={{ fontSize: "18px", fontWeight: 800, marginBottom: "20px" }}>Existing Ads</h2>
           {ads && ads.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {ads.map((ad) => (
+              {ads.map((ad: any) => (
                 <div key={ad.id} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px", background: "var(--bg-secondary)", borderRadius: "16px", border: "1px solid var(--border-primary)" }}>
                   <div style={{ width: "60px", height: "60px", borderRadius: "10px", overflow: "hidden" }}>
                     <img src={ad.image_url} alt={ad.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
