@@ -64,7 +64,7 @@ export const metadata: Metadata = {
 };
 
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
-import { createClient } from "@/utils/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -93,7 +93,12 @@ export default async function RootLayout({
   let courses = [];
   
   try {
-    const supabase = await createClient();
+    // Use a cookie-less standard client for public data in the root layout
+    // This prevents Next.js from throwing DYNAMIC_SERVER_USAGE errors on static pages
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+    
     const [{ data: sData }, { data: cData }] = await Promise.all([
       supabase.from("site_settings").select("*").single(),
       supabase.from("courses").select("id, title, slug, category_name").eq("status", "published").order("created_at", { ascending: false })
