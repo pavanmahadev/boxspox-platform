@@ -90,7 +90,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   let settings = null;
-  let courses = [];
+  let courses: any[] = [];
   
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
