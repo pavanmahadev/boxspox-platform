@@ -34,18 +34,22 @@ const YoutubeIcon = (props: any) => (
   </svg>
 );
 
-export function Footer() {
+import Image from "next/image";
+
+export function Footer({ initialSettings }: { initialSettings?: any }) {
   const currentYear = new Date().getFullYear();
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<any>(initialSettings || null);
   const supabase = createClient();
 
   useEffect(() => {
-    const getSettings = async () => {
-      const { data } = await supabase.from("site_settings").select("*").single();
-      if (data) setSettings(data);
-    };
-    getSettings();
-  }, []);
+    if (!initialSettings) {
+      const getSettings = async () => {
+        const { data } = await supabase.from("site_settings").select("*").single();
+        if (data) setSettings(data);
+      };
+      getSettings();
+    }
+  }, [initialSettings, supabase]);
 
   const footerSections = [
     {
@@ -60,9 +64,9 @@ export function Footer() {
     {
       title: "Resources",
       links: [
-        { label: "Documentation", href: "#" },
-        { label: "Community", href: "#" },
-        { label: "Support", href: "#" },
+        { label: "Documentation", href: "/docs" },
+        { label: "Community", href: "/community" },
+        { label: "Support", href: "/support" },
         { label: "Cheat Sheets", href: "/cheatsheets" },
       ]
     },
@@ -107,7 +111,7 @@ export function Footer() {
             `}</style>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none", color: "var(--text-primary)", marginBottom: "24px" }}>
               {settings?.logo_url ? (
-                <img src={settings.logo_url} alt={settings.platform_name} style={{ height: "40px", width: "auto", display: "block" }} />
+                <Image src={settings.logo_url} alt={settings.platform_name || "Logo"} width={120} height={40} style={{ height: "40px", width: "auto", display: "block" }} />
               ) : (
                 <>
                   <div style={{ width: 36, height: 36, borderRadius: "8px", background: "var(--brand-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>

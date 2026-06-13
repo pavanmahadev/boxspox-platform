@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight, Code, PenTool, Database, ShieldCheck, Play, Sparkles, Briefcase, Scale, Tractor, BrainCircuit } from "lucide-react";
 import { Notch } from "@/components/ui/Notch";
 
@@ -213,9 +214,12 @@ export function Hero() {
                   transition={{ duration: 0.35 }}
                 >
                   <Link href={currentDomain.link}>
-                    <img
+                    <Image
                       src={currentDomain.image}
                       alt={currentDomain.title}
+                      width={1200}
+                      height={800}
+                      priority
                       style={{ width: "100%", height: "auto", display: "block" }}
                     />
                   </Link>
@@ -226,7 +230,7 @@ export function Hero() {
             {/* Hidden preloader to fix image reloading flashes */}
             <div style={{ position: "absolute", width: 0, height: 0, overflow: "hidden", opacity: 0, pointerEvents: "none" }}>
               {DOMAINS.map((domain) => (
-                <img key={domain.id} src={domain.image} alt="preload" />
+                <Image key={domain.id} src={domain.image} alt="preload" width={1200} height={800} priority={false} />
               ))}
             </div>
 

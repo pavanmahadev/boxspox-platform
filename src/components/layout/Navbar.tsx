@@ -35,6 +35,7 @@ import { getCurrentUserAction } from "@/app/tutorials/actions";
 
 const navLinks = [
   { name: "Tutorials", href: "/tutorials" },
+  { name: "Exams", href: "/exams" },
   { name: "Leaderboard", href: "/leaderboard" },
   { name: "Jobs", href: "/jobs/apply" },
   { name: "Certificates", href: "/certifications" },
@@ -89,9 +90,10 @@ const profileLinkStyle: React.CSSProperties = {
   transition: "all 0.2s ease",
 };
 
+import Image from "next/image";
 import { TutorialsMenu } from "@/components/layout/TutorialsMenu";
 
-export function Navbar() {
+export function Navbar({ initialSettings, initialCourses }: { initialSettings?: any, initialCourses?: any[] }) {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -100,11 +102,11 @@ export function Navbar() {
   const [role, setRole] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<any>(initialSettings || null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [jobsOpen, setJobsOpen] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>(initialCourses || []);
   const [hoveredDomain, setHoveredDomain] = useState<string | null>(null);
   const { showToast } = useToast();
   const supabase = createClient();
@@ -124,19 +126,20 @@ export function Navbar() {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-search", handleOpenSearch);
 
-    const getSettings = async () => {
-      const { data } = await supabase.from("site_settings").select("*").single();
-      if (data) setSettings(data);
-      
-      const { data: dbCourses } = await supabase
-        .from("courses")
-        .select("id, title, slug, category_name")
-        .eq("status", "published")
-        .order("created_at", { ascending: false });
-      if (dbCourses) setCourses(dbCourses);
-    };
-
-    getSettings();
+    if (!initialSettings || !initialCourses) {
+      const getSettings = async () => {
+        const { data } = await supabase.from("site_settings").select("*").single();
+        if (data) setSettings(data);
+        
+        const { data: dbCourses } = await supabase
+          .from("courses")
+          .select("id, title, slug, category_name")
+          .eq("status", "published")
+          .order("created_at", { ascending: false });
+        if (dbCourses) setCourses(dbCourses);
+      };
+      getSettings();
+    }
 
     const getUserData = async () => {
       const userData = await getCurrentUserAction();
@@ -220,7 +223,7 @@ export function Navbar() {
         <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 2vw, 24px)" }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
             {settings?.logo_url ? (
-                <img src={settings.logo_url} alt={settings.platform_name} style={{ height: "36px", width: "auto", display: "block" }} />
+                <Image src={settings.logo_url} alt={settings.platform_name || "Logo"} width={120} height={36} style={{ height: "36px", width: "auto", display: "block" }} />
             ) : (
               <>
                 <Code2 size={24} color="var(--brand-primary)" />
@@ -274,6 +277,12 @@ export function Navbar() {
             </Link>
             <Link href="/playground" style={{ textDecoration: "none", color: "var(--text-secondary)", fontWeight: 600, fontSize: "0.9rem", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--brand-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>
               Playground
+            </Link>
+            <Link href="/projects" style={{ textDecoration: "none", color: "var(--text-secondary)", fontWeight: 600, fontSize: "0.9rem", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--brand-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>
+              Projects
+            </Link>
+            <Link href="/exams" style={{ textDecoration: "none", color: "var(--text-secondary)", fontWeight: 600, fontSize: "0.9rem", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "var(--brand-primary)"} onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-secondary)"}>
+              Exams
             </Link>
 
             <div style={{ position: "relative" }} onMouseEnter={() => setJobsOpen(true)} onMouseLeave={() => setJobsOpen(false)}>

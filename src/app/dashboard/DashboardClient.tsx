@@ -414,7 +414,7 @@ export default function DashboardClient({
                       <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {item.lesson?.title || "Unknown Lesson"}
                       </div>
-                      <div style={{ fontSize: "0.8rem", color: "var(--text-tertiary)", fontWeight: 500 }}>
+                      <div style={{ fontSize: "0.8rem", color: "var(--text-tertiary)", fontWeight: 500 }} suppressHydrationWarning>
                         {item.lesson?.course?.title || "Course"} • {item.completed_at ? new Date(item.completed_at).toLocaleDateString() : "Date unknown"}
                       </div>
                     </div>
@@ -483,7 +483,7 @@ export default function DashboardClient({
                       <Award size={24} color="#f59e0b" />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cert.course?.title}</div>
-                        <div style={{ fontSize: "0.75rem", color: "var(--text-tertiary)", fontWeight: 500 }}>Issued {new Date(cert.issued_at).toLocaleDateString()}</div>
+                        <div style={{ fontSize: "0.75rem", color: "var(--text-tertiary)", fontWeight: 500 }} suppressHydrationWarning>Issued {new Date(cert.issued_at).toLocaleDateString()}</div>
                       </div>
                       <ChevronRight size={18} style={{ color: "var(--brand-primary)" }} />
                     </Link>

@@ -11,6 +11,7 @@ export function InstructorSidebar({ onNavItemClick }: { onNavItemClick?: () => v
   const navItems = [
     { icon: <BarChart3 size={20} />, label: "Dashboard", href: "/instructor" },
     { icon: <BookOpen size={20} />, label: "My Courses", href: "/instructor/courses" },
+    { icon: <BookOpen size={20} />, label: "Exams", href: "/instructor/exams" },
   ];
 
   return (

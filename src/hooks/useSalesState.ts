@@ -30,7 +30,10 @@ export function useSalesState() {
           .single();
 
         if (error && error.code !== 'PGRST116') {
-          console.warn("Sales state table missing or error:", error.message || error);
+          // Only warn if it's an error OTHER than the table missing
+          if (!error.message?.includes("Could not find the table")) {
+            console.warn("Sales state table error:", error.message || error);
+          }
           return;
         }
 

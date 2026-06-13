@@ -24,14 +24,25 @@ export async function deleteUser(userId: string) {
 
 export async function updateUserRole(userId: string, role: string) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     
-    const { error } = await supabase
+    // Update role in profiles table (bypasses RLS)
+    const { error: profileError } = await supabase
       .from("profiles")
       .update({ role })
       .eq("id", userId);
     
-    if (error) throw error;
+    if (profileError) throw profileError;
+
+    // Update role in auth.users app_metadata so JWT gets updated
+    const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
+      app_metadata: { user_role: role }
+    });
+
+    if (authError) {
+      console.warn("Could not update auth.users metadata:", authError);
+      // Don't fail completely if just auth sync fails
+    }
 
     revalidatePath("/admin/users");
     return { success: true };

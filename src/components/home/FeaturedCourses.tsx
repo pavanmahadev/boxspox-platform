@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight, ChevronLeft, Clock, Star, BookOpen } from "lucide-react";
 
 const fallbackImage = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80";
@@ -254,11 +255,13 @@ export function FeaturedCourses({ courses: dbCourses }: { courses?: any[] }) {
                   justifyContent: "center",
                   padding: "16px"
                 }}>
-                  <img 
+                  <Image 
                     src={image} 
                     alt={`${course.title} course thumbnail`} 
                     loading="lazy"
                     decoding="async"
+                    width={400}
+                    height={200}
                     style={{ 
                       maxWidth: "100%", 
                       maxHeight: "100%", 

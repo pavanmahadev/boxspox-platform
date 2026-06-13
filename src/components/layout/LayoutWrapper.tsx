@@ -9,11 +9,14 @@ import { AITutor } from "@/components/editor/AITutor";
 import { MaintenanceView } from "./MaintenanceView";
 import { createClient } from "@/utils/supabase/client";
 
-export function LayoutWrapper({ children }: { children: React.ReactNode }) {
+export function LayoutWrapper({ children, settings, courses }: { children: React.ReactNode, settings: any, courses: any[] }) {
   const pathname = usePathname();
   const isAdminPage = pathname?.startsWith("/admin");
   const isInstructorPage = pathname?.startsWith("/instructor");
   const isAuthPage = pathname?.startsWith("/login") || pathname?.startsWith("/register") || pathname?.startsWith("/forgot-password");
+  
+  // Exact match for the active exam taking page: /exams/[id] (but not /exams/[id]/results)
+  const isExamSessionPage = pathname?.match(/^\/exams\/[^\/]+$/);
 
   const [loading, setLoading] = useState(false); // Default to false to show content immediately
   const [maintenanceMode, setMaintenanceMode] = useState(false);
@@ -24,7 +27,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const { data: settings } = await supabase.from("site_settings").select("maintenance_mode").single();
         if (settings?.maintenance_mode) setMaintenanceMode(true);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -52,9 +54,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (isAdminPage || isInstructorPage) {
+  if (isAdminPage || isInstructorPage || isExamSessionPage) {
     return <>{children}</>;
   }
 
@@ -65,9 +68,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <div className="mesh-gradient" />
-      <Navbar />
+      <Navbar initialSettings={settings} initialCourses={courses} />
       <main style={{ flex: 1, position: "relative", zIndex: 1 }}>{children}</main>
-      <Footer />
+      <Footer initialSettings={settings} />
       <MobileNav />
       {hasAiAccess && <AITutor />}
     </div>

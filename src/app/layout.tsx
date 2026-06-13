@@ -64,6 +64,7 @@ export const metadata: Metadata = {
 };
 
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import { createClient } from "@/utils/supabase/server";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -83,17 +84,32 @@ const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let settings = null;
+  let courses = [];
+  
+  try {
+    const supabase = await createClient();
+    const [{ data: sData }, { data: cData }] = await Promise.all([
+      supabase.from("site_settings").select("*").single(),
+      supabase.from("courses").select("id, title, slug, category_name").eq("status", "published").order("created_at", { ascending: false })
+    ]);
+    if (sData) settings = sData;
+    if (cData) courses = cData;
+  } catch (err) {
+    console.warn("Global layout fetch failed:", err);
+  }
+
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body>
         <ToastProvider>
           <ThemeProvider>
-            <LayoutWrapper>
+            <LayoutWrapper settings={settings} courses={courses}>
               {children}
             </LayoutWrapper>
           </ThemeProvider>
