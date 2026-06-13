@@ -93,18 +93,25 @@ export default async function RootLayout({
   let courses = [];
   
   try {
-    // Use a cookie-less standard client for public data in the root layout
-    // This prevents Next.js from throwing DYNAMIC_SERVER_USAGE errors on static pages
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
-    const [{ data: sData }, { data: cData }] = await Promise.all([
-      supabase.from("site_settings").select("*").single(),
-      supabase.from("courses").select("id, title, slug, category_name").eq("status", "published").order("created_at", { ascending: false })
-    ]);
-    if (sData) settings = sData;
-    if (cData) courses = cData;
+    if (supabaseUrl && supabaseKey) {
+      const supabase = createSupabaseClient(supabaseUrl, supabaseKey, {
+        global: {
+          fetch: (url, options) => {
+            return fetch(url, { ...options, cache: 'force-cache' });
+          }
+        }
+      });
+      
+      const [{ data: sData }, { data: cData }] = await Promise.all([
+        supabase.from("site_settings").select("*").single(),
+        supabase.from("courses").select("id, title, slug, category_name").eq("status", "published").order("created_at", { ascending: false })
+      ]);
+      if (sData) settings = sData;
+      if (cData) courses = cData;
+    }
   } catch (err) {
     console.warn("Global layout fetch failed:", err);
   }
