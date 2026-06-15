@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Users, BarChart3, ChevronLeft } from "lucide-react";
+import { BookOpen, Users, BarChart3, ChevronLeft, Megaphone } from "lucide-react";
 
 export function InstructorSidebar({ onNavItemClick }: { onNavItemClick?: () => void }) {
   const pathname = usePathname();
@@ -12,6 +12,7 @@ export function InstructorSidebar({ onNavItemClick }: { onNavItemClick?: () => v
     { icon: <BarChart3 size={20} />, label: "Dashboard", href: "/instructor" },
     { icon: <BookOpen size={20} />, label: "My Courses", href: "/instructor/courses" },
     { icon: <BookOpen size={20} />, label: "Exams", href: "/instructor/exams" },
+    { icon: <Megaphone size={20} />, label: "Announcements", href: "/instructor/announcements" },
   ];
 
   return (

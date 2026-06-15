@@ -3,9 +3,9 @@ import Link from "next/link";
 import { ChevronLeft, Users, Clock, Award, CheckCircle, XCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 
-export default async function ExamSubmissionsPage({ params }: { params: { id: string } }) {
+export default async function ExamSubmissionsPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
-  const examId = params.id;
+  const { id: examId } = await params;
 
   // Verify instructor owns this exam
   const { data: { user } } = await supabase.auth.getUser();

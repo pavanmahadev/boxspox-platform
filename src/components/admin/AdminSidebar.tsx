@@ -51,6 +51,7 @@ const menuSections = [
       { name: "User Management", icon: <Users size={20} />, href: "/admin/users" },
       { name: "Submissions", icon: <FileText size={20} />, href: "/admin/submissions" },
       { name: "Course Reviews", icon: <MessageSquare size={20} />, href: "/admin/reviews" },
+      { name: "Announcements", icon: <Megaphone size={20} />, href: "/admin/announcements" },
       { name: "Live Activity", icon: <Activity size={20} />, href: "/admin/activity" },
     ],
   },

@@ -10,6 +10,7 @@ import ExamForm from "@/components/instructor/ExamForm";
 
 export default function EditExam({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { id } = React.use(params);
   const supabase = createClient();
   const { showToast } = useToast();
   const [initialData, setInitialData] = useState<any>(null);
@@ -18,11 +19,10 @@ export default function EditExam({ params }: { params: Promise<{ id: string }> }
   useEffect(() => {
     async function loadExam() {
       try {
-        const resolvedParams = await params;
         const { data, error } = await supabase
           .from("exams")
           .select("*, exam_questions(*)")
-          .eq("id", resolvedParams.id)
+          .eq("id", id)
           .single();
         
         if (data) {
@@ -39,15 +39,14 @@ export default function EditExam({ params }: { params: Promise<{ id: string }> }
       }
     }
     loadExam();
-  }, [params]);
+  }, [id]);
 
   const handleSubmit = async (examData: any, questionsData: any[]) => {
-    const resolvedParams = await params;
     const res = await fetch("/api/exams/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
-        examId: resolvedParams.id, 
+        examId: id, 
         exam: examData, 
         questions: questionsData 
       }),

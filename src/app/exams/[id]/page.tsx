@@ -206,7 +206,8 @@ export default function ExamSession() {
         if (q.question_type === "multiple_choice") {
           isCorrect = userAnswer === q.correct_answer;
         } else if (q.question_type === "fill_in_the_blank") {
-          isCorrect = userAnswer.toLowerCase().trim() === (q.correct_answer || "").toLowerCase().trim();
+          const normalize = (s: string) => (s || "").replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+          isCorrect = normalize(userAnswer) === normalize(q.correct_answer);
         } else if (q.question_type === "coding") {
           const codingOpt = q.options[0];
           if (codingOpt && typeof codingOpt === "object" && codingOpt.test_cases) {

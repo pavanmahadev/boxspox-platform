@@ -382,6 +382,11 @@ export default function ExamForm({ initialData, onSubmit, submitLabel = "Save Ex
                 placeholder="Enter the question or problem statement here..." required rows={2}
                 style={{ width: "100%", padding: "14px", borderRadius: "10px", border: "1px solid var(--border-primary)", background: "var(--bg-secondary)", color: "var(--text-primary)", fontSize: "15px", outline: "none", fontWeight: 500, resize: "vertical" }}
               />
+              {q.question_type === "fill_in_the_blank" && (
+                <p style={{ fontSize: "12px", color: "var(--text-tertiary)", marginTop: "8px" }}>
+                  Tip: Use underscores (e.g., "______") to represent the blank in your question text.
+                </p>
+              )}
             </div>
 
             {/* MULTIPLE CHOICE */}

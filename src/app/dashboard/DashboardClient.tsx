@@ -25,7 +25,7 @@ import { BadgeGrid } from "@/components/dashboard/BadgeGrid";
 import { StreakTracker } from "@/components/dashboard/StreakTracker";
 import { ActiveCourses } from "@/components/dashboard/ActiveCourses";
 import { ActivityHeatmap } from "@/components/dashboard/ActivityHeatmap";
-
+import { AnnouncementsWidget } from "@/components/dashboard/AnnouncementsWidget";
 interface DashboardClientProps {
   user: any;
   initialProfile: any;
@@ -33,6 +33,7 @@ interface DashboardClientProps {
   initialCertificates: any[];
   initialEnrollments: any[];
   wishlistCount: number;
+  initialAnnouncements?: any[];
 }
 
 export default function DashboardClient({ 
@@ -41,7 +42,8 @@ export default function DashboardClient({
   initialProgress, 
   initialCertificates, 
   initialEnrollments, 
-  wishlistCount 
+  wishlistCount,
+  initialAnnouncements = [] 
 }: DashboardClientProps) {
   const [profile, setProfile] = useState<any>(initialProfile);
   const [progress, setProgress] = useState<any[]>(initialProgress);
@@ -381,6 +383,8 @@ export default function DashboardClient({
           
           {/* Main Content: Active Courses */}
           <div style={{ minWidth: 0 }}>
+            <AnnouncementsWidget announcements={initialAnnouncements} />
+
             {profile && user && (
               <DailyChallenge 
                 profile={profile} 

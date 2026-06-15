@@ -125,9 +125,29 @@ export default function ExamResults() {
               if (type === "multiple_choice") {
                 isCorrect = userAnswer === q.correct_answer;
               } else if (type === "fill_in_the_blank") {
-                isCorrect = (userAnswer || "").toLowerCase().trim() === (q.correct_answer || "").toLowerCase().trim();
+                const normalize = (s: string) => (s || "").replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+                isCorrect = normalize(userAnswer) === normalize(q.correct_answer);
               } else if (type === "coding") {
-                isCorrect = false; // Simplified
+                const codingOpt = q.options && q.options[0];
+                if (codingOpt && typeof codingOpt === "object" && codingOpt.test_cases) {
+                  let passedCount = 0;
+                  const totalTests = codingOpt.test_cases.length;
+                  try {
+                    for (const tc of codingOpt.test_cases) {
+                      const execCode = `
+                        ${userAnswer}
+                        return ${codingOpt.function_name}(${tc.input});
+                      `;
+                      const result = new Function(execCode)();
+                      if (String(result) === String(tc.expected_output)) passedCount++;
+                    }
+                    isCorrect = passedCount === totalTests; 
+                  } catch (e) {
+                    isCorrect = false;
+                  }
+                } else {
+                  isCorrect = (userAnswer || "").trim() === (q.correct_answer || "").trim();
+                }
               } else if (type === "match_the_following") {
                 try {
                   const cMap = JSON.parse(q.correct_answer);

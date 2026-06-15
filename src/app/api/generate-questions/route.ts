@@ -18,7 +18,8 @@ export async function POST(req: Request) {
 
     const systemPrompt = `You are an expert educational question generator. Your task is to generate exactly ${numQuestions} exam questions based on the provided text.
 You must return a JSON object containing an array called "questions".
-There are four types of questions you can generate: "multiple_choice", "fill_in_the_blank", "match_the_following", and "coding". Use a mix of these types where appropriate.
+There are four types of questions you can generate: "multiple_choice", "fill_in_the_blank", "match_the_following", and "coding". 
+CRITICAL INSTRUCTION: You MUST include at least one "match_the_following" question and at least one "coding" question in your response, regardless of the prompt. Ensure a good mix of ALL four types.
 
 Format the JSON strictly as follows:
 {
@@ -32,9 +33,9 @@ Format the JSON strictly as follows:
     },
     {
       "question_type": "fill_in_the_blank",
-      "question_text": "...",
+      "question_text": "The capital of France is ______.",
       "options": [],
-      "correct_answer": "exact word or phrase",
+      "correct_answer": "Paris",
       "points": 1
     },
     {
@@ -67,14 +68,16 @@ Format the JSON strictly as follows:
 CRITICAL RULES:
 1. ONLY OUTPUT RAW VALID JSON. NO MARKDOWN. NO BACKTICKS.
 2. For coding questions, options MUST be an array containing exactly ONE object with 'function_name', 'starter_code', and an array of 'test_cases'.
-3. For coding questions, the starter_code MUST NOT contain the final answer! It should only contain the empty function signature.`;
+3. For coding questions, the starter_code MUST NOT contain the final answer! It should only contain the empty function signature.
+4. For fill_in_the_blank questions, the question_text MUST contain a blank represented by underscores (e.g., '______') and NOT contain the answer in the text.
+5. For match_the_following questions, the options array MUST contain the correctly aligned pairs (the left item must be paired with its correct right match). DO NOT shuffle them.`;
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: `Generate ${numQuestions} questions based on this topic/text:\n\n${prompt}` }
       ],
-      model: "llama-3.1-8b-instant", 
+      model: "llama-3.3-70b-versatile", 
       temperature: 0.5,
       response_format: { type: "json_object" }
     });
