@@ -76,6 +76,19 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  // 5. Protected Routes - Exams
+  const isExamPath = 
+    request.nextUrl.pathname.match(/^\/exams\/[^\/]+$/) ||
+    request.nextUrl.pathname.match(/^\/tutorials\/[^\/]+\/exam$/) ||
+    request.nextUrl.pathname.match(/^\/learn\/[^\/]+\/[^\/]+\/exam$/);
+    
+  if (isExamPath && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
+
   return supabaseResponse;
 }
 

@@ -93,6 +93,7 @@ export default async function ExamSubmissionsPage({ params }: { params: Promise<
                   <th style={{ padding: "16px 24px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase" }}>Student Name</th>
                   <th style={{ padding: "16px 24px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase" }}>Submitted At</th>
                   <th style={{ padding: "16px 24px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase" }}>Score</th>
+                  <th style={{ padding: "16px 24px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase" }}>Warnings</th>
                   <th style={{ padding: "16px 24px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase" }}>Status</th>
                   <th style={{ padding: "16px 24px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", textAlign: "right" }}>Actions</th>
                 </tr>
@@ -119,6 +120,15 @@ export default async function ExamSubmissionsPage({ params }: { params: Promise<
                         <span style={{ fontSize: "16px", fontWeight: 800, color: sub.passed ? "#10B981" : "#EF4444" }}>
                           {sub.score !== null ? `${Math.round(sub.score)}%` : "-"}
                         </span>
+                      </td>
+                      <td style={{ padding: "16px 24px" }}>
+                        {sub.warnings_count > 0 ? (
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "13px", fontWeight: 700, color: "#EF4444" }}>
+                            {sub.warnings_count} Warning{sub.warnings_count > 1 ? "s" : ""}
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: "13px", color: "var(--text-tertiary)", fontWeight: 500 }}>None</span>
+                        )}
                       </td>
                       <td style={{ padding: "16px 24px" }}>
                         {sub.passed ? (

@@ -34,6 +34,7 @@ interface DashboardClientProps {
   initialEnrollments: any[];
   wishlistCount: number;
   initialAnnouncements?: any[];
+  initialPassedExams?: any[];
 }
 
 export default function DashboardClient({ 
@@ -43,7 +44,8 @@ export default function DashboardClient({
   initialCertificates, 
   initialEnrollments, 
   wishlistCount,
-  initialAnnouncements = [] 
+  initialAnnouncements = [],
+  initialPassedExams = []
 }: DashboardClientProps) {
   const [profile, setProfile] = useState<any>(initialProfile);
   const [progress, setProgress] = useState<any[]>(initialProgress);
@@ -491,6 +493,41 @@ export default function DashboardClient({
                       </div>
                       <ChevronRight size={18} style={{ color: "var(--brand-primary)" }} />
                     </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Exam Badges */}
+            {initialPassedExams.length > 0 && (
+              <div style={{ background: "var(--bg-card)", padding: "24px", borderRadius: "var(--radius-xl)", border: "1px solid var(--border-primary)" }}>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Award size={18} color="#10B981" /> Earned Badges
+                </h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: "16px" }}>
+                  {initialPassedExams.map((exam) => (
+                    <div 
+                      key={exam.id} 
+                      className="badge-hover"
+                      style={{ 
+                        display: "flex", 
+                        flexDirection: "column", 
+                        alignItems: "center", 
+                        justifyContent: "center",
+                        gap: "12px", 
+                        padding: "16px", 
+                        borderRadius: "16px", 
+                        background: "var(--bg-secondary)",
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        textAlign: "center"
+                      }}
+                    >
+                      <div style={{ width: "48px", height: "48px", background: "linear-gradient(135deg, #10B981, #059669)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 16px rgba(16, 185, 129, 0.2)" }}>
+                        <Award size={24} color="white" />
+                      </div>
+                      <div style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--text-primary)", lineHeight: 1.2 }}>{exam.exams?.title || "Exam"}</div>
+                      <div style={{ fontSize: "0.7rem", color: "var(--brand-primary)", fontWeight: 700 }}>{Math.round(exam.score)}% Score</div>
+                    </div>
                   ))}
                 </div>
               </div>

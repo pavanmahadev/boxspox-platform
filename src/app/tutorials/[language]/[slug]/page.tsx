@@ -3,6 +3,8 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { LessonContent } from "@/components/tutorials/LessonContent";
 import { ArticleSchema } from "@/components/seo/ArticleSchema";
 import { BreadcrumbSchema } from "@/components/seo/BreadcrumbSchema";
+import { StudentNotes } from "@/components/learn/StudentNotes";
+import { AITutor } from "@/components/learn/AITutor";
 import Link from "next/link";
 import { Metadata } from "next";
 
@@ -182,6 +184,13 @@ export default async function LessonPage({
         gradient={gradient}
         currentUserId={user?.id}
       />
+      
+      {user && (
+        <>
+          <AITutor contextTopic={lesson.title} />
+          <StudentNotes tutorialSlug={`${course.slug}/${lesson.slug}`} />
+        </>
+      )}
     </>
   );
 }

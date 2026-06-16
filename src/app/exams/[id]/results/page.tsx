@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useState, useEffect, use } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, ChevronRight, Award, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 
-export default function ExamResults() {
-  const params = useParams();
+export default function ExamResults({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const supabase = createClient();
-  const examId = params?.id as string;
+  const resolvedParams = use(params);
+  const examId = resolvedParams.id;
 
   const [exam, setExam] = useState<any>(null);
   const [submission, setSubmission] = useState<any>(null);
@@ -91,17 +91,39 @@ export default function ExamResults() {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/dashboard" style={{
-              padding: "16px 32px", background: "var(--bg-secondary)", color: "var(--text-primary)", borderRadius: "12px", border: "1px solid var(--border-primary)", fontSize: "15px", fontWeight: 700, textDecoration: "none", display: "inline-flex", alignItems: "center"
-            }}>
-              Back to Dashboard
-            </Link>
-            <Link href={`/exams/${exam.id}`} style={{
-              padding: "16px 32px", background: "var(--brand-primary)", color: "white", borderRadius: "12px", border: "none", fontSize: "15px", fontWeight: 700, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 8px 24px rgba(15, 110, 86, 0.2)"
-            }}>
-              Retake Exam <ChevronRight size={18} />
-            </Link>
+          <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", alignItems: "center", flexDirection: "column" }}>
+            {passed ? (
+              <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "16px 24px", borderRadius: "16px", display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px", animation: "pulse 2s infinite" }}>
+                <div style={{ width: "40px", height: "40px", background: "linear-gradient(135deg, #10B981, #059669)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(16, 185, 129, 0.4)" }}>
+                  <Award size={20} color="white" />
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  <div style={{ fontSize: "14px", fontWeight: 800, color: "#10B981" }}>Badge Unlocked!</div>
+                  <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>Check your dashboard to view your new badge.</div>
+                </div>
+              </div>
+            ) : null}
+            
+            <div style={{ display: "flex", gap: "16px" }}>
+              <Link href="/dashboard" style={{
+                padding: "16px 32px", background: "var(--bg-secondary)", color: "var(--text-primary)", borderRadius: "12px", border: "1px solid var(--border-primary)", fontSize: "15px", fontWeight: 700, textDecoration: "none", display: "inline-flex", alignItems: "center"
+              }}>
+                Back to Dashboard
+              </Link>
+              {!passed ? (
+                <Link href={`/exams/${exam.id}`} style={{
+                  padding: "16px 32px", background: "#EF4444", color: "white", borderRadius: "12px", border: "none", fontSize: "15px", fontWeight: 700, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 8px 24px rgba(239, 68, 68, 0.2)"
+                }}>
+                  Retake Exam <ChevronRight size={18} />
+                </Link>
+              ) : (
+                <Link href={`/exams/${exam.id}`} style={{
+                  padding: "16px 32px", background: "var(--brand-primary)", color: "white", borderRadius: "12px", border: "none", fontSize: "15px", fontWeight: 700, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 8px 24px rgba(15, 110, 86, 0.2)"
+                }}>
+                  Take Again <ChevronRight size={18} />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 

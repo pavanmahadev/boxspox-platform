@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useState, useEffect, useRef, use } from "react";
+import { useRouter } from "next/navigation";
 import { Clock, AlertTriangle, CheckCircle, ShieldAlert, FileText, ChevronRight, ChevronLeft, Flag, Send } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useToast } from "@/components/ui/ToastProvider";
 
-export default function ExamSession() {
-  const params = useParams();
+export default function ExamSession({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { showToast } = useToast();
   const supabase = createClient();
-  const examId = params?.id as string;
+  const resolvedParams = use(params);
+  const examId = resolvedParams.id;
 
   const [exam, setExam] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
@@ -260,7 +260,8 @@ export default function ExamSession() {
             completed_at: new Date().toISOString(),
             score: percentage,
             passed: passed,
-            answers: answers
+            answers: answers,
+            warnings_count: warnings
           })
           .eq("exam_id", exam.id)
           .eq("user_id", user.id)
