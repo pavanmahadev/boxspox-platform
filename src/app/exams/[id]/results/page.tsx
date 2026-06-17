@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { CheckCircle, XCircle, ChevronRight, Award, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 
-export default function ExamResults({ params }: { params: Promise<{ id: string }> }) {
+export default function ExamResults() {
   const router = useRouter();
+  const params = useParams();
+  const examId = params?.id as string;
   const supabase = createClient();
-  const resolvedParams = use(params);
-  const examId = resolvedParams.id;
 
   const [exam, setExam] = useState<any>(null);
   const [submission, setSubmission] = useState<any>(null);
