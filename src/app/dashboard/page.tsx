@@ -30,13 +30,13 @@ export default async function DashboardPage() {
 
   // Group unique passed exams (keep highest score or most recent)
   const passedExams = exams ? Array.from(
-    exams.reduce((map, submission) => {
+    exams.reduce((map: Map<string, any>, submission: any) => {
       const current = map.get(submission.exam_id);
       if (!current || submission.score > current.score) {
         map.set(submission.exam_id, submission);
       }
       return map;
-    }, new Map()).values()
+    }, new Map<string, any>()).values()
   ) : [];
 
   return (
