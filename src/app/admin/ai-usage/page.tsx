@@ -3,13 +3,30 @@ import { createClient } from "@/utils/supabase/server";
 export default async function AIUsagePage() {
   const supabase = await createClient();
   
-  const { data: usage } = await supabase
+  const { data: usageRaw } = await supabase
     .from("ai_usage")
-    .select(`
-      *,
-      profiles:user_id (full_name, email)
-    `)
+    .select("*")
     .order("created_at", { ascending: false });
+
+  let usage = usageRaw || [];
+
+  if (usage.length > 0) {
+    const userIds = usage.map((u: any) => u.user_id);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", userIds);
+
+    const profileMap = (profiles || []).reduce((acc: any, p: any) => {
+      acc[p.id] = p;
+      return acc;
+    }, {});
+
+    usage = usage.map((u: any) => ({
+      ...u,
+      profiles: profileMap[u.user_id] || { full_name: "Unknown", email: "No email" }
+    }));
+  }
 
   // Calculate totals
   const totalTokens = usage?.reduce((acc: any, curr: any) => acc + curr.total_tokens, 0) || 0;

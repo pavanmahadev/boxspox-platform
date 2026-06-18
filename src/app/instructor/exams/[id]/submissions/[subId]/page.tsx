@@ -26,8 +26,7 @@ export default function SubmissionReview() {
   useEffect(() => {
     const fetchDetailedSubmission = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        // user is already checked in layout.tsx, no need to call getUser() which might hang on client
 
         const { data: eData } = await supabase.from("exams").select("*").eq("id", examId).single();
         if (eData) setExam(eData);
@@ -37,11 +36,21 @@ export default function SubmissionReview() {
 
         const { data: sData } = await supabase
           .from("exam_submissions")
-          .select(`*, profiles:user_id (full_name, email)`)
+          .select("*")
           .eq("id", subId)
           .single();
           
         if (sData) {
+          if (sData.user_id) {
+            const { data: pData } = await supabase
+              .from("profiles")
+              .select("full_name, email")
+              .eq("id", sData.user_id)
+              .single();
+            if (pData) {
+              sData.profiles = pData;
+            }
+          }
           setSubmission(sData);
           setOverrideScore(String(Math.round(sData.score || 0)));
         }
@@ -142,26 +151,8 @@ export default function SubmissionReview() {
             const normalize = (s: string) => (s || "").replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
             isCorrect = normalize(userAnswer) === normalize(q.correct_answer);
           } else if (type === "coding") {
-            const codingOpt = q.options && q.options[0];
-            if (codingOpt && typeof codingOpt === "object" && codingOpt.test_cases) {
-              let passedCount = 0;
-              const totalTests = codingOpt.test_cases.length;
-              try {
-                for (const tc of codingOpt.test_cases) {
-                  const execCode = `
-                    ${userAnswer}
-                    return ${codingOpt.function_name}(${tc.input});
-                  `;
-                  const result = new Function(execCode)();
-                  if (String(result) === String(tc.expected_output)) passedCount++;
-                }
-                isCorrect = passedCount === totalTests; 
-              } catch (e) {
-                isCorrect = false;
-              }
-            } else {
-              isCorrect = (userAnswer || "").trim() === (q.correct_answer || "").trim();
-            }
+            // Do not evaluate student code during render to avoid infinite loops and XSS
+            isCorrect = false;
           } else if (type === "match_the_following") {
             try {
               const cMap = JSON.parse(q.correct_answer);
@@ -178,7 +169,7 @@ export default function SubmissionReview() {
           return (
             <div key={q.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-primary)", borderRadius: "16px", padding: "24px", position: "relative", overflow: "hidden" }}>
               
-              <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: "6px", background: !hasAnswered ? "var(--text-tertiary)" : isCorrect ? "#10B981" : "#EF4444" }} />
+              <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: "6px", background: !hasAnswered ? "var(--text-tertiary)" : type === "coding" ? "#F59E0B" : isCorrect ? "#10B981" : "#EF4444" }} />
 
               <div style={{ paddingLeft: "16px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
@@ -208,7 +199,7 @@ export default function SubmissionReview() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", background: "var(--bg-secondary)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-primary)" }}>
                   
                   <div>
-                    <div style={{ fontSize: "12px", color: "var(--text-tertiary)", fontWeight: 700, textTransform: "uppercase", marginBottom: "8px" }}>Student's Answer</div>
+                    <div style={{ fontSize: "12px", color: "var(--text-tertiary)", fontWeight: 700, textTransform: "uppercase", marginBottom: "8px" }}>Student&apos;s Answer</div>
                     {type === "coding" ? (
                       <pre style={{ margin: 0, padding: "12px", background: "#111827", color: "#f3f4f6", borderRadius: "8px", fontSize: "13px", overflowX: "auto" }}>
                         {userAnswer || "// No code submitted"}

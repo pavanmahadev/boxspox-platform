@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ChevronLeft, Users, Clock, Award, CheckCircle, XCircle } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 
+import ExportSubmissionsButton from "@/components/instructor/ExportSubmissionsButton";
+
 export default async function ExamSubmissionsPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
   const { id: examId } = await params;
@@ -19,15 +21,36 @@ export default async function ExamSubmissionsPage({ params }: { params: Promise<
     );
   }
 
-  // Fetch submissions with profile info
-  const { data: submissions, error: subErr } = await supabase
+  // Fetch submissions and profile info separately to avoid foreign key issues
+  const { data: submissionsRaw, error: subErr } = await supabase
     .from("exam_submissions")
-    .select(`
-      *,
-      profiles:user_id (full_name, email)
-    `)
+    .select("*")
     .eq("exam_id", examId)
     .order("created_at", { ascending: false });
+
+  if (subErr) {
+    console.error("Error fetching submissions:", subErr);
+  }
+
+  let submissions = submissionsRaw || [];
+
+  if (submissions.length > 0) {
+    const userIds = submissions.map((s: any) => s.user_id);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", userIds);
+
+    const profileMap = (profiles || []).reduce((acc: any, p: any) => {
+      acc[p.id] = p;
+      return acc;
+    }, {});
+
+    submissions = submissions.map((s: any) => ({
+      ...s,
+      profiles: profileMap[s.user_id] || { full_name: "Unknown Student", email: "No email" }
+    }));
+  }
 
   const passedCount = submissions?.filter((s: any) => s.passed).length || 0;
   const avgScore = submissions?.length ? Math.round(submissions.reduce((acc: number, s: any) => acc + (s.score || 0), 0) / submissions.length) : 0;
@@ -48,6 +71,25 @@ export default async function ExamSubmissionsPage({ params }: { params: Promise<
           <p style={{ color: "var(--text-secondary)", fontSize: "15px" }}>
             Review student submissions, grades, and analytics for this exam.
           </p>
+        </div>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <Link href={`/instructor/exams/${examId}/analytics`} style={{
+            padding: "10px 20px",
+            background: "var(--bg-secondary)",
+            border: "1px solid var(--brand-primary)",
+            color: "var(--brand-primary)",
+            borderRadius: "10px",
+            textDecoration: "none",
+            fontWeight: 700,
+            fontSize: "14px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+          }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Advanced Analytics
+          </Link>
+          <ExportSubmissionsButton submissions={submissions} examTitle={exam.title} />
         </div>
       </div>
 
@@ -82,7 +124,7 @@ export default async function ExamSubmissionsPage({ params }: { params: Promise<
             </div>
             <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "8px" }}>No submissions yet</h3>
             <p style={{ color: "var(--text-tertiary)", fontSize: "14px" }}>
-              Students haven't completed this exam yet.
+              Students haven&apos;t completed this exam yet.
             </p>
           </div>
         ) : (

@@ -15,13 +15,30 @@ import { projects } from "@/data/projects";
 export default async function SubmissionsPage() {
   const supabase = await createClient();
 
-  const { data: submissions, error } = await supabase
+  const { data: submissionsRaw, error } = await supabase
     .from("project_submissions")
-    .select(`
-      *,
-      profiles:user_id (full_name, email)
-    `)
+    .select("*")
     .order("submitted_at", { ascending: false });
+
+  let submissions = submissionsRaw || [];
+
+  if (submissions.length > 0) {
+    const userIds = submissions.map((s: any) => s.user_id);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", userIds);
+
+    const profileMap = (profiles || []).reduce((acc: any, p: any) => {
+      acc[p.id] = p;
+      return acc;
+    }, {});
+
+    submissions = submissions.map((s: any) => ({
+      ...s,
+      profiles: profileMap[s.user_id] || { full_name: "Unknown", email: "No email" }
+    }));
+  }
 
   return (
     <div>

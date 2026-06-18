@@ -20,12 +20,20 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
 
   const { data: sub, error } = await supabase
     .from("project_submissions")
-    .select(`
-      *,
-      profiles:user_id (full_name, email)
-    `)
+    .select("*")
     .eq("id", id)
     .single();
+
+  if (sub && sub.user_id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", sub.user_id)
+      .single();
+    if (profile) {
+      sub.profiles = profile;
+    }
+  }
 
   if (!sub) return <div>Submission not found</div>;
   

@@ -7,14 +7,33 @@ import { revalidatePath } from "next/cache";
 export default async function ReviewsModerationPage() {
   const supabase = await createClient();
 
-  const { data: reviews, error } = await supabase
+  const { data: reviewsRaw, error } = await supabase
     .from("course_reviews")
     .select(`
       *,
-      profiles:user_id (full_name, email),
       courses:course_id (title)
     `)
     .order("created_at", { ascending: false });
+
+  let reviews = reviewsRaw || [];
+
+  if (reviews.length > 0) {
+    const userIds = reviews.map((r: any) => r.user_id);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", userIds);
+
+    const profileMap = (profiles || []).reduce((acc: any, p: any) => {
+      acc[p.id] = p;
+      return acc;
+    }, {});
+
+    reviews = reviews.map((r: any) => ({
+      ...r,
+      profiles: profileMap[r.user_id] || { full_name: "Unknown", email: "No email" }
+    }));
+  }
 
   async function deleteReview(formData: FormData) {
     "use server";

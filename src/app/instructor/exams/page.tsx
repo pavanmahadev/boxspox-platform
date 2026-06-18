@@ -150,6 +150,18 @@ export default async function ExamsList() {
                         }}>
                           Submissions
                         </Link>
+                        <Link href={`/instructor/exams/${exam.id}/analytics`} style={{
+                          padding: "8px 16px",
+                          background: "var(--bg-secondary)",
+                          border: "1px solid var(--brand-primary)",
+                          color: "var(--brand-primary)",
+                          borderRadius: "8px",
+                          textDecoration: "none",
+                          fontWeight: 600,
+                          fontSize: "13px"
+                        }}>
+                          Analytics
+                        </Link>
                         <Link href={`/instructor/exams/${exam.id}/edit`} style={{
                           padding: "8px 16px",
                           background: "var(--bg-secondary)",
