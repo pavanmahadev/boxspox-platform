@@ -80,9 +80,9 @@ export default async function ExamAnalyticsPage({ params }: { params: Promise<{ 
 
   // 2. Item Analysis
   const itemStats: Record<string, { correct: number, total: number }> = {};
-  questions.forEach(q => itemStats[q.id] = { correct: 0, total: 0 });
+  questions.forEach((q: any) => itemStats[q.id] = { correct: 0, total: 0 });
 
-  submissions.forEach(sub => {
+  submissions.forEach((sub: any) => {
     totalScore += (sub.score || 0);
 
     // Time calculation
@@ -102,7 +102,7 @@ export default async function ExamAnalyticsPage({ params }: { params: Promise<{ 
 
     // Question performance
     const answers = sub.answers || {};
-    questions.forEach(q => {
+    questions.forEach((q: any) => {
       const userAnswer = answers[q.id];
       if (userAnswer === undefined) return;
 
@@ -228,7 +228,7 @@ export default async function ExamAnalyticsPage({ params }: { params: Promise<{ 
                 </tr>
               </thead>
               <tbody>
-                {questions.map((q, i) => {
+                {questions.map((q: any, i: number) => {
                   const stat = itemStats[q.id];
                   const successRate = stat.total > 0 ? Math.round((stat.correct / stat.total) * 100) : 0;
                   const isHard = successRate < 40 && stat.total > 0;
